@@ -1,0 +1,395 @@
+#!/usr/bin/perl
+# $Id$
+
+=head1 NAME
+
+youri-check - package check agent
+
+=head1 VERSION
+
+Version 1.0
+
+=head1 SYNOPSIS
+
+youri-check [options] <mode>
+
+Options:
+
+    --config <file>        use file <file> as config file
+    --skip-media <media>   skip media <media>
+    --skip-plugin <plugin> skip plugin <plugin>
+    --parallel             parallel run
+    --verbose              verbose run
+    --test                 test run
+    --help                 print this help message
+
+=head1 DESCRIPTION
+
+B<youri-check> allows to check packages in a repository.
+
+In input mode, all medias defined in configuration are passed to a list of
+input plugins, each of them storing their result in a persistent resultset. In
+output mode, this resultset is passed to a list of output plugins, each of them
+producing arbitrary effects.
+
+=head1 OPTIONS
+
+=over
+
+=item B<--config> <file>
+
+Use given file as configuration, instead of normal one.
+
+=item B<--skip-media> <media>
+
+Skip media with given identity.
+
+=item B<--skip-plugin> <plugin>
+
+Skip plugin with given identity.
+
+=item B<--parallel>
+
+Run all plugins parallelously
+
+=item B<--verbose>
+
+Produce more verbose output (can be used more than once)
+
+=item B<--test>
+
+Don't perform any modification.
+
+=item B<--help>
+
+Print a brief help message and exits.
+
+=back
+
+=head1 CONFIGURATION
+
+Configuration is read from the first file found among:
+
+=over
+
+=item * the one specified by B<--config> option on command-line
+
+=item * $HOME/.youri/check.conf
+
+=item * @sysconfdir@/youri/check.conf
+
+=back
+
+All additional configuration files specified by B<includes> directive are then
+processed. Then command line options. Any directive overrides prior definition.
+
+=over
+
+=item B<includes> I<files>
+
+Uses space-separated list I<files> as a list of additional configuration files.
+
+=item B<resolver> I<id>
+
+Declare a maintainer resolver object with identity I<id>.
+
+=item B<preferences> I<id>
+
+Declare a maintainer preferences object with identity I<id>.
+
+=item B<resultset> I<id>
+
+Declare a resultset object with identity I<id>.
+
+=item B<medias> I<ids>
+
+Declares a list of media objects with identity taken in space-separated list
+I<ids>.
+
+=item B<inputs> I<ids>
+
+Declares a list of input plugin objects with identity taken in space-separated
+list I<ids>.
+
+=item B<outputs> I<ids>
+
+Declares a list of output plugin objects with identity taken in space-separated
+list I<ids>.
+
+=back
+
+Each object declared in configuration must be fully defined later, using a
+configuration section, starting with bracketed object identity, followed by at
+least a class directive, then any number of additional object-specific
+directives.
+
+Example:
+
+        objects = foo
+        
+        [foo]
+        class = Foo::Bar
+        key1  = value1
+        key2  = value2
+
+=head1 SEE ALSO
+
+Youri::Config, for configuration file format.
+
+Each used plugin man page, for available options.
+
+=head1 COPYRIGHT AND LICENSE
+
+Copyright (C) 2002-2006, YOURI project
+
+This program is free software; you can redistribute it and/or modify it under the same terms as Perl itself.
+
+=cut
+
+use strict;
+use warnings;
+
+use Youri::Config;
+use Youri::Utils;
+use Pod::Usage;
+use Net::Config qw/%NetConfig/;
+use DateTime;
+
+my $config = Youri::Config->new(
+    command_spec => [
+        'config=s',
+        'skip-plugin=s@',
+        'skip-media=s@',
+        'parallel!',
+        'help|h!',
+        'test|t!',
+        'verbose|v!'
+    ],
+    file_spec => [
+        'includes=s',
+        'resolver=s',
+        'preferences=s',
+        'resultset=s',
+        'medias=s',
+        'inputs=s',
+        'outputs=s'
+    ],
+    directories => [ '@sysconfdir@', "$ENV{HOME}/.youri" ],
+    file_name   => 'check.conf',
+    caller => $0,
+);
+
+pod2usage(
+    -verbose => 0,
+    -message => "No mode specified, aborting\n"
+) unless @ARGV;
+
+my $mode = $ARGV[0];
+
+# convenient global flags
+my $test    = $config->get('test');
+my $verbose = $config->get('verbose');
+
+# libnet configuration
+my %netconfig = $config->get_section('netconfig');
+$NetConfig{$_} = $netconfig{$_} foreach keys %netconfig;
+
+# resultset creation
+my $resultset_id = $config->get('resultset');
+die "No resultset defined" unless $resultset_id;
+
+report("Creating resultset $resultset_id");
+my $resultset = create_instance(
+    'Youri::Check::Resultset',
+    test    => $test,
+    verbose => $verbose > 0 ? $verbose - 1 : 0,
+    $config->get_section($resultset_id)
+);
+
+my $children;
+
+my %skip_plugins = map { $_ => 1 } @{$config->get('skip-plugin')};
+
+if ($mode eq 'input') {
+
+    # additional objects
+
+    my $resolver;
+    my $resolver_id = $config->get('resolver');
+    if ($resolver_id) {
+        report("Creating maintainer resolver $resolver_id");
+        eval {
+            $resolver = create_instance(
+                'Youri::Check::Maintainer::Resolver',
+                test    => $test,
+                verbose => $verbose > 1 ? $verbose - 2 : 0,
+                $config->get_section($resolver_id)
+            );
+        };
+        print STDERR "Failed to create maintainer resolver $resolver_id: $@\n" if $@;
+    }
+
+    my $preferences;
+    my $preferences_id = $config->get('preferences');
+    if ($preferences_id) {
+        report("Creating maintainer preferences $preferences_id");
+        eval {
+            $preferences = create_instance(
+                'Youri::Check::Maintainer::Preferences',
+                test      => $test,
+                verbose   => $verbose > 1 ? $verbose - 2 : 0,
+                $config->get_section($preferences_id)
+            );
+        };
+        print STDERR "Failed to create maintainer preferences $preferences_id: $@\n" if $@;
+    }
+
+    my @medias;
+    my %skip_medias = map { $_ => 1 } @{$config->get('skip-media')};
+    foreach my $id (split(/\s+/, $config->get('medias'))) {
+        next if $skip_medias{$id};
+        report("Creating media $id");
+        eval {
+            push(
+                @medias,
+                 create_instance(
+                    'Youri::Media',
+                    id      => $id,
+                    test    => $test,
+                    verbose => $verbose > 0 ? $verbose - 1 : 0,
+                    $config->get_section($id)
+                )
+            );
+        };
+        print STDERR "Failed to create media $id: $@\n" if $@;
+    }
+
+    # prepare resultset
+    $resultset->reset();
+    $resultset->set_resolver($resolver);
+
+
+    foreach my $id (split(/\s+/, $config->get('inputs'))) {
+        next if $skip_plugins{$id};
+        report("Creating input $id");
+        my $input;
+        eval {
+            $input = create_instance(
+                'Youri::Check::Input',
+                id         => $id,
+                test       => $test,
+                verbose    => $verbose > 0 ? $verbose - 1 : 0,
+                resolver   => $resolver,
+                preferences => $preferences,
+                $config->get_section($id)
+            );
+        };
+        if ($@) {
+            print STDERR "Failed to create input $id: $@\n";
+        } else {
+            if ($config->get('parallel')) {
+                # fork
+                my $pid = fork;
+                die "Can't fork: $!" unless defined $pid;
+                if ($pid) {
+                    # parent process
+                    $children++;
+                    next;
+                }
+            }
+            eval {
+                $input->prepare(@medias);
+            };
+            if ($@) {
+                print STDERR "Failed to prepare input $id: $@\n";
+            } else {
+                # clone resultset in child process
+                $resultset = $config->get('parallel') ?
+                    $resultset->clone() :
+                    $resultset;
+
+                foreach my $media (@medias) {
+                    next if $media->skip_input($id);
+                    my $media_id = $media->get_id();
+                    report("running input $id on media $media_id");
+                    eval {
+                        $input->run($media, $resultset);
+                    };
+                    if ($@) {
+                        print STDERR "Failed to run input $id on media $media_id: $@\n";
+                    }
+                }
+            }
+            if ($config->get('parallel')) {
+                # child process
+                exit;
+            }
+        }
+    }
+
+} elsif ($mode eq 'output') {
+
+    foreach my $id (split(/\s+/, $config->get('outputs'))) {
+        next if $skip_plugins{$id};
+        report("Creating output $id");
+        my $output;
+        eval {
+            $output = create_instance(
+                'Youri::Check::Output',
+                id      => $id,
+                test    => $test,
+                verbose => $verbose > 0 ? $verbose - 1 : 0,
+                config  => $config,
+                $config->get_section($id)
+            );
+        };
+        if ($@) {
+            print STDERR "Failed to create output $id: $@\n";
+        } else {
+            if ($config->get('parallel')) {
+                # fork
+                my $pid = fork;
+                die "Can't fork: $!" unless defined $pid;
+                if ($pid) {
+                    # parent process
+                    $children++;
+                    next;
+                }
+            }
+
+            # clone resultset in child process
+            $resultset = $config->get('parallel') ?
+                $resultset->clone() :
+                $resultset;
+
+            report("running output $id");
+            eval {
+                $output->run($resultset);
+            };
+            if ($@) {
+                print STDERR "Failed to run output $id: $@\n";
+            }
+
+            if ($config->get('parallel')) {
+                # child process
+                exit;
+            }
+        }
+    }
+} else {
+    die "Invalid mode $mode";
+}
+
+# wait for all forked processus termination
+while ($children) {
+    wait;
+    $children--;
+}
+
+sub report {
+    my ($message) = @_;
+    print DateTime->now()->strftime('[%H:%M:%S] ')
+        if $verbose > 1;
+    print "$message\n"
+        if $verbose > 0;
+}
