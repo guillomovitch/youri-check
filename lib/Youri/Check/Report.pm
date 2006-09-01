@@ -1,9 +1,9 @@
 # $Id$
-package Youri::Check::Output;
+package Youri::Check::Report;
 
 =head1 NAME
 
-Youri::Check::Output - Abstract output plugin
+Youri::Check::Report - Abstract output plugin
 
 =head1 DESCRIPTION
 
@@ -20,7 +20,7 @@ use Youri::Utils;
 
 =head2 new(%args)
 
-Creates and returns a new Youri::Check::Output object.
+Creates and returns a new Youri::Check::Report object.
 
 Generic parameters (subclasses may define additional ones):
 
