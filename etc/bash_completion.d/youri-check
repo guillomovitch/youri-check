@@ -50,7 +50,7 @@ _youri-check()
     	_count_args
 	case $args in
 	    1)
-	    	COMPREPLY=( $( compgen -W 'input output' -- $cur ) )
+	    	COMPREPLY=( $( compgen -W 'test report' -- $cur ) )
 		;;
 	esac
     fi
