@@ -1,13 +1,13 @@
 # $Id$
-package Youri::Check::Input;
+package Youri::Check::Test;
 
 =head1 NAME
 
-Youri::Check::Input - Abstract input plugin
+Youri::Check::Test - Abstract input plugin
 
 =head1 DESCRIPTION
 
-This abstract class defines input plugin interface.
+This abstract class defines test plugin interface.
 
 =cut
 
