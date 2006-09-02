@@ -48,32 +48,20 @@ sub get_preference {
 sub _load_config {
     my ($self, $maintainer) = @_;
 
-    print "Attempting to load maintainers preferences for $maintainer\n" if $self->{_verbose} > 1;
-
-
     my ($login) = $maintainer =~ /^(\S+)\@\S+$/;
     my $home = (getpwnam($login))[7];
-    my $file = "$home/.youri/check.prefs";
+    my $config = Youri::Config->new(
+        directories => [ "$home/.youri" ],
+        file_name   => 'check.prefs.conf',
+    );
+    $self->{_config}->{$maintainer} = $config;
 
-    if (-f $file && -r $file) {
-        print "Found, loading\n" if $self->{_verbose} > 1;
-        my $config = Youri::Config->new(
-            {
-                CREATE => 1,
-                GLOBAL => {
-                   DEFAULT  => undef,
-                   EXPAND   => EXPAND_VAR | EXPAND_ENV,
-                   ARGCOUNT => ARGCOUNT_ONE,
-                }
-            }
-        );
-        $config->file($file);
-        $self->{_config}->{$maintainer} = $config;
-    } else {
-        print "Not found, aborting\n" if $self->{_verbose} > 1;
-        $self->{_config}->{$maintainer} = undef;
+    if ($self->{_verbose} > 1) {
+        print
+            "Loading maintainers preferences for $maintainer: " .
+            ($config ? "success" : "failure" ) .
+            "\n";
     }
-
 }
 
 =head1 COPYRIGHT AND LICENSE
