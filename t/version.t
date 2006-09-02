@@ -2,7 +2,7 @@
 # $Id$
 
 use Test::More;
-use Youri::Check::Input::Updates;
+use Youri::Check::Test::Updates;
 use strict;
 
 my @differents = (
@@ -38,14 +38,14 @@ plan tests => 2 * @differents + 2 * @equals;
 
 foreach my $different (@differents) {
     ok(
-        Youri::Check::Input::Updates::is_newer(
+        Youri::Check::Test::Updates::is_newer(
 	    $different->[0],
 	    $different->[1]
 	),
         "$different->[0] is newer as $different->[1]"
     );
     ok(
-        !Youri::Check::Input::Updates::is_newer(
+        !Youri::Check::Test::Updates::is_newer(
 	    $different->[1],
 	    $different->[0]
 	),
@@ -55,14 +55,14 @@ foreach my $different (@differents) {
 
 foreach my $equal (@equals) {
     ok(
-        !Youri::Check::Input::Updates::is_newer(
+        !Youri::Check::Test::Updates::is_newer(
 	    $equal->[0],
 	    $equal->[1]
 	),
         "$equal->[0] is equal as $equal->[1]"
     );
     ok(
-        !Youri::Check::Input::Updates::is_newer(
+        !Youri::Check::Test::Updates::is_newer(
 	    $equal->[1],
 	    $equal->[0]
 	),
