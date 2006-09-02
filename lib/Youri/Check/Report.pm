@@ -7,7 +7,7 @@ Youri::Check::Report - Abstract output plugin
 
 =head1 DESCRIPTION
 
-This abstract class defines output plugin interface.
+This abstract class defines report plugin interface.
 
 =cut
 
