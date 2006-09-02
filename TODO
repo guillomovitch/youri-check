@@ -1,7 +1,5 @@
 1.0 Goals 
 =========
-
-youri-check:
 - cumulative results aggregation
 - build bot specific information exploitation
 - results filtering and sorting facilities
@@ -12,13 +10,3 @@ youri-check:
  - pld
 - alternative dependency input based on rpmcheck
 - circular dependency input based on smart
-
-youri-upload:
-- svn support
-- automatic bugzilla ticket closing on upload
-- more customizable (template based ?) mail notification
-
-library:
-- API-based bugzilla interface, instead of SQL-based one
-- more generic check-specific options handling in medias (don't use a
-specific attribute for each of them)
