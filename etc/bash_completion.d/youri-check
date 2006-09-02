@@ -1,4 +1,4 @@
-# youri tools completion
+# youri-check completion
 # $Id$
 
 _youri-check()
@@ -57,60 +57,6 @@ _youri-check()
 
 }
 complete -F _youri-check youri-check
-
-_youri-upload()
-{
-
-    local cur prev config
-
-    COMPREPLY=()
-    cur=${COMP_WORDS[COMP_CWORD]}
-    prev=${COMP_WORDS[COMP_CWORD-1]}
-
-    case "$prev" in
-	--config)
-	    _filedir
-	    return 0
-	    ;;
-	--skip-check)
-	    _find_config upload.conf
-	    if [ -n "$config" ]; then
-		COMPREPLY=( $( awk -F=  '/^checks/ {print $2}' $config \
-		    | grep "^$cur" ) )
-	    fi
-	    return 0
-	    ;;
-	--skip-action)
-	    _find_config upload.conf
-	    if [ -n "$config" ]; then
-		COMPREPLY=( $( awk -F=  '/^actions/ {print $2}' $config \
-		    | grep "^$cur" ) )
-	    fi
-	    return 0
-	    ;;
-    esac
-
-    if [[ "$cur" == -* ]]; then
-	COMPREPLY=( $( compgen -W '--config --skip-check --skip-action \
-	    --define -h --help -t --test -v --verbose' -- $cur ) )
-    else
-    	_count_args
-	case $args in
-	    1)
-		_find_config upload.conf
-		if [ -n "$config" ]; then
-		    COMPREPLY=( $( awk -F=  '/^targets/ {print $2}' $config \
-			| grep "^$cur" ) )
-		fi
-		;;
-	    *)
-		_filedir
-		;;
-	esac
-    fi
-
-}
-complete -F _youri-upload youri-upload
 
 _find_config()
 {
