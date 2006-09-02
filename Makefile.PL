@@ -2,14 +2,14 @@
 use ExtUtils::MakeMaker;
 
 WriteMakefile(
-    NAME       => 'youri',
+    NAME       => 'youri-check',
     VERSION    => 0.9,
     AUTHOR     => 'Youri project <youri@zarb.org>',
-    EXE_FILES  => [ 'bin/youri-check', 'bin/youri-upload' ],
+    EXE_FILES  => [ 'bin/youri-check' ],
     PREREQ_PM  => {
-        'AppConfig'              => 0,
-        'YAML'                   => 0,
-        'DateTime'               => 0,
+        'Youri::Config'          => 0,
+        'Youri::Utils'           => 0,
+        'Youri::Bugzilla'        => 0,
         'Pod::Simple::HTMLBatch' => 0
     }
 );
@@ -37,7 +37,6 @@ htmlifypods : $(TO_INST_PM)
 	if [ ! -d blib/html ]; then mkdir blib/html; fi
 	perl -MPod::Simple::HTMLBatch -e Pod::Simple::HTMLBatch::go lib blib/html
 	-perl -MPod::Simple::HTML -e Pod::Simple::HTML::go bin/youri-check blib/html/youri-check.html
-	-perl -MPod::Simple::HTML -e Pod::Simple::HTML::go bin/youri-upload blib/html/youri-upload.html
 EOF
      return $top_targets;
 }
@@ -50,11 +49,10 @@ sub install {
 config_install :
 	install -d -m 755 $(DESTDIR)$(SYSCONFDIR)/youri
 	install -m 644 etc/check.conf $(DESTDIR)$(SYSCONFDIR)/youri
-	install -m 644 etc/upload.conf $(DESTDIR)$(SYSCONFDIR)/youri
 
 completion_install :
 	install -d -m 755 $(DESTDIR)$(SYSCONFDIR)/bash_completion.d
-	install -m 644 etc/bash_completion.d/youri $(DESTDIR)$(SYSCONFDIR)/bash_completion.d
+	install -m 644 etc/bash_completion.d/youri-check $(DESTDIR)$(SYSCONFDIR)/bash_completion.d
 EOF
     return $install;
 }
@@ -68,10 +66,6 @@ bin/youri-check : bin/youri-check.in Makefile
 	    -e 's|\@sysconfdir\@|$(SYSCONFDIR)|;' \
 	    < $< > $@
 
-bin/youri-upload : bin/youri-upload.in Makefile
-	perl -p \
-	    -e 's|\@sysconfdir\@|$(SYSCONFDIR)|;' \
-	    < $< > $@
 EOF
     return $installbin;
 }
