@@ -95,7 +95,7 @@ sub _init {
 
         foreach my $arch (@{$options{arches}}) {
             foreach my $media (@{$options{medias}}) {
-		my $bot_media = $options{aliases}->{$media} || $media;
+                my $bot_media = $options{aliases}->{$media} || $media;
                 my $base_url = "$options{url}/$arch/$bot_media/log";
                 print "Fetching URL $base_url: " if $self->{_verbose} > 1;
                 my $response = $agent->get($base_url);
@@ -118,12 +118,12 @@ sub _init {
         $self->{_agent}   = $agent;
         $self->{_url}     = $options{url};
         $self->{_aliases} = $options{aliases};
-	if ($options{arches}) {
-	    $self->{_arches}->{$_} = 1 foreach @{$options{arches}}
-	}
-	if ($options{medias}) {
-	    $self->{_medias}->{$_} = 1 foreach @{$options{medias}}
-	}
+        if ($options{arches}) {
+            $self->{_arches}->{$_} = 1 foreach @{$options{arches}}
+        }
+        if ($options{medias}) {
+            $self->{_medias}->{$_} = 1 foreach @{$options{medias}}
+        }
     }
 }
 
@@ -147,14 +147,14 @@ sub fails {
             $release
         );
         $self->{_results}->{$name}->{$version}->{$release}->{$arch} =
-	    $self->_get_package_result($self->{_agent}, $url);
+            $self->_get_package_result($self->{_agent}, $url);
     }
 
     my $status = 
-	$self->{_results}->{$name}->{$version}->{$release}->{$arch}->{status};
+        $self->{_results}->{$name}->{$version}->{$release}->{$arch}->{status};
 
     return $status
-	&& $status ne 'binary_test';
+        && $status ne 'binary_test';
 }
 
 sub status {

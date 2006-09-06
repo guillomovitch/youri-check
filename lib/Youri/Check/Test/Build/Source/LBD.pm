@@ -96,7 +96,7 @@ sub _init {
 
         foreach my $arch (@{$options{arches}}) {
             foreach my $media (@{$options{medias}}) {
-		my $bot_media = $options{aliases}->{$media} || $media;
+                my $bot_media = $options{aliases}->{$media} || $media;
                 my $base_url = "$options{url}/$arch/$bot_media/BO";
                 foreach my $status (@status) {
                     my $url = "$base_url/$status";
@@ -124,12 +124,12 @@ sub _init {
         $self->{_agent}   = $agent;
         $self->{_url}     = $options{url};
         $self->{_aliases} = $options{aliases};
-	if ($options{arches}) {
-	    $self->{_arches}->{$_} = 1 foreach @{$options{arches}}
-	}
-	if ($options{medias}) {
-	    $self->{_medias}->{$_} = 1 foreach @{$options{medias}}
-	}
+        if ($options{arches}) {
+            $self->{_arches}->{$_} = 1 foreach @{$options{arches}}
+        }
+        if ($options{medias}) {
+            $self->{_medias}->{$_} = 1 foreach @{$options{medias}}
+        }
     }
 }
 
@@ -138,38 +138,38 @@ sub fails {
     croak "Not a class method" unless ref $self;
   
     if ($self->{_agent}) {
-	# only try monitored arches and medias
+        # only try monitored arches and medias
         return if $self->{_arches} and ! $self->{_arches}->{$arch};
         return if $self->{_medias} and ! $self->{_medias}->{$media};
 
-	my $bot_media = $self->{_aliases}->{$media} || $media;
-	my $base_url = "$self->{_url}/$arch/$bot_media/BO";
-	STATUS: foreach my $status (@status) {
-	    my $url = "$base_url/$status/";
-	    print "Fetching URL $url: " if $self->{_verbose} > 1;
-	    my $response = $self->{_agent}->get($url);
-	    print $response->status_line() . "\n" if $self->{_verbose} > 1;
-	    if ($response->is_success()) {
-		my $parser = HTML::TokeParser->new(\$response->content());
-		while (my $token = $parser->get_tag('a')) {
-		    my $href = $token->[1]->{href};
-		    next unless $href =~ /^$name-$version-$release(?:\.gz)?$/o;
-		    my $result;
-		    $result->{status} = $status;
-		    $result->{url}    = $url . '/' . $href;
-		    $self->{_results}->{$name}->{$version}->{$release}->{$arch} = $result;
-		    last STATUS;
-		}
-	    }
-	}
+        my $bot_media = $self->{_aliases}->{$media} || $media;
+        my $base_url = "$self->{_url}/$arch/$bot_media/BO";
+        STATUS: foreach my $status (@status) {
+            my $url = "$base_url/$status/";
+            print "Fetching URL $url: " if $self->{_verbose} > 1;
+            my $response = $self->{_agent}->get($url);
+            print $response->status_line() . "\n" if $self->{_verbose} > 1;
+            if ($response->is_success()) {
+                my $parser = HTML::TokeParser->new(\$response->content());
+                while (my $token = $parser->get_tag('a')) {
+                    my $href = $token->[1]->{href};
+                    next unless $href =~ /^$name-$version-$release(?:\.gz)?$/o;
+                    my $result;
+                    $result->{status} = $status;
+                    $result->{url}    = $url . '/' . $href;
+                    $self->{_results}->{$name}->{$version}->{$release}->{$arch} = $result;
+                    last STATUS;
+                }
+            }
+        }
     }
 
     my $status =
-	$self->{_results}->{$name}->{$version}->{$release}->{$arch}->{status};
+        $self->{_results}->{$name}->{$version}->{$release}->{$arch}->{status};
 
     return $status
-	&& $status ne 'OK'
-       	&& $status ne 'arch_excl';
+        && $status ne 'OK'
+        && $status ne 'arch_excl';
 }
 
 sub status {
