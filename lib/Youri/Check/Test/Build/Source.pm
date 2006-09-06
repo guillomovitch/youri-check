@@ -69,10 +69,9 @@ sub get_id {
     return $self->{_id};
 }
 
-=head2 fails($name, $version, $release, $arch)
+=head2 fails($name, $version, $release, $arch, $media)
 
-Returns true if build fails for package with given name, version and release on
-given architecture.
+Returns true if build fails for package with given name, version and release, belonging to given media, on given architecture.
 
 =head2 status($name, $version, $release, $arch)
 

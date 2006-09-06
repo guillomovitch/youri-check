@@ -121,6 +121,8 @@ sub run {
     # this is a source media check only
     return unless $media->get_type() eq 'source';
 
+    my $media_id = $media->get_id();
+
     my $callback = sub {
         my ($package) = @_;
 
@@ -129,12 +131,12 @@ sub run {
         my $release = $package->get_release();
 
         foreach my $source (@{$self->{_sources}}) {
-            my $id = $source->get_id();
+            my $source_id = $source->get_id();
             foreach my $arch (keys %{$self->{_archs}}) {
                 next unless $self->{_archs}->{$arch}->{$id};
                 $resultset->add_result($self->{_id}, $media, $package, { 
                     arch   => $arch,
-                    bot    => $id,
+                    bot    => $source_id,
                     status => $source->status($name, $version, $release, $arch),
                     url    => $source->url($name, $version, $release, $arch),
                 }) if $source->fails(
@@ -142,6 +144,7 @@ sub run {
                     $version,
                     $release,
                     $arch,
+                    $media_id
                 );
             }
         }
