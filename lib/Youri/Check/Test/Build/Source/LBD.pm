@@ -10,6 +10,9 @@ Youri::Check::Test::Build::Source::LBD - LBD build log source
 This source plugin for L<Youri::Check::Test::Build> collects build logs
 available from a LBD build bot.
 
+Due to LBD logs setup (one directory for each build status), preloading results
+is highly advantageous.
+
 =cut
 
 use warnings;
@@ -32,6 +35,8 @@ my @status = qw/
     unpackaged_files
 /;
 
+my $package_pattern = '^(\S+)-([^-]+)-([^-]+)(?:\.gz)?$';
+
 =head1 CLASS METHODS
 
 =head2 new(%args)
@@ -46,13 +51,24 @@ Specific parameters:
 
 URL of logs for this LBD instance (default: http://eijk.homelinux.org/build)
 
+=item preloading true/false
+
+Allows to load all build logs at initialisation, rather than on-demand
+(default: false)
+
 =item medias $medias
 
-List of medias monitored by this LBD instance
+List of medias monitored by this LBD instance. Mandatory if preloading
+results, useful to limit bandwidth usage otherwise if defined.
 
 =item archs $archs
 
-List of architectures monitored by this LBD instance
+List of architectures monitored by this LBD instance. Mandatory if preloading
+results, useful to limit bandwidth usage otherwise if defined.
+
+=item aliases $aliases
+
+Maps given media names to names used by this LBD instance.
 
 =back
 
@@ -61,65 +77,113 @@ List of architectures monitored by this LBD instance
 sub _init {
     my $self    = shift;
     my %options = (
-        url    => 'http://eijk.homelinux.org/build',
-        medias => undef,
-        archs  => undef,
+        url     => 'http://eijk.homelinux.org/build',
+        preload => 0,
+        medias  => undef,
+        arches  => undef,
+        aliases => undef,
         @_
     );
 
-    my $agent   = LWP::UserAgent->new();
+    my $agent = LWP::UserAgent->new();
 
     # try to connect to base URL directly, and abort if not available
     my $response = $agent->head($options{url});
     die "Unavailable URL $options{url}: " . $response->status_line()
         unless $response->is_success();
 
-    my $pattern = '^(\S+)-([^-]+)-([^-]+)(?:\.gz)?$';
+    if ($options{preload}) {
 
-    foreach my $arch (@{$options{archs}}) {
-        foreach my $media (@{$options{medias}}) {
-            my $url_base = "$options{url}/$arch/$media/BO";
-            foreach my $status (@status) {
-                my $url = "$url_base/$status/";
-                print "Fetching URL $url: " if $self->{_verbose} > 1;
-                my $response = $agent->get($url);
-                print $response->status_line() . "\n" if $self->{_verbose} > 1;
-                if ($response->is_success()) {
-                    my $parser = HTML::TokeParser->new(\$response->content());
-                    while (my $token = $parser->get_tag('a')) {
-                        my $href = $token->[1]->{href};
-                        next unless $href =~ /$pattern/o;
-                        my $name    = $1;
-                        my $version = $2;
-                        my $release = $3;
-                        my $result;
-                        $result->{status} = $status;
-                        $result->{url}    = $url . '/' . $href;
-                        $self->{_results}->{$name}->{$version}->{$release}->{$arch} = $result;
+        foreach my $arch (@{$options{arches}}) {
+            foreach my $media (@{$options{medias}}) {
+		my $bot_media = $options{aliases}->{$media} || $media;
+                my $base_url = "$options{url}/$arch/$bot_media/BO";
+                foreach my $status (@status) {
+                    my $url = "$base_url/$status";
+                    print "Fetching URL $url: " if $self->{_verbose} > 1;
+                    my $response = $agent->get($url);
+                    print $response->status_line() . "\n" if $self->{_verbose} > 1;
+                    if ($response->is_success()) {
+                        my $parser = HTML::TokeParser->new(\$response->content());
+                        while (my $token = $parser->get_tag('a')) {
+                            my $href = $token->[1]->{href};
+                            next unless $href =~ /$package_pattern/o;
+                            my $name    = $1;
+                            my $version = $2;
+                            my $release = $3;
+                            my $result;
+                            $result->{status} = $status;
+                            $result->{url}    = $url . '/' . $href;
+                            $self->{_results}->{$name}->{$version}->{$release}->{$arch} = $result;
+                        }
                     }
                 }
             }
         }
+    } else {
+        $self->{_agent}   = $agent;
+        $self->{_url}     = $options{url};
+        $self->{_aliases} = $options{aliases};
+	if ($options{arches}) {
+	    $self->{_arches}->{$_} = 1 foreach @{$options{arches}}
+	}
+	if ($options{medias}) {
+	    $self->{_medias}->{$_} = 1 foreach @{$options{medias}}
+	}
     }
 }
 
 sub fails {
-    my ($self, $name, $version, $release, $arch) = @_;
+    my ($self, $name, $version, $release, $arch, $media) = @_;
+    croak "Not a class method" unless ref $self;
+  
+    if ($self->{_agent}) {
+	# only try monitored arches and medias
+        return if $self->{_arches} and ! $self->{_arches}->{$arch};
+        return if $self->{_medias} and ! $self->{_medias}->{$media};
+
+	my $bot_media = $self->{_aliases}->{$media} || $media;
+	my $base_url = "$self->{_url}/$arch/$bot_media/BO";
+	STATUS: foreach my $status (@status) {
+	    my $url = "$base_url/$status/";
+	    print "Fetching URL $url: " if $self->{_verbose} > 1;
+	    my $response = $self->{_agent}->get($url);
+	    print $response->status_line() . "\n" if $self->{_verbose} > 1;
+	    if ($response->is_success()) {
+		my $parser = HTML::TokeParser->new(\$response->content());
+		while (my $token = $parser->get_tag('a')) {
+		    my $href = $token->[1]->{href};
+		    next unless $href =~ /^$name-$version-$release(?:\.gz)?$/o;
+		    my $result;
+		    $result->{status} = $status;
+		    $result->{url}    = $url . '/' . $href;
+		    $self->{_results}->{$name}->{$version}->{$release}->{$arch} = $result;
+		    last STATUS;
+		}
+	    }
+	}
+    }
 
     my $status =
-        $self->{_results}->{$name}->{$version}->{$release}->{$arch}->{status};
+	$self->{_results}->{$name}->{$version}->{$release}->{$arch}->{status};
 
-    return $status && $status ne 'OK' && $status ne 'arch_excl';
+    return $status
+	&& $status ne 'OK'
+       	&& $status ne 'arch_excl';
 }
 
 sub status {
     my ($self, $name, $version, $release, $arch) = @_;
+    croak "Not a class method" unless ref $self;
+
     return
         $self->{_results}->{$name}->{$version}->{$release}->{$arch}->{status};
 }
 
 sub url {
     my ($self, $name, $version, $release, $arch) = @_;
+    croak "Not a class method" unless ref $self;
+
     return
         $self->{_results}->{$name}->{$version}->{$release}->{$arch}->{url};
 }
