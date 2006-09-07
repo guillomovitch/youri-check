@@ -27,9 +27,9 @@ Options:
 
 B<youri-check> allows to check packages in a repository.
 
-In input mode, all medias defined in configuration are passed to a list of
-input plugins, each of them storing their result in a persistent resultset. In
-output mode, this resultset is passed to a list of output plugins, each of them
+In test mode, all medias defined in configuration are passed to a list of
+test plugins, each of them storing their result in a persistent resultset. In
+report mode, this resultset is passed to a list of output plugins, each of them
 producing arbitrary effects.
 
 =head1 OPTIONS
@@ -54,7 +54,7 @@ Run all plugins parallelously
 
 =item B<--verbose>
 
-Produce more verbose output (can be used more than once)
+Produce more verbose report (can be used more than once)
 
 =item B<--test>
 
@@ -106,14 +106,14 @@ Declare a resultset object with identity I<id>.
 Declares a list of media objects with identity taken in space-separated list
 I<ids>.
 
-=item B<inputs> I<ids>
+=item B<tests> I<ids>
 
-Declares a list of input plugin objects with identity taken in space-separated
+Declares a list of test plugin objects with identity taken in space-separated
 list I<ids>.
 
-=item B<outputs> I<ids>
+=item B<reports> I<ids>
 
-Declares a list of output plugin objects with identity taken in space-separated
+Declares a list of report plugin objects with identity taken in space-separated
 list I<ids>.
 
 =back
@@ -171,8 +171,8 @@ my $config = Youri::Config->new(
         'preferences=s',
         'resultset=s',
         'medias=s',
-        'inputs=s',
-        'outputs=s'
+        'tests=s',
+        'reports=s'
     ],
     directories => [ '@sysconfdir@', "$ENV{HOME}/.youri" ],
     file_name   => 'check.conf',
@@ -210,7 +210,7 @@ my $children;
 
 my %skip_plugins = map { $_ => 1 } @{$config->get('skip-plugin')};
 
-if ($mode eq 'input') {
+if ($mode eq 'test') {
 
     # additional objects
 
@@ -269,13 +269,13 @@ if ($mode eq 'input') {
     $resultset->set_resolver($resolver);
 
 
-    foreach my $id (split(/\s+/, $config->get('inputs'))) {
+    foreach my $id (split(/\s+/, $config->get('tests'))) {
         next if $skip_plugins{$id};
-        report("Creating input $id");
-        my $input;
+        report("Creating test $id");
+        my $test;
         eval {
-            $input = create_instance(
-                'Youri::Check::Input',
+            $test = create_instance(
+                'Youri::Check::Test',
                 id         => $id,
                 test       => $test,
                 verbose    => $verbose > 0 ? $verbose - 1 : 0,
@@ -285,7 +285,7 @@ if ($mode eq 'input') {
             );
         };
         if ($@) {
-            print STDERR "Failed to create input $id: $@\n";
+            print STDERR "Failed to create test $id: $@\n";
         } else {
             if ($config->get('parallel')) {
                 # fork
@@ -298,10 +298,10 @@ if ($mode eq 'input') {
                 }
             }
             eval {
-                $input->prepare(@medias);
+                $test->prepare(@medias);
             };
             if ($@) {
-                print STDERR "Failed to prepare input $id: $@\n";
+                print STDERR "Failed to prepare test $id: $@\n";
             } else {
                 # clone resultset in child process
                 $resultset = $config->get('parallel') ?
@@ -309,14 +309,14 @@ if ($mode eq 'input') {
                     $resultset;
 
                 foreach my $media (@medias) {
-                    next if $media->skip_input($id);
+                    next if $media->skip_test($id);
                     my $media_id = $media->get_id();
-                    report("running input $id on media $media_id");
+                    report("running test $id on media $media_id");
                     eval {
-                        $input->run($media, $resultset);
+                        $test->run($media, $resultset);
                     };
                     if ($@) {
-                        print STDERR "Failed to run input $id on media $media_id: $@\n";
+                        print STDERR "Failed to run test $id on media $media_id: $@\n";
                     }
                 }
             }
@@ -327,15 +327,15 @@ if ($mode eq 'input') {
         }
     }
 
-} elsif ($mode eq 'output') {
+} elsif ($mode eq 'report') {
 
-    foreach my $id (split(/\s+/, $config->get('outputs'))) {
+    foreach my $id (split(/\s+/, $config->get('reports'))) {
         next if $skip_plugins{$id};
-        report("Creating output $id");
-        my $output;
+        report("Creating report $id");
+        my $report;
         eval {
-            $output = create_instance(
-                'Youri::Check::Output',
+            $report = create_instance(
+                'Youri::Check::Report',
                 id      => $id,
                 test    => $test,
                 verbose => $verbose > 0 ? $verbose - 1 : 0,
@@ -344,7 +344,7 @@ if ($mode eq 'input') {
             );
         };
         if ($@) {
-            print STDERR "Failed to create output $id: $@\n";
+            print STDERR "Failed to create report $id: $@\n";
         } else {
             if ($config->get('parallel')) {
                 # fork
@@ -362,12 +362,12 @@ if ($mode eq 'input') {
                 $resultset->clone() :
                 $resultset;
 
-            report("running output $id");
+            report("running report $id");
             eval {
-                $output->run($resultset);
+                $report->run($resultset);
             };
             if ($@) {
-                print STDERR "Failed to run output $id: $@\n";
+                print STDERR "Failed to run report $id: $@\n";
             }
 
             if ($config->get('parallel')) {
