@@ -133,7 +133,7 @@ sub run {
         foreach my $source (@{$self->{_sources}}) {
             my $source_id = $source->get_id();
             foreach my $arch (keys %{$self->{_archs}}) {
-                next unless $self->{_archs}->{$arch}->{$id};
+                next unless $self->{_archs}->{$arch}->{$source_id};
                 $resultset->add_result($self->{_id}, $media, $package, { 
                     arch   => $arch,
                     bot    => $source_id,
