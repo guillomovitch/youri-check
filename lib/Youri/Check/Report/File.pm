@@ -134,9 +134,10 @@ sub _report {
                 $contents[$i] .= $self->{_formats}->[$i]->get_formated_row(
                     \@results,
                     $descriptor,
-                    $line++ % 2 ? 'odd' : 'even',
+                    $line % 2 ? 'odd' : 'even',
                 );
             }
+            $line++;
             @results = ();
         }
         push(@results, $result);
