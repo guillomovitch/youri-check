@@ -104,9 +104,9 @@ sub _init {
                     %{$options{sources}->{$id}}
                 )
             );
-            # register monitored archs
-            $self->{_archs}->{$_}->{$id} = 1
-                foreach @{$options{sources}->{$id}->{archs}};
+            # register monitored arches
+            $self->{_arches}->{$_}->{$id} = 1
+                foreach @{$options{sources}->{$id}->{arches}};
         };
         print STDERR "Failed to create source $id: $@\n" if $@;
     }
@@ -132,8 +132,8 @@ sub run {
 
         foreach my $source (@{$self->{_sources}}) {
             my $source_id = $source->get_id();
-            foreach my $arch (keys %{$self->{_archs}}) {
-                next unless $self->{_archs}->{$arch}->{$source_id};
+            foreach my $arch (keys %{$self->{_arches}}) {
+                next unless $self->{_arches}->{$arch}->{$source_id};
                 $resultset->add_result($self->{_id}, $media, $package, { 
                     arch   => $arch,
                     bot    => $source_id,
