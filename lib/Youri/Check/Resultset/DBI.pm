@@ -271,6 +271,9 @@ sub _add_package {
         $self->{_resolver}->get_maintainer($package) :
         undef;
 
+    # lock tables to ensure proper isolation
+    $self->{_dbh}->do('LOCK TABLES packages WRITE');
+
     my $sth =
         $self->{_sths}->{add_package} ||=
         $self->{_dbh}->prepare($queries{add_package});
@@ -282,6 +285,9 @@ sub _add_package {
     );
 
     my $id = $self->{_dbh}->last_insert_id(undef, undef, 'packages', 'id');
+
+    # unlock table
+    $self->{_dbh}->do('UNLOCK TABLES');
 
     return $id;
 }
