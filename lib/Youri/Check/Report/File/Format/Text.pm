@@ -27,6 +27,7 @@ sub get_header {
     my $header;
     $header .= $title;
     $header .= "\n";
+    $header .= "\n";
     $header .=
         join("\t", map { $_->get_name() } $descriptor->get_cells()) .
         "\n";
