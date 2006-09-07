@@ -150,7 +150,7 @@ sub _report {
             $descriptor,
             $line++ % 2 ? 'odd' : 'even',
         );
-        $contents[$i] = $self->{_formats}->[$i]->get_footer(
+        $contents[$i] .= $self->{_formats}->[$i]->get_footer(
             $self->{_time}
         );
 
@@ -158,7 +158,7 @@ sub _report {
         my $extension = $self->{_formats}->[$i]->extension();
         $self->_write_file(
             "$path/$type.$extension",
-            $contents[$i]
+            \$contents[$i]
         );
 
         # register file
