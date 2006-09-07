@@ -118,7 +118,7 @@ sub _report {
     my @contents;
 
     # initialisation
-    for my $i (0 .. $#$self->{_formats}) {
+    for my $i (0 .. $#{$self->{_formats}}) {
         $contents[$i] = $self->{_formats}->[$i]->get_header(
             $title,
             $descriptor,
@@ -130,7 +130,7 @@ sub _report {
     my $line;
     while (my $result = $iterator->get_result()) {
         if (@results && $result->{package} ne $results[0]->{package}) {
-            for my $i (0 .. $#$self->{_formats}) {
+            for my $i (0 .. $#{$self->{_formats}}) {
                 $contents[$i] .= $self->{_formats}->[$i]->get_formated_row(
                     \@results,
                     $descriptor,
@@ -143,7 +143,7 @@ sub _report {
     }
 
     # finalisation
-    for my $i (0 .. $#$self->{_formats}) {
+    for my $i (0 .. $#{$self->{_formats}}) {
         # last results
         $contents[$i] .= $self->{_formats}->[$i]->get_formated_row(
             \@results,
