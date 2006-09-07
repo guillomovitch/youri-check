@@ -21,41 +21,31 @@ sub extension {
     return 'txt';
 }
 
-sub get_report {
-    my ($self, $time, $title, $iterator, $type, $descriptor, $maintainer) = @_;
-    
-    my $content;
-    $content .= $title;
-    $content .= "\n";
-    $content .=
+sub get_header {
+    my ($self, $title, $descriptor) = @_;
+
+    my $header;
+    $header .= $title;
+    $header .= "\n";
+    $header .=
         join("\t", map { $_->get_name() } $descriptor->get_cells()) .
         "\n";
 
-    # merge all results related to a single package into a single row
-    my @results;
-    while (my $result = $iterator->get_result()) {
-        if (@results && $result->{package} ne $results[0]->{package}) {
-            $content .= $self->_get_formated_row(
-                \@results,
-                $descriptor,
-            );
-            @results = ();
-        }
-        push(@results, $result);
-    }
-    $content .= $self->_get_formated_row(
-        \@results,
-        $descriptor,
-    );
-
-    $content .= "\n";
-    $content .= "Page generated $time\n";
-
-    return \$content;
+    return $header;
 }
 
-sub _get_formated_row {
-    my ($self, $results, $descriptor) = @_;
+sub get_footer {
+    my ($self, $time) = @_;
+
+    my $footer;
+    $footer .= "\n";
+    $footer .= "Page generated $time\n";
+
+    return $footer;
+}
+
+sub get_formated_row {
+    my ($self, $results, $descriptor, $class) = @_;
 
     my $row;
     my @mergeable_cells_values =

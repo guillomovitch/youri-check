@@ -53,45 +53,39 @@ EOF
     $self->{_cgi}   = CGI->new();
 }
 
-sub get_report {
-    my ($self, $time, $title, $iterator, $type, $descriptor, $maintainer) = @_;
+sub get_header {
+    my ($self, $title, $descriptor) = @_;
 
-    my $content;
-    $content .= $self->{_cgi}->start_table();
-    $content .= $self->{_cgi}->Tr([
+    my $header;
+
+    $header .= $self->_get_page_start($title);
+    $header .= $self->{_cgi}->start_table();
+    $header .= $self->{_cgi}->Tr([
         $self->{_cgi}->th([ 
             map { $_->get_name() } $descriptor->get_cells()
         ])
     ]);
 
-    # merge all results related to a single package into a single row
-    my @results;
-    my $line;
-    while (my $result = $iterator->get_result()) {
-        if (@results && $result->{package} ne $results[0]->{package}) {
-            $content .= $self->_get_formated_row(
-                \@results,
-                $descriptor,
-                $line++ % 2 ? 'odd' : 'even',
-            );
-            @results = ();
-        }
-        push(@results, $result);
-    }
-    $content .= $self->_get_formated_row(
-        \@results,
-        $descriptor,
-        $line++ % 2 ? 'odd' : 'even'
-    );
-    $content .= $self->{_cgi}->end_table();
+    return $header;
+}
 
-    return $self->_get_html_page($time, $title, \$content);
+sub get_footer {
+    my ($self, $time) = @_;
+
+    my $footer;
+
+    $footer .= $self->{_cgi}->end_table();
+    $footer .= $self->_get_page_end($time);
+
+    return $footer;
 }
 
 sub get_index {
     my ($self, $time, $title, $reports, $maintainers) = @_;
 
     my $content;
+
+    $content .= $self->_get_page_start($title);
 
     if ($reports) {
         $content .= $self->{_cgi}->h2("Reports");
@@ -131,10 +125,12 @@ sub get_index {
         $content .= $self->{_cgi}->end_ul();
     }
 
-    return $self->_get_html_page($time, $title, \$content);
+    $content .= $self->_get_page_end($time);
+
+    return $content;
 }
 
-sub _get_formated_row {
+sub get_formated_row {
     my ($self, $results, $descriptor, $class) = @_;
 
     my $row;
@@ -191,24 +187,31 @@ sub _get_formated_cell {
     return $cell;
 }
 
-sub _get_html_page {
-    my ($self, $time, $title, $body) = @_;
+sub _get_page_start {
+    my ($self, $title) = @_;
 
-    my $content;
-    $content .= $self->{_cgi}->start_html(
+    my $start;
+    $start .= $self->{_cgi}->start_html(
         -title => $title,
         -style => { code => $self->{_style} }
     );
-    $content .= $self->{_cgi}->h1($title);
-    $content .= $$body;
-    $content .= $self->{_cgi}->hr();
-    $content .= $self->{_cgi}->p(
+    $start .= $self->{_cgi}->h1($title);
+
+    return $start;
+}
+
+sub _get_page_end {
+    my ($self, $time) = @_;
+
+    my $end;
+    $end .= $self->{_cgi}->hr();
+    $end .= $self->{_cgi}->p(
         { class => 'footer' },
         "Page generated $time"
     );
-    $content .= $self->{_cgi}->end_html();
+    $end .= $self->{_cgi}->end_html();
 
-    return \$content;
+    return $end;
 }
 
 sub _obfuscate {

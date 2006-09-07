@@ -75,65 +75,95 @@ sub _init_report {
 sub _global_report {
     my ($self, $resultset, $type, $descriptor) = @_;
 
-    foreach my $format (@{$self->{_formats}}) {
-        my $iterator = $resultset->get_iterator(
-            $type,
-            [ 'package' ]
-        );
+    my $iterator = $resultset->get_iterator(
+        $type,
+        [ 'package' ]
+    );
 
-        return if $self->{_noempty} && ! $iterator->has_results();
+    $self->_report(
+        $iterator,
+        $descriptor,
+        $type,
+        "$type global report",
+        "$self->{_to}",
+        $self->{_files}->{global}
+    );
 
-        my $content = $format->get_report(
-            $self->{_time},
-            "$type global report",
-            $iterator,
-            $type,
-            $descriptor,
-            undef
-        );
-
-        # create and register file
-        my $extension = $format->extension();
-        $self->_write_file(
-            "$self->{_to}/$type.$extension",
-            $content
-        );
-        push(
-            @{$self->{_files}->{global}->{$type}},
-            $extension
-        );
-    }
 }
 
 sub _individual_report {
     my ($self, $resultset, $type, $descriptor, $maintainer) = @_;
 
-    foreach my $format (@{$self->{_formats}}) {
-        my $iterator = $resultset->get_iterator(
-            $type,
-            [ 'package' ],
-            { maintainer => [ $maintainer ] }
-        );
+    my $iterator = $resultset->get_iterator(
+        $type,
+        [ 'package' ],
+        { maintainer => [ $maintainer ] }
+    );
 
-        return if $self->{_noempty} && ! $iterator->has_results();
+    $self->_report(
+        $iterator,
+        $descriptor,
+        $type,
+        "$type individual report for $maintainer",
+        "$self->{_to}/$maintainer",
+        $self->{_files}->{maintainers}->{$maintainer}
+    );
+}
 
-        my $content = $format->get_report(
-            $self->{_time},
-            "$type individual report for $maintainer",
-            $iterator,
-            $type,
+sub _report {
+    my ($self, $iterator, $descriptor, $type, $title, $path, $registry) = @_;
+
+    return if $self->{_noempty} && ! $iterator->has_results();
+
+    my @contents;
+
+    # initialisation
+    for my $i (0 .. $#$self->{_formats}) {
+        $contents[$i] = $self->{_formats}->[$i]->get_header(
+            $title,
             $descriptor,
-            $maintainer
+        );
+    }
+
+    # content creation
+    my @results;
+    my $line;
+    while (my $result = $iterator->get_result()) {
+        if (@results && $result->{package} ne $results[0]->{package}) {
+            for my $i (0 .. $#$self->{_formats}) {
+                $contents[$i] .= $self->{_formats}->[$i]->get_formated_row(
+                    \@results,
+                    $descriptor,
+                    $line++ % 2 ? 'odd' : 'even',
+                );
+            }
+            @results = ();
+        }
+        push(@results, $result);
+    }
+
+    # finalisation
+    for my $i (0 .. $#$self->{_formats}) {
+        # last results
+        $contents[$i] .= $self->{_formats}->[$i]->get_formated_row(
+            \@results,
+            $descriptor,
+            $line++ % 2 ? 'odd' : 'even',
+        );
+        $contents[$i] = $self->{_formats}->[$i]->get_footer(
+            $self->{_time}
         );
 
-        # create and register file
-        my $extension = $format->extension();
+        # create file
+        my $extension = $self->{_formats}->[$i]->extension();
         $self->_write_file(
-            "$self->{_to}/$maintainer/$type.$extension",
-            $content
+            "$path/$type.$extension",
+            $contents[$i]
         );
+
+        # register file
         push(
-            @{$self->{_files}->{maintainers}->{$maintainer}->{$type}},
+            @{$registry->{$type}},
             $extension
         );
     }
