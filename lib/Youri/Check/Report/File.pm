@@ -145,12 +145,14 @@ sub _report {
 
     # finalisation
     for my $i (0 .. $#{$self->{_formats}}) {
-        # last results
-        $contents[$i] .= $self->{_formats}->[$i]->get_formated_row(
-            \@results,
-            $descriptor,
-            $line++ % 2 ? 'odd' : 'even',
-        );
+        if (@results) {
+            # last results
+            $contents[$i] .= $self->{_formats}->[$i]->get_formated_row(
+                \@results,
+                $descriptor,
+                $line % 2 ? 'odd' : 'even',
+            );
+        }
         $contents[$i] .= $self->{_formats}->[$i]->get_footer(
             $self->{_time}
         );
