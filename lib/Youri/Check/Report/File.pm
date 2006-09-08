@@ -80,13 +80,12 @@ sub _global_report {
         [ 'package' ]
     );
 
-    $self->_report(
+    $self->{_files}->{global} = $self->_report(
         $iterator,
         $descriptor,
         $type,
         "$type global report",
         "$self->{_to}",
-        $self->{_files}->{global}
     );
 
 }
@@ -100,22 +99,22 @@ sub _individual_report {
         { maintainer => [ $maintainer ] }
     );
 
-    $self->_report(
+    $self->{_files}->{maintainers}->{$maintainer} = $self->_report(
         $iterator,
         $descriptor,
         $type,
         "$type individual report for $maintainer",
         "$self->{_to}/$maintainer",
-        $self->{_files}->{maintainers}->{$maintainer}
     );
 }
 
 sub _report {
-    my ($self, $iterator, $descriptor, $type, $title, $path, $registry) = @_;
+    my ($self, $iterator, $descriptor, $type, $title, $path) = @_;
 
     return if $self->{_noempty} && ! $iterator->has_results();
 
     my @contents;
+    my $files;
 
     # initialisation
     for my $i (0 .. $#{$self->{_formats}}) {
@@ -166,10 +165,12 @@ sub _report {
 
         # register file
         push(
-            @{$registry->{$type}},
+            @{$files->{$type}}, 
             $extension
         );
     }
+
+    return $files;
 }
 
 sub _finish_report {
