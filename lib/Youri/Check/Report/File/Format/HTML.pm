@@ -127,7 +127,7 @@ sub get_index {
 
     $content .= $self->_get_page_end($time);
 
-    return $content;
+    return \$content;
 }
 
 sub get_formated_row {
