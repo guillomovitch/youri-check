@@ -127,7 +127,7 @@ sub _report {
 
     # content creation
     my @results;
-    my $line;
+    my $line = 0;
     while (my $result = $iterator->get_result()) {
         if (@results && $result->{package} ne $results[0]->{package}) {
             for my $i (0 .. $#{$self->{_formats}}) {
