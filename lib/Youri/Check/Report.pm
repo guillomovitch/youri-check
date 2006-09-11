@@ -110,12 +110,16 @@ sub run {
         load($class);
         my $descriptor = $class->get_descriptor();
 
+        # get filtering informations from config
+        my $filter = $self->{_config}->get($type . '_filter');
+
         if ($self->{_global}) {
             print STDERR "generating global report for $type\n" if $self->{_verbose};
             $self->_global_report(
                 $resultset,
                 $type,
-                $descriptor
+                $descriptor,
+                $filter
             );
         }
 
@@ -127,7 +131,8 @@ sub run {
                     $resultset,
                     $type,
                     $descriptor,
-                    $maintainer
+                    $filter,
+                    $maintainer,
                 );
             }
         }

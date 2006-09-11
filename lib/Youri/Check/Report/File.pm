@@ -67,11 +67,12 @@ sub _init_report {
 }
 
 sub _global_report {
-    my ($self, $resultset, $type, $descriptor) = @_;
+    my ($self, $resultset, $type, $descriptor, $filter) = @_;
 
     my $iterator = $resultset->get_iterator(
         $type,
-        [ 'package' ]
+        [ 'package' ],
+        $filter
     );
 
     $self->{_files}->{global} = $self->_report(
@@ -85,12 +86,15 @@ sub _global_report {
 }
 
 sub _individual_report {
-    my ($self, $resultset, $type, $descriptor, $maintainer) = @_;
+    my ($self, $resultset, $type, $descriptor, $filter, $maintainer) = @_;
 
     my $iterator = $resultset->get_iterator(
         $type,
         [ 'package' ],
-        { maintainer => [ $maintainer ] }
+        {
+            ($filter ? %$filter : () ),
+            maintainer => [ $maintainer ]
+        }
     );
 
     $self->{_files}->{maintainers}->{$maintainer} = $self->_report(
