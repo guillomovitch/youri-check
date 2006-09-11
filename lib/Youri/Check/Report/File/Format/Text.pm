@@ -21,34 +21,30 @@ sub extension {
     return 'txt';
 }
 
-sub get_header {
-    my ($self, $title, $descriptor) = @_;
+sub init_report {
+    my ($self, $path, $type, $title, $descriptor) = @_;
 
-    my $header;
-    $header .= $title;
-    $header .= "\n";
-    $header .= "\n";
-    $header .=
-        join("\t", map { $_->get_name() } $descriptor->get_cells()) .
-        "\n";
+    $self->open_output($path, $type . '.txt');
 
-    return $header;
+    $self->{_out}->print("$title\n");
+    $self->{_out}->print("\n");
+    $self->{_out}->print(
+        join("\t", map { $_->get_name() } $descriptor->get_cells()) .  "\n"
+    );
 }
 
-sub get_footer {
-    my ($self, $time) = @_;
+sub finish_report {
+    my ($self) = @_;
 
-    my $footer;
-    $footer .= "\n";
-    $footer .= "Page generated $time\n";
+    $self->{out}->print("\n");
+    $self->{out}->print("Page generated $self->{_time}\n");
 
-    return $footer;
+    $self->close_output();
 }
 
-sub get_formated_row {
-    my ($self, $results, $descriptor, $class) = @_;
+sub add_results {
+    my ($self, $results, $descriptor) = @_;
 
-    my $row;
     my @mergeable_cells_values =
         map { $_->get_value() }
         $descriptor->get_mergeable_cells();
@@ -57,21 +53,20 @@ sub get_formated_row {
         $descriptor->get_unmergeable_cells();
 
     # first line contains merged cells
-    $row .= join(
+    $self->{out}->print(join(
         "\t",
         (map { $results->[0]->{$_} || '' } @mergeable_cells_values),
         (map { $results->[0]->{$_} || '' } @unmergeable_cells_values)
-    ) . "\n";
+    ) . "\n");
     # all lines contains other cells
     for my $i (1 .. $#$results) {
-        $row .= join(
+        $self->{out}->print(join(
             "\t",
             (map { '' } @mergeable_cells_values),
             (map { $results->[$i]->{$_} || '' } @unmergeable_cells_values)
-        ) . "\n";
+        ) . "\n");
     }
 
-    return $row;
 }
 
 =head1 COPYRIGHT AND LICENSE

@@ -53,45 +53,92 @@ EOF
     $self->{_cgi}   = CGI->new();
 }
 
-sub get_header {
-    my ($self, $title, $descriptor) = @_;
+sub init_report {
+    my ($self, $path, $type, $title, $descriptor) = @_;
 
-    my $header;
+    $self->{_count} = 0;
+    $self->_init_page($path, $type . '.html', $title);
 
-    $header .= $self->_get_page_start($title);
-    $header .= $self->{_cgi}->start_table();
-    $header .= $self->{_cgi}->Tr([
-        $self->{_cgi}->th([ 
-            map { $_->get_name() } $descriptor->get_cells()
+    $self->{_out}->print($self->{_cgi}->start_table());
+    $self->{_out}->print(
+        $self->{_cgi}->Tr([
+            $self->{_cgi}->th([ 
+                map { $_->get_name() } $descriptor->get_cells()
+            ])
         ])
-    ]);
-
-    return $header;
+    );
 }
 
-sub get_footer {
-    my ($self, $time) = @_;
+sub finish_report {
+    my ($self) = @_;
 
-    my $footer;
+    $self->{_out}->print($self->{_cgi}->end_table());
 
-    $footer .= $self->{_cgi}->end_table();
-    $footer .= $self->_get_page_end($time);
-
-    return $footer;
+    $self->_finish_page();
 }
 
-sub get_index {
-    my ($self, $time, $title, $reports, $maintainers) = @_;
+sub add_results {
+    my ($self, $results, $descriptor) = @_;
 
-    my $content;
+    my $class = $self->{_count}++ % 2 ? 'odd' : 'even';
+    my @mergeable_cells = $descriptor->get_mergeable_cells();
+    my @unmergeable_cells = $descriptor->get_unmergeable_cells();
 
-    $content .= $self->_get_page_start($title);
+    for my $i (0 .. $#$results) {
+        $self->{_out}->print($self->{_cgi}->start_Tr(
+            { class => $class }
+        ));
+        # first line contains merged cells
+        if ($i == 0) {
+            foreach my $cell (@mergeable_cells) {
+                $self->_add_cell(
+                    $results->[$i],
+                    $cell,
+                    { rowspan => scalar @$results }
+                );
+            }
+        }
+        # all lines contains other cells
+        foreach my $cell (@unmergeable_cells) {
+            $self->_add_cell(
+                $results->[$i],
+                $cell,
+            );
+        }
+        $self->{_out}->print($self->{_cgi}->end_Tr());
+    }
+}
+
+sub _add_cell {
+    my ($self, $result, $descriptor, $attributes) = @_;
+
+    my $link = $descriptor->get_link();
+    if ($link && $result->{$link}) {
+        $self->{_out}->print($self->{_cgi}->td(
+            $attributes,
+            $self->{_cgi}->a(
+                { href => $result->{$link} },
+                $self->{_cgi}->escapeHTML($result->{$descriptor->get_value()})
+            )
+        ));
+    } else {
+        $self->{_out}->print($self->{_cgi}->td(
+            $attributes,
+            $self->{_cgi}->escapeHTML($result->{$descriptor->get_value()})
+        ));
+    }
+}
+
+sub create_index {
+    my ($self, $path, $title, $reports, $maintainers) = @_;
+
+    $self->_init_page($path, 'index.html', $title);
 
     if ($reports) {
-        $content .= $self->{_cgi}->h2("Reports");
+        $self->{_out}->print($self->{_cgi}->h2("Reports"));
         my @types = keys %{$reports};
 
-        $content .= $self->{_cgi}->start_ul();
+        $self->{_out}->print($self->{_cgi}->start_ul());
         foreach my $type (sort @types) {
             my $item;
             $item = $self->{_cgi}->a(
@@ -105,113 +152,52 @@ sub get_index {
                         "[$extension]"
                 );
             }
-            $content .= $self->{_cgi}->li($item);
+            $self->{_out}->print($self->{_cgi}->li($item));
         }
-        $content .= $self->{_cgi}->end_ul();
+        $self->{_out}->print($self->{_cgi}->end_ul());
     }
 
     if ($maintainers) {
-        $content .= $self->{_cgi}->h2("Individual reports");
+        $self->{_out}->print($self->{_cgi}->h2("Individual reports"));
 
-        $content .= $self->{_cgi}->start_ul();
+        $self->{_out}->print($self->{_cgi}->start_ul());
         foreach my $maintainer (sort @{$maintainers}) {
-            $content .= $self->{_cgi}->li(
+            $self->{_out}->print($self->{_cgi}->li(
                 $self->{_cgi}->a(
                     { href => "$maintainer/index.html" },
                     _obfuscate($maintainer)
                 )
-            );
+            ));
         }
-        $content .= $self->{_cgi}->end_ul();
+        $self->{_out}->print($self->{_cgi}->end_ul());
     }
 
-    $content .= $self->_get_page_end($time);
-
-    return \$content;
+    $self->_finish_page();
 }
 
-sub get_formated_row {
-    my ($self, $results, $descriptor, $class) = @_;
+sub _init_page {
+    my ($self, $path, $name, $title) = @_;
 
-    my $row;
-    my @mergeable_cells = $descriptor->get_mergeable_cells();
-    my @unmergeable_cells = $descriptor->get_unmergeable_cells();
+    $self->open_output($path, $name);
 
-    for my $i (0 .. $#$results) {
-        $row .= $self->{_cgi}->start_Tr(
-            { class => $class }
-        );
-        # first line contains merged cells
-        if ($i == 0) {
-            foreach my $cell (@mergeable_cells) {
-                $row .= $self->_get_formated_cell(
-                    $results->[$i],
-                    $cell,
-                    { rowspan => scalar @$results }
-                );
-            }
-        }
-        # all lines contains other cells
-        foreach my $cell (@unmergeable_cells) {
-            $row .= $self->_get_formated_cell(
-                $results->[$i],
-                $cell,
-            );
-        }
-        $row .= $self->{_cgi}->end_Tr();
-    }
-
-    return $row;
-}
-
-sub _get_formated_cell {
-    my ($self, $result, $descriptor, $attributes) = @_;
-
-    my $cell;
-    my $link = $descriptor->get_link();
-    if ($link && $result->{$link}) {
-        $cell = $self->{_cgi}->td(
-            $attributes,
-            $self->{_cgi}->a(
-                { href => $result->{$link} },
-                $self->{_cgi}->escapeHTML($result->{$descriptor->get_value()})
-            )
-        );
-    } else {
-        $cell = $self->{_cgi}->td(
-            $attributes,
-            $self->{_cgi}->escapeHTML($result->{$descriptor->get_value()})
-        );
-    }
-
-    return $cell;
-}
-
-sub _get_page_start {
-    my ($self, $title) = @_;
-
-    my $start;
-    $start .= $self->{_cgi}->start_html(
+    $self->{out}->print($self->{_cgi}->start_html(
         -title => $title,
         -style => { code => $self->{_style} }
-    );
-    $start .= $self->{_cgi}->h1($title);
-
-    return $start;
+    ));
+    $self->{out}->print($self->{_cgi}->h1($title));
 }
 
-sub _get_page_end {
-    my ($self, $time) = @_;
+sub _finish_page {
+    my ($self) = @_;
 
-    my $end;
-    $end .= $self->{_cgi}->hr();
-    $end .= $self->{_cgi}->p(
+    $self->{out}->print($self->{_cgi}->hr());
+    $self->{out}->print($self->{_cgi}->p(
         { class => 'footer' },
-        "Page generated $time"
-    );
-    $end .= $self->{_cgi}->end_html();
+        "Page generated $self->{_time}"
+    ));
+    $self->{out}->print($self->{_cgi}->end_html());
 
-    return $end;
+    $self->close_output();
 }
 
 sub _obfuscate {

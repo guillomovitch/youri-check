@@ -15,6 +15,7 @@ L<Youri::Check::Report::File>.
 use warnings;
 use strict;
 use IO::Handle;
+use File::Path;
 use DateTime;
 use Carp;
 
@@ -62,16 +63,14 @@ sub get_id {
 }
 
 sub open_output {
-    my ($self, $dir, $name) = @_;
+    my ($self, $dir, $file) = @_;
 
     if ($self->{_test}) {
         $self->{_out} = \*STDOUT;
     } else {
-        my $extension = $self->extension();
-        my $file = "$dir/$name.$extension";
-        my $dirname = dirname($file);
-        mkpath($dirname) unless -d $dirname;
-        open($self->{_out}, '>', $file) or croak "Can't open file $file: $!";
+        my $path = "$dir/$file";
+        mkpath($dir) unless -d $dir;
+        open($self->{_out}, '>', $path) or croak "Can't open file $path: $!";
     }
 }
 

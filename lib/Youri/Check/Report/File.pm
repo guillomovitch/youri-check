@@ -15,9 +15,6 @@ formats.
 use warnings;
 use strict;
 use Carp;
-use File::Basename;
-use File::Path;
-use DateTime;
 use Youri::Utils;
 use base 'Youri::Check::Report';
 
@@ -34,13 +31,9 @@ sub _init {
     croak "no format defined" unless $options{formats};
     croak "formats should be an hashref" unless ref $options{formats} eq 'HASH';
 
-    my $now = DateTime->now(time_zone => 'local');
-    my $time = "the " . $now->ymd() . " at " . $now->hms();
-
     $self->{_to}      = $options{to};
     $self->{_noclean} = $options{noclean};
     $self->{_noempty} = $options{noempty};
-    $self->{_time}    = $time;
 
     foreach my $id (keys %{$options{formats}}) {
         print "Creating format $id\n" if $options{verbose};
@@ -117,8 +110,10 @@ sub _report {
     my $files;
 
     # initialisation
-    for my $i (0 .. $#{$self->{_formats}}) {
-        $contents[$i] = $self->{_formats}->[$i]->get_header(
+    foreach my $format (@{$self->{_formats}}) {
+        $format->init_report(
+            $path,
+            $type,
             $title,
             $descriptor,
         );
@@ -126,47 +121,34 @@ sub _report {
 
     # content creation
     my @results;
-    my $line = 0;
     while (my $result = $iterator->get_result()) {
         if (@results && $result->{package} ne $results[0]->{package}) {
-            for my $i (0 .. $#{$self->{_formats}}) {
-                $contents[$i] .= $self->{_formats}->[$i]->get_formated_row(
+            foreach my $format (@{$self->{_formats}}) {
+                $format->add_results(
                     \@results,
                     $descriptor,
-                    $line % 2 ? 'odd' : 'even',
                 );
             }
-            $line++;
             @results = ();
         }
         push(@results, $result);
     }
 
     # finalisation
-    for my $i (0 .. $#{$self->{_formats}}) {
+    foreach my $format (@{$self->{_formats}}) {
         if (@results) {
             # last results
-            $contents[$i] .= $self->{_formats}->[$i]->get_formated_row(
+            $format->add_results(
                 \@results,
                 $descriptor,
-                $line % 2 ? 'odd' : 'even',
             );
         }
-        $contents[$i] .= $self->{_formats}->[$i]->get_footer(
-            $self->{_time}
-        );
-
-        # create file
-        my $extension = $self->{_formats}->[$i]->extension();
-        $self->_write_file(
-            "$path/$type.$extension",
-            \$contents[$i]
-        );
+        $format->finish_report();
 
         # register file
         push(
             @{$files->{$type}}, 
-            $extension
+            $format->extension()
         );
     }
 
@@ -177,51 +159,25 @@ sub _finish_report {
     my ($self, $types, $maintainers) = @_;
 
     foreach my $format (@{$self->{_formats}}) {
-        next unless $format->can('get_index');
-        my $extension = $format->extension();
+        next unless $format->can('create_index');
         print STDERR "writing global index page\n" if $self->{_verbose};
-        $self->_write_file(
-            "$self->{_to}/index.$extension",
-            $format->get_index(
-                $self->{_time},
-                "QA global report",
-                $self->{_files}->{global},
-                [ keys %{$self->{_files}->{maintainers}} ],
-            )
+        $format->create_index(
+            $self->{_to},
+            "QA global report",
+            $self->{_files}->{global},
+            [ keys %{$self->{_files}->{maintainers}} ],
         );
+
         foreach my $maintainer (@$maintainers) {
             print STDERR "writing index page for $maintainer\n" if $self->{_verbose};
-
-            $self->_write_file(
-                "$self->{_to}/$maintainer/index.$extension",
-                $format->get_index(
-                    $self->{_time},
-                    "QA report for $maintainer",
-                    $self->{_files}->{maintainers}->{$maintainer},
-                    undef,
-                )
+            $format->create_index(
+                "$self->{_to}/$maintainer",
+                "QA report for $maintainer",
+                $self->{_files}->{maintainers}->{$maintainer},
+                undef
             );
         }
     }
-}
-
-sub _write_file {
-    my ($self, $file, $content) = @_;
-
-    return unless $content;
-
-    my $dirname = dirname($file);
-    mkpath($dirname) unless -d $dirname;
-    
-    if ($self->{_test}) {
-        *OUT = *STDOUT;
-    } else {
-        open(OUT, ">$file") or die "Can't open file $file: $!";
-    }
-
-    print OUT $$content;
-
-    close(OUT) unless $self->{_test};
 }
 
 =head1 COPYRIGHT AND LICENSE
