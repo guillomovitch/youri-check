@@ -15,6 +15,7 @@ formats.
 use warnings;
 use strict;
 use Carp;
+use File::Path;
 use Youri::Utils;
 use base 'Youri::Check::Report';
 
