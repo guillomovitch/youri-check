@@ -75,14 +75,15 @@ sub _global_report {
         $filter
     );
 
-    $self->{_files}->{global} = $self->_report(
-        $iterator,
-        $descriptor,
-        $type,
-        "$type global report",
-        "$self->{_to}",
-    );
-
+    $self->{_files}->{global}->{type} = [
+        $self->_report(
+            $iterator,
+            $descriptor,
+            $type,
+            "$type global report",
+            "$self->{_to}",
+        )
+    ];
 }
 
 sub _individual_report {
@@ -97,22 +98,21 @@ sub _individual_report {
         }
     );
 
-    $self->{_files}->{maintainers}->{$maintainer} = $self->_report(
-        $iterator,
-        $descriptor,
-        $type,
-        "$type individual report for $maintainer",
-        "$self->{_to}/$maintainer",
-    );
+    $self->{_files}->{maintainers}->{$maintainer} = [
+        $self->_report(
+            $iterator,
+            $descriptor,
+            $type,
+            "$type individual report for $maintainer",
+            "$self->{_to}/$maintainer",
+        )
+    ];
 }
 
 sub _report {
     my ($self, $iterator, $descriptor, $type, $title, $path) = @_;
 
     return if $self->{_noempty} && ! $iterator->has_results();
-
-    my @contents;
-    my $files;
 
     # initialisation
     foreach my $format (@{$self->{_formats}}) {
@@ -149,15 +149,12 @@ sub _report {
             );
         }
         $format->finish_report();
-
-        # register file
-        push(
-            @{$files->{$type}}, 
-            $format->extension()
-        );
     }
 
-    return $files;
+    # return list of file formats created
+    return
+        map { $_->extension() }
+        @{$self->{_formats}};
 }
 
 sub _finish_report {
