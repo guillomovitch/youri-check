@@ -14,6 +14,7 @@ L<Youri::Check::Report::File>.
 
 use warnings;
 use strict;
+use IO::Handle;
 use Carp;
 
 sub new {
@@ -53,6 +54,26 @@ sub get_id {
     croak "Not a class method" unless ref $self;
 
     return $self->{_id};
+}
+
+sub open_output {
+    my ($self, $dir, $name) = @_;
+
+    if ($self->{_test}) {
+        $self->{_out} = \*STDOUT;
+    } else {
+        my $extension = $self->extension();
+        my $file = "$dir/$name.$extension";
+        my $dirname = dirname($file);
+        mkpath($dirname) unless -d $dirname;
+        open($self->{_out}, '>', $file) or croak "Can't open file $file: $!";
+    }
+}
+
+sub close_output {
+    my ($self) = @_;
+
+    close($self->{_out}) unless $self->{_test};
 }
 
 =head1 COPYRIGHT AND LICENSE
