@@ -75,7 +75,7 @@ sub _global_report {
         $filter
     );
 
-    $self->{_files}->{global}->{type} = [
+    $self->{_files}->{global}->{$type} = [
         $self->_report(
             $iterator,
             $descriptor,
@@ -98,7 +98,7 @@ sub _individual_report {
         }
     );
 
-    $self->{_files}->{maintainers}->{$maintainer}->{type} = [
+    $self->{_files}->{maintainers}->{$maintainer}->{$type} = [
         $self->_report(
             $iterator,
             $descriptor,
