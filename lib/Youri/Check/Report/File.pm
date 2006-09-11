@@ -98,7 +98,7 @@ sub _individual_report {
         }
     );
 
-    $self->{_files}->{maintainers}->{$maintainer} = [
+    $self->{_files}->{maintainers}->{$maintainer}->{type} = [
         $self->_report(
             $iterator,
             $descriptor,
