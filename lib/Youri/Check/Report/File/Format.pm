@@ -15,6 +15,7 @@ L<Youri::Check::Report::File>.
 use warnings;
 use strict;
 use IO::Handle;
+use DateTime;
 use Carp;
 
 sub new {
@@ -28,10 +29,14 @@ sub new {
         @_
     );
 
+    my $now = DateTime->now(time_zone => 'local');
+    my $time = "the " . $now->ymd() . " at " . $now->hms();
+
     my $self = bless {
         _id         => $options{id},
         _test       => $options{test},
         _verbose    => $options{verbose},
+        _time       => $time
     }, $class;
 
     $self->_init(%options);
