@@ -105,13 +105,13 @@ sub run {
     my @types       = $resultset->get_types();
 
     foreach my $type (@types) {
-        # get formatting instructions from class
-        my $class = $self->{_config}->get($type . '_class');
-        load($class);
-        my $descriptor = $class->get_descriptor();
+        # get test configuration
+        my %config = $self->{_config}->get_section($type);
 
-        # get filtering informations from config
-        my $filter = $self->{_config}->get($type . '_filter');
+        load($config{class});
+        my $descriptor = $config{class}->get_descriptor();
+        my $filter = $config{filter};
+
 
         if ($self->{_global}) {
             print STDERR "generating global report for $type\n" if $self->{_verbose};
