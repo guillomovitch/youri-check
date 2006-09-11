@@ -36,8 +36,8 @@ sub init_report {
 sub finish_report {
     my ($self) = @_;
 
-    $self->{out}->print("\n");
-    $self->{out}->print("Page generated $self->{_time}\n");
+    $self->{_out}->print("\n");
+    $self->{_out}->print("Page generated $self->{_time}\n");
 
     $self->close_output();
 }
@@ -53,14 +53,14 @@ sub add_results {
         $descriptor->get_unmergeable_cells();
 
     # first line contains merged cells
-    $self->{out}->print(join(
+    $self->{_out}->print(join(
         "\t",
         (map { $results->[0]->{$_} || '' } @mergeable_cells_values),
         (map { $results->[0]->{$_} || '' } @unmergeable_cells_values)
     ) . "\n");
     # all lines contains other cells
     for my $i (1 .. $#$results) {
-        $self->{out}->print(join(
+        $self->{_out}->print(join(
             "\t",
             (map { '' } @mergeable_cells_values),
             (map { $results->[$i]->{$_} || '' } @unmergeable_cells_values)

@@ -180,22 +180,22 @@ sub _init_page {
 
     $self->open_output($path, $name);
 
-    $self->{out}->print($self->{_cgi}->start_html(
+    $self->{_out}->print($self->{_cgi}->start_html(
         -title => $title,
         -style => { code => $self->{_style} }
     ));
-    $self->{out}->print($self->{_cgi}->h1($title));
+    $self->{_out}->print($self->{_cgi}->h1($title));
 }
 
 sub _finish_page {
     my ($self) = @_;
 
-    $self->{out}->print($self->{_cgi}->hr());
-    $self->{out}->print($self->{_cgi}->p(
+    $self->{_out}->print($self->{_cgi}->hr());
+    $self->{_out}->print($self->{_cgi}->p(
         { class => 'footer' },
         "Page generated $self->{_time}"
     ));
-    $self->{out}->print($self->{_cgi}->end_html());
+    $self->{_out}->print($self->{_cgi}->end_html());
 
     $self->close_output();
 }
