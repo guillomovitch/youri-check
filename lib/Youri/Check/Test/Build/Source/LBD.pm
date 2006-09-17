@@ -165,7 +165,7 @@ sub fails {
     }
 
     my $status =
-        $self->{_results}->{$name}->{$version}->{$release}->{$arch}->{status};
+	$self->{_results}->{$name}->{$version}->{$release}->{$arch}->{status};
 
     return $status
         && $status ne 'OK'
