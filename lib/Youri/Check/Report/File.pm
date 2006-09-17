@@ -135,6 +135,7 @@ sub _report {
                     $descriptor,
                 );
             }
+            $line++;
             @results = ();
         }
         push(@results, $result);
