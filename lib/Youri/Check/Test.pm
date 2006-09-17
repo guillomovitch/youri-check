@@ -3,7 +3,7 @@ package Youri::Check::Test;
 
 =head1 NAME
 
-Youri::Check::Test - Abstract input plugin
+Youri::Check::Test - Abstract test plugin
 
 =head1 DESCRIPTION
 
