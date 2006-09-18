@@ -166,7 +166,6 @@ my $config = Youri::Config->new(
         'verbose|v!'
     ],
     file_spec => [
-        'includes=s',
         'resolver=s',
         'preferences=s',
         'resultset=s',
@@ -174,6 +173,7 @@ my $config = Youri::Config->new(
         'tests=s',
         'reports=s'
     ],
+    allow_includes => 1,
     directories => [ '@sysconfdir@', "$ENV{HOME}/.youri" ],
     file_name   => 'check.conf',
     caller => $0,
