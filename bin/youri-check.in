@@ -157,11 +157,9 @@ use DateTime;
 
 my $config = Youri::Config->new(
     command_spec => [
-        'config=s',
         'skip-plugin=s@',
         'skip-media=s@',
         'parallel!',
-        'help|h!',
         'test|t!',
         'verbose|v!'
     ],
@@ -173,6 +171,8 @@ my $config = Youri::Config->new(
         'tests=s',
         'reports=s'
     ],
+    allow_help     => 1,
+    allow_config   => 1,
     allow_includes => 1,
     directories => [ '@sysconfdir@/youri', "$ENV{HOME}/.youri" ],
     file_name   => 'check.conf',
