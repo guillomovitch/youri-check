@@ -1,5 +1,6 @@
 # $Id$
 use ExtUtils::MakeMaker;
+use Config;
 
 WriteMakefile(
     NAME       => 'youri-check',
@@ -11,18 +12,27 @@ WriteMakefile(
         'Youri::Utils'           => 0,
         'Youri::Bugzilla'        => 0,
         'Pod::Simple::HTMLBatch' => 0
-    }
+    },
+    PREFIX               => '/usr/local',
+    INSTALLPRIVLIB       => $Config{installprivlib},
+    INSTALLSITELIB       => $Config{installsitelib},
+    INSTALLVENDORLIB     => $Config{installvendorlib},
+    INSTALLMAN3DIR       => $Config{installman3dir},
+    INSTALLSITEMAN3DIR   => $Config{installsiteman3dir},
+    INSTALLVENDORMAN3DIR => $Config{installvendorman3dir},
+    INSTALLSCRIPT        => '$(PREFIX)/bin',
+    INSTALLSITESCRIPT    => '$(PREFIX)/bin',
+    INSTALLVENDORSCRIPT  => '$(PREFIX)/bin',
+    INSTALLMAN1DIR       => '$(PREFIX)/share/man/man1',
+    INSTALLSITEMAN1DIR   => '$(PREFIX)/share/man/man1',
+    INSTALLVENDORMAN1DIR => '$(PREFIX)/share/man/man1',
 );
 
 package MY;
 
 sub post_constants {
     my ($self) = @_;
-    my $sysconfdir =
-        $self->{ARGS}->{SYSCONFDIR} ||
-        ($self->{INSTALLDIRS} eq 'site' ?
-            '/usr/local/etc' :
-            '/usr/etc');
+    my $sysconfdir = $self->{ARGS}->{SYSCONFDIR} || '$(PREFIX)/etc';
     return <<EOF;
 SYSCONFDIR = $sysconfdir
 EOF
