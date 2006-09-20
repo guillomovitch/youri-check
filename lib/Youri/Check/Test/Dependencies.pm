@@ -170,7 +170,7 @@ sub run {
             my @found_in_range =
                 grep {
                     !$_->[RANGE] ||
-                    $class->are_ranges_compatible(
+                    $class->check_ranges_compatibility(
                         $require->[Youri::Package::DEPENDENCY_RANGE],
                         $_->[RANGE]
                     )
