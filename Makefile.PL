@@ -46,7 +46,7 @@ sub top_targets {
 htmlifypods : $(TO_INST_PM)
 	if [ ! -d blib/html ]; then mkdir blib/html; fi
 	perl -MPod::Simple::HTMLBatch -e Pod::Simple::HTMLBatch::go lib blib/html
-	-perl -MPod::Simple::HTML -e Pod::Simple::HTML::go bin/youri-check blib/html/youri-check.html
+	pod2html < bin/youri-check > blib/html/youri-check.html
 EOF
      return $top_targets;
 }
