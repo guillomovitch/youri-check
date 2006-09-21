@@ -174,7 +174,7 @@ my $config = Youri::Config->new(
     allow_help     => 1,
     allow_config   => 1,
     allow_includes => 1,
-    directories => [ '@sysconfdir@/youri', "$ENV{HOME}/.youri" ],
+    directories => [ "$ENV{HOME}/.youri", '@sysconfdir@/youri' ],
     file_name   => 'check.conf',
     caller => $0,
 );
