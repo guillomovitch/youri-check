@@ -108,7 +108,6 @@ sub _individual_report {
         )
     ];
 }
-    }
 
 sub _report {
     my ($self, $iterator, $descriptor, $type, $title, $path) = @_;
