@@ -40,7 +40,7 @@ http://www2.ruby-lang.org/xmlns/soap/interface/RAA/0.0.4)
 sub _init {
     my $self    = shift;
     my %options = (
-        url => 'http2://www.ruby-lang.org/xmlns/soap/interface/RAA/0.0.4/',
+        url => 'http://www2.ruby-lang.org/xmlns/soap/interface/RAA/0.0.4/',
         @_
     );
 
