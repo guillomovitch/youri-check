@@ -15,6 +15,15 @@ _youri-check()
 	    _filedir
 	    return 0
 	    ;;
+    --list)
+	    COMPREPLY=( $( compgen -W 'medias' -- $cur ) )
+	    return 0
+	    ;;
+    --skip-media)
+	    _find_config
+	    COMPREPLY=( $( compgen -W '$( youri-check $config --list medias )' -- $cur ) )
+	    return 0
+	    ;;
     esac
 
     if [[ "$cur" == -* ]]; then
