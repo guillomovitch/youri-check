@@ -4,7 +4,7 @@
 _youri-check()
 {
 
-    local cur prev config i mode
+    local cur prev config
 
     COMPREPLY=()
     cur=${COMP_WORDS[COMP_CWORD]}
@@ -15,37 +15,11 @@ _youri-check()
 	    _filedir
 	    return 0
 	    ;;
-	--skip-plugin)
-	    _find_config check.conf
-	    if [ -n "$config" ]; then
-		# try to guess mode
-		for (( i=1; i < COMP_CWORD; i++ )); do
-		    if [[ "${COMP_WORDS[i]}" != -* ]]; then
-			mode=${COMP_WORDS[i]}
-			break
-		    fi
-		done
-
-		if [ -n $mode ]; then
-		    COMPREPLY=( $( awk -F=  '/^'$mode's/ {print $2}' $config \
-			    | grep "^$cur" ) )
-		fi
-	    fi
-	    return 0
-	    ;;
-	--skip-media)
-	    _find_config check.conf
-	    if [ -n "$config" ]; then
-		COMPREPLY=( $( awk -F=  '/^medias/ {print $2}' $config \
-			| grep "^$cur" ) )
-	    fi
-	    return 0
-	    ;;
     esac
 
     if [[ "$cur" == -* ]]; then
-	COMPREPLY=( $( compgen -W '--config --skip-plugin --skip-media -h \
-		--help -t --test -v --verbose' -- $cur ) )
+	COMPREPLY=( $( compgen -W '--config --skip-test --skip-report \
+		--skip-media -h --help -t --test -v --verbose' -- $cur ) )
     else
     	_count_args
 	case $args in
@@ -60,28 +34,10 @@ complete -F _youri-check youri-check
 
 _find_config()
 {
-    local name i
-
-    name=$1
-
     for (( i=1; i < COMP_CWORD; i++ )); do
 	if [[ "${COMP_WORDS[i]}" == --config ]]; then
-	    config=${COMP_WORDS[i+1]}
+	    config="--config ${COMP_WORDS[i+1]}"
 	    break
 	fi
     done
-    if [ -f "$config" ]; then
-	return 0
-    fi
-
-    if [ -f "$HOME/.youri/$name" ]; then
-	config=$HOME/.youri/$name
-	return 0
-    fi
-
-    if [ -f "/etc/youri/$name" ]; then
-	config=/etc/youri/$name
-	return 0
-    fi
-
 }
