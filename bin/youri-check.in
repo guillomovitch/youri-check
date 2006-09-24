@@ -17,7 +17,8 @@ Options:
 
     --config <file>        use file <file> as config file
     --skip-media <media>   skip media <media>
-    --skip-plugin <plugin> skip plugin <plugin>
+    --skip-test <test>     skip test <test>
+    --skip-report <report> skip report <report>
     --parallel             parallel run
     --verbose              verbose run
     --test                 test run
@@ -29,7 +30,7 @@ B<youri-check> allows to check packages in a repository.
 
 In test mode, all medias defined in configuration are passed to a list of
 test plugins, each of them storing their result in a persistent resultset. In
-report mode, this resultset is passed to a list of output plugins, each of them
+report mode, this resultset is passed to a list of report plugins, each of them
 producing arbitrary effects.
 
 =head1 OPTIONS
@@ -44,9 +45,13 @@ Use given file as configuration, instead of normal one.
 
 Skip media with given identity.
 
-=item B<--skip-plugin> <plugin>
+=item B<--skip-test> <test>
 
-Skip plugin with given identity.
+Skip test with given identity.
+
+=item B<--skip-report> <report>
+
+Skip report with given identity.
 
 =item B<--parallel>
 
@@ -157,7 +162,8 @@ use DateTime;
 
 my $config = Youri::Config->new(
     command_spec => [
-        'skip-plugin=s@',
+        'skip-test=s@',
+        'skip-report=s@',
         'skip-media=s@',
         'parallel!',
         'test|t!',
@@ -207,8 +213,6 @@ my $resultset = create_instance(
 );
 
 my $children;
-
-my %skip_plugins = map { $_ => 1 } @{$config->get('skip-plugin')};
 
 if ($mode eq 'test') {
 
@@ -268,9 +272,9 @@ if ($mode eq 'test') {
     $resultset->reset();
     $resultset->set_resolver($resolver);
 
-
+    my %skip_tests = map { $_ => 1 } @{$config->get('skip-test')};
     foreach my $id (split(/\s+/, $config->get('tests'))) {
-        next if $skip_plugins{$id};
+        next if $skip_tests{$id};
         report("Creating test $id");
         my $test;
         eval {
@@ -329,8 +333,9 @@ if ($mode eq 'test') {
 
 } elsif ($mode eq 'report') {
 
+    my %skip_reports = map { $_ => 1 } @{$config->get('skip-report')};
     foreach my $id (split(/\s+/, $config->get('reports'))) {
-        next if $skip_plugins{$id};
+        next if $skip_reports{$id};
         report("Creating report $id");
         my $report;
         eval {
