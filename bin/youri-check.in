@@ -22,6 +22,7 @@ Options:
     --parallel             parallel run
     --verbose              verbose run
     --test                 test run
+    --list <category>      list items from given category
     --help                 print this help message
 
 =head1 DESCRIPTION
@@ -64,6 +65,11 @@ Produce more verbose report (can be used more than once)
 =item B<--test>
 
 Don't perform any modification.
+
+=item B<--list> I<category>
+
+List available items from given category and exits. Category must be either
+B<medias>.
 
 =item B<--help>
 
@@ -167,6 +173,7 @@ my $config = Youri::Config->new(
         'skip-media=s@',
         'parallel!',
         'test|t!',
+        'list|l!',
         'verbose|v!'
     ],
     file_spec => [
@@ -184,6 +191,20 @@ my $config = Youri::Config->new(
     file_name   => 'check.conf',
     caller => $0,
 );
+
+my @media_ids = split(/\s+/, $config->get('medias'));
+
+if ($config->get('list')) {
+    my $category = $ARGV[0];
+    pod2usage(-verbose => 0, -message => "No category specified, aborting\n")
+        unless $category;
+    if ($category eq 'medias') {
+        print join(' ', @media_ids) . "\n";
+    } else {
+        pod2usage(-verbose => 0, -message => "Invalid category $category, aborting\n")
+    }
+    exit 0;
+}
 
 pod2usage(
     -verbose => 0,
@@ -250,7 +271,7 @@ if ($mode eq 'test') {
 
     my @medias;
     my %skip_medias = map { $_ => 1 } @{$config->get('skip-media')};
-    foreach my $id (split(/\s+/, $config->get('medias'))) {
+    foreach my $id (@media_ids) {
         next if $skip_medias{$id};
         report("Creating media $id");
         eval {
