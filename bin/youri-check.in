@@ -134,18 +134,9 @@ configuration section, starting with bracketed object identity, followed by at
 least a class directive, then any number of additional object-specific
 directives.
 
-Example:
-
-        objects = foo
-        
-        [foo]
-        class = Foo::Bar
-        key1  = value1
-        key2  = value2
-
 =head1 SEE ALSO
 
-Youri::Config, for configuration file format.
+YAML::AppConfig, for configuration file format.
 
 Each used plugin man page, for available options.
 
@@ -167,41 +158,31 @@ use Net::Config qw/%NetConfig/;
 use DateTime;
 
 my $config = Youri::Config->new(
-    command_spec => [
-        'skip-test=s@',
-        'skip-report=s@',
-        'skip-media=s@',
-        'parallel!',
-        'test|t!',
-        'list|l!',
-        'verbose|v!'
-    ],
-    file_spec => [
-        'resolver=s',
-        'preferences=s',
-        'resultset=s',
-        'medias=s',
-        'tests=s',
-        'reports=s'
-    ],
-    allow_help     => 1,
-    allow_config   => 1,
-    allow_includes => 1,
+    args => {
+        'skip-test=s@'   => 'skip-test',
+        'skip-report=s@' => 'skip-report',
+        'skip-media=s@'  => 'skip-media',
+        'parallel!'      => 'parallel',
+        'test|t!'        => 'test',
+        'list|l!'        => 'list'
+    },
     directories => [ "$ENV{HOME}/.youri", '@sysconfdir@/youri' ],
-    file_name   => 'check.conf',
-    caller => $0,
+    file   => 'check.conf',
 );
 
-my @media_ids = split(/\s+/, $config->get('medias'));
+my @media_ids = split(/\s+/, $config->get_param('medias'));
 
-if ($config->get('list')) {
+if ($config->get_arg('list')) {
     my $category = $ARGV[0];
     pod2usage(-verbose => 0, -message => "No category specified, aborting\n")
         unless $category;
     if ($category eq 'medias') {
-        print join(' ', @media_ids) . "\n";
+        print join(' ', keys %{$config->get_param('medias')}) . "\n";
     } else {
-        pod2usage(-verbose => 0, -message => "Invalid category $category, aborting\n")
+        pod2usage(
+            -verbose => 0,
+            -message => "Invalid category $category, aborting\n"
+        )
     }
     exit 0;
 }
@@ -214,23 +195,28 @@ pod2usage(
 my $mode = $ARGV[0];
 
 # convenient global flags
-my $test    = $config->get('test');
-my $verbose = $config->get('verbose');
+my $test    = $config->get_arg('test');
+my $verbose = $config->get_arg('verbose');
 
 # libnet configuration
-my %netconfig = $config->get_section('netconfig');
-$NetConfig{$_} = $netconfig{$_} foreach keys %netconfig;
+my $netconfig_conf = $config->get_param('netconfig');
+if ($netconfig_conf) {
+    $NetConfig{$_} = $netconfig_conf->{$_} foreach keys %{$netconfig_conf};
+}
 
 # resultset creation
-my $resultset_id = $config->get('resultset');
-die "No resultset defined" unless $resultset_id;
+my $resultset_conf = $config->get_param('resultset');
+die "No resultset defined" unless $resultset_conf;
 
-report("Creating resultset $resultset_id");
+report("Creating resultset");
 my $resultset = create_instance(
     'Youri::Check::Resultset',
-    test    => $test,
-    verbose => $verbose > 0 ? $verbose - 1 : 0,
-    $config->get_section($resultset_id)
+    $resultset_conf->{class},
+    {
+        $resultset_conf->{options} ? %{$resultset_conf->{options}} : (),
+        test    => $test,
+        verbose => $verbose > 0 ? $verbose - 1 : 0,
+    }
 );
 
 my $children;
@@ -240,49 +226,64 @@ if ($mode eq 'test') {
     # additional objects
 
     my $resolver;
-    my $resolver_id = $config->get('resolver');
-    if ($resolver_id) {
-        report("Creating maintainer resolver $resolver_id");
+    my $resolver_conf = $config->get_param('resolver');
+    if ($resolver_conf) {
+        report("Creating maintainer resolver");
         eval {
             $resolver = create_instance(
                 'Youri::Check::Maintainer::Resolver',
-                test    => $test,
-                verbose => $verbose > 1 ? $verbose - 2 : 0,
-                $config->get_section($resolver_id)
+                $resolver_conf->{class},
+                {
+                    $resolver_conf->{options} ?
+                        %{$resolver_conf->{options}} :
+                        (),
+                    test    => $test,
+                    verbose => $verbose > 1 ? $verbose - 2 : 0,
+                }
             );
         };
-        print STDERR "Failed to create maintainer resolver $resolver_id: $@\n" if $@;
+        print STDERR "Failed to create maintainer resolver: $@\n" if $@;
     }
 
     my $preferences;
-    my $preferences_id = $config->get('preferences');
-    if ($preferences_id) {
-        report("Creating maintainer preferences $preferences_id");
+    my $preferences_conf = $config->get_param('preferences');
+    if ($preferences_conf) {
+        report("Creating maintainer preferences");
         eval {
             $preferences = create_instance(
                 'Youri::Check::Maintainer::Preferences',
-                test      => $test,
-                verbose   => $verbose > 1 ? $verbose - 2 : 0,
-                $config->get_section($preferences_id)
+                $preferences_conf->{class},
+                {
+                    $preferences_conf->{options} ?
+                        %{$preferences_conf->{options}} :
+                        (),
+                    test      => $test,
+                    verbose   => $verbose > 1 ? $verbose - 2 : 0,
+                }
             );
         };
-        print STDERR "Failed to create maintainer preferences $preferences_id: $@\n" if $@;
+        print STDERR "Failed to create maintainer preferences: $@\n" if $@;
     }
 
     my @medias;
-    my %skip_medias = map { $_ => 1 } @{$config->get('skip-media')};
-    foreach my $id (@media_ids) {
-        next if $skip_medias{$id};
+    my $skip_media = $config->get_arg('skip-media');
+    my %skip_media = $skip_media ?  map { $_ => 1 } @{$skip_media} : ();
+    foreach my $id (keys %{$config->get_param('medias')}) {
+        next if $skip_media{$id};
         report("Creating media $id");
+        my $media_conf = $config->get_param('medias')->{$id};
         eval {
             push(
                 @medias,
                  create_instance(
                     'Youri::Media',
-                    id      => $id,
-                    test    => $test,
-                    verbose => $verbose > 0 ? $verbose - 1 : 0,
-                    $config->get_section($id)
+                    $media_conf->{class},
+                    {
+                        $media_conf->{options} ? %{$media_conf->{options}} : (),
+                        id      => $id,
+                        test    => $test,
+                        verbose => $verbose > 0 ? $verbose - 1 : 0,
+                    }
                 )
             );
         };
@@ -293,26 +294,31 @@ if ($mode eq 'test') {
     $resultset->reset();
     $resultset->set_resolver($resolver);
 
-    my %skip_tests = map { $_ => 1 } @{$config->get('skip-test')};
-    foreach my $id (split(/\s+/, $config->get('tests'))) {
-        next if $skip_tests{$id};
+    my $skip_test = $config->get_arg('skip-test');
+    my %skip_test = $skip_test ?  map { $_ => 1 } @{$skip_test} : ();
+    foreach my $id (keys %{$config->get_param('tests')}) {
+        next if $skip_test{$id};
         report("Creating test $id");
         my $test;
+        my $test_conf = $config->get_param('tests')->{$id};
         eval {
             $test = create_instance(
                 'Youri::Check::Test',
-                id         => $id,
-                test       => $test,
-                verbose    => $verbose > 0 ? $verbose - 1 : 0,
-                resolver   => $resolver,
-                preferences => $preferences,
-                $config->get_section($id)
+                $test_conf->{class},
+                {
+                    $test_conf->{options} ? %{$test_conf->{options}} : (),
+                    id         => $id,
+                    test       => $test,
+                    verbose    => $verbose > 0 ? $verbose - 1 : 0,
+                    resolver   => $resolver,
+                    preferences => $preferences,
+                }
             );
         };
         if ($@) {
             print STDERR "Failed to create test $id: $@\n";
         } else {
-            if ($config->get('parallel')) {
+            if ($config->get_arg('parallel')) {
                 # fork
                 my $pid = fork;
                 die "Can't fork: $!" unless defined $pid;
@@ -329,7 +335,7 @@ if ($mode eq 'test') {
                 print STDERR "Failed to prepare test $id: $@\n";
             } else {
                 # clone resultset in child process
-                $resultset = $config->get('parallel') ?
+                $resultset = $config->get_arg('parallel') ?
                     $resultset->clone() :
                     $resultset;
 
@@ -345,7 +351,7 @@ if ($mode eq 'test') {
                     }
                 }
             }
-            if ($config->get('parallel')) {
+            if ($config->get_arg('parallel')) {
                 # child process
                 exit;
             }
@@ -354,25 +360,30 @@ if ($mode eq 'test') {
 
 } elsif ($mode eq 'report') {
 
-    my %skip_reports = map { $_ => 1 } @{$config->get('skip-report')};
-    foreach my $id (split(/\s+/, $config->get('reports'))) {
-        next if $skip_reports{$id};
+    my $skip_report = $config->get_arg('skip-report');
+    my %skip_report = $skip_report ?  map { $_ => 1 } @{$skip_report} : ();
+    foreach my $id (keys %{$config->get_param('reports')}) {
+        next if $skip_report{$id};
         report("Creating report $id");
         my $report;
+        my $report_conf = $config->get_param('reports')->{$id};
         eval {
             $report = create_instance(
                 'Youri::Check::Report',
-                id      => $id,
-                test    => $test,
-                verbose => $verbose > 0 ? $verbose - 1 : 0,
-                config  => $config,
-                $config->get_section($id)
+                $report_conf->{class},
+                {
+                    $report_conf->{options} ? %{$report_conf->{options}} : (),
+                    id      => $id,
+                    test    => $test,
+                    verbose => $verbose > 0 ? $verbose - 1 : 0,
+                    config  => $config,
+                }
             );
         };
         if ($@) {
             print STDERR "Failed to create report $id: $@\n";
         } else {
-            if ($config->get('parallel')) {
+            if ($config->get_arg('parallel')) {
                 # fork
                 my $pid = fork;
                 die "Can't fork: $!" unless defined $pid;
@@ -384,7 +395,7 @@ if ($mode eq 'test') {
             }
 
             # clone resultset in child process
-            $resultset = $config->get('parallel') ?
+            $resultset = $config->get_arg('parallel') ?
                 $resultset->clone() :
                 $resultset;
 
@@ -396,7 +407,7 @@ if ($mode eq 'test') {
                 print STDERR "Failed to run report $id: $@\n";
             }
 
-            if ($config->get('parallel')) {
+            if ($config->get_arg('parallel')) {
                 # child process
                 exit;
             }
