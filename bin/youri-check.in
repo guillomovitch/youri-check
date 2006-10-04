@@ -211,9 +211,8 @@ die "No resultset defined" unless $resultset_conf;
 report("Creating resultset");
 my $resultset = create_instance(
     'Youri::Check::Resultset',
-    $resultset_conf->{class},
+    $resultset_conf,
     {
-        $resultset_conf->{options} ? %{$resultset_conf->{options}} : (),
         test    => $test,
         verbose => $verbose > 0 ? $verbose - 1 : 0,
     }
@@ -232,11 +231,8 @@ if ($mode eq 'test') {
         eval {
             $resolver = create_instance(
                 'Youri::Check::Maintainer::Resolver',
-                $resolver_conf->{class},
+                $resolver_conf,
                 {
-                    $resolver_conf->{options} ?
-                        %{$resolver_conf->{options}} :
-                        (),
                     test    => $test,
                     verbose => $verbose > 1 ? $verbose - 2 : 0,
                 }
@@ -252,11 +248,8 @@ if ($mode eq 'test') {
         eval {
             $preferences = create_instance(
                 'Youri::Check::Maintainer::Preferences',
-                $preferences_conf->{class},
+                $preferences_conf,
                 {
-                    $preferences_conf->{options} ?
-                        %{$preferences_conf->{options}} :
-                        (),
                     test      => $test,
                     verbose   => $verbose > 1 ? $verbose - 2 : 0,
                 }
@@ -277,9 +270,8 @@ if ($mode eq 'test') {
                 @medias,
                  create_instance(
                     'Youri::Media',
-                    $media_conf->{class},
+                    $media_conf,
                     {
-                        $media_conf->{options} ? %{$media_conf->{options}} : (),
                         id      => $id,
                         test    => $test,
                         verbose => $verbose > 0 ? $verbose - 1 : 0,
@@ -304,9 +296,8 @@ if ($mode eq 'test') {
         eval {
             $test = create_instance(
                 'Youri::Check::Test',
-                $test_conf->{class},
+                $test_conf,
                 {
-                    $test_conf->{options} ? %{$test_conf->{options}} : (),
                     id         => $id,
                     test       => $test,
                     verbose    => $verbose > 0 ? $verbose - 1 : 0,
@@ -370,9 +361,8 @@ if ($mode eq 'test') {
         eval {
             $report = create_instance(
                 'Youri::Check::Report',
-                $report_conf->{class},
+                $report_conf,
                 {
-                    $report_conf->{options} ? %{$report_conf->{options}} : (),
                     id      => $id,
                     test    => $test,
                     verbose => $verbose > 0 ? $verbose - 1 : 0,
