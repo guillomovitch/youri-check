@@ -108,7 +108,7 @@ sub run {
         # get test configuration
         my %config = $self->{_config}->get_section($type);
 
-        load($config{class});
+        load_class($config{class});
         my $descriptor = $config{class}->get_descriptor();
         my $filter = $config{filter};
 
