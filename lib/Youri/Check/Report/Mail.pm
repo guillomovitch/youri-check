@@ -42,15 +42,18 @@ sub _init {
 
     foreach my $id (keys %{$options{formats}}) {
         print "Creating format $id\n" if $options{verbose};
+        my $format_conf = $options{formats}->{$id};
         eval {
             push(
                 @{$self->{_formats}},
                 create_instance(
                     'Youri::Check::Report::Mail::Format',
-                    id        => $id,
-                    test      => $options{test},
-                    verbose   => $options{verbose},
-                    %{$options{formats}->{$id}}
+                    $format_conf,
+                    {
+                        id        => $id,
+                        test      => $options{test},
+                        verbose   => $options{verbose},
+                    }
                 )
             );
         };

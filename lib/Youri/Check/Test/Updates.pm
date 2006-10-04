@@ -115,17 +115,20 @@ sub _init {
                 }
             }
 
+            my $source_conf = $options{sources}->{$id};
             push(
                 @{$self->{_sources}},
                 create_instance(
                     'Youri::Check::Test::Updates::Source',
-                    id          => $id,
-                    test        => $options{test},
-                    verbose     => $options{verbose},
-                    check_id    => $options{id},
-                    resolver    => $options{resolver},
-                    preferences => $options{preferences},
-                    %{$options{sources}->{$id}}
+                    $source_conf,
+                    {
+                        id          => $id,
+                        test        => $options{test},
+                        verbose     => $options{verbose},
+                        check_id    => $options{id},
+                        resolver    => $options{resolver},
+                        preferences => $options{preferences},
+                    }
                 )
             );
         };

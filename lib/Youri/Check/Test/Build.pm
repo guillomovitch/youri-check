@@ -93,15 +93,18 @@ sub _init {
 
     foreach my $id (keys %{$options{sources}}) {
         print "Creating source $id\n" if $options{verbose};
+        my $source_conf = $options{sources}->{$id};
         eval {
             push(
             @{$self->{_sources}},
             create_instance(
                     'Youri::Check::Test::Build::Source',
-                    id        => $id,
-                    test      => $options{test},
-                    verbose   => $options{verbose},
-                    %{$options{sources}->{$id}}
+                    $source_conf,
+                    {
+                        id      => $id,
+                        test    => $options{test},
+                        verbose => $options{verbose},
+                    }
                 )
             );
             # register monitored arches
