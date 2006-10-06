@@ -102,36 +102,43 @@ sub run {
 
     # get types and maintainers list from resultset
     my @maintainers = $resultset->get_maintainers();
-    my @types       = $resultset->get_types();
+    my @test_ids    = $resultset->get_types();
 
-    foreach my $type (@types) {
+    foreach my $test_id (@test_ids) {
         # get test configuration
-        my %config = $self->{_config}->get_section($type);
+        my $test_config = $self->{_config}->get_config('tests')->{$test_id};
 
-        load_class($config{class});
-        my $descriptor = $config{class}->get_descriptor();
-        my $filter = $config{filter};
+        if (! $test_config) {
+            carp "No configuration available for test $test_id, skipping";
+            next;
+        }
+
+        my $test_class = $test_config->{class};
+        load_class($test_class);
+        my $test_descriptor = $test_class->get_descriptor();
+
+        my $test_filter = $test_config->{options}->{filter};
 
 
         if ($self->{_global}) {
-            print STDERR "generating global report for $type\n" if $self->{_verbose};
+            print STDERR "generating global report for $test_id\n" if $self->{_verbose};
             $self->_global_report(
                 $resultset,
-                $type,
-                $descriptor,
-                $filter
+                $test_id,
+                $test_descriptor,
+                $test_filter
             );
         }
 
         if ($self->{_individual}) {
             foreach my $maintainer (@maintainers) {
-                print STDERR "generating individual report for $type and $maintainer\n" if $self->{_verbose};
+                print STDERR "generating individual report for $test_id and $maintainer\n" if $self->{_verbose};
 
                 $self->_individual_report(
                     $resultset,
-                    $type,
-                    $descriptor,
-                    $filter,
+                    $test_id,
+                    $test_descriptor,
+                    $test_filter,
                     $maintainer,
                 );
             }
