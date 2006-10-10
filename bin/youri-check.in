@@ -91,52 +91,46 @@ Configuration is read from the first file found among:
 
 =back
 
-All additional configuration files specified by B<includes> directive are then
-processed. Then command line options. Any directive overrides prior definition.
+The configuration file should be a YAML-format files, with the following
+mandatory top-level directives:
 
 =over
 
-=item B<includes> I<files>
+=item B<resultset>
 
-Uses space-separated list I<files> as a list of additional configuration files.
+The definition of the resultset plugin to be used.
 
-=item B<resolver> I<id>
+=item B<medias>
 
-Declare a maintainer resolver object with identity I<id>.
+The list of available media plugins, indexed by their identity.
 
-=item B<preferences> I<id>
+=item B<tests>
 
-Declare a maintainer preferences object with identity I<id>.
+The list of available test plugins, indexed by their identity.
 
-=item B<resultset> I<id>
+=item B<reports>
 
-Declare a resultset object with identity I<id>.
-
-=item B<medias> I<ids>
-
-Declares a list of media objects with identity taken in space-separated list
-I<ids>.
-
-=item B<tests> I<ids>
-
-Declares a list of test plugin objects with identity taken in space-separated
-list I<ids>.
-
-=item B<reports> I<ids>
-
-Declares a list of report plugin objects with identity taken in space-separated
-list I<ids>.
+The list of available report plugins, indexed by their identity.
 
 =back
 
-Each object declared in configuration must be fully defined later, using a
-configuration section, starting with bracketed object identity, followed by at
-least a class directive, then any number of additional object-specific
-directives.
+Additional optional top-level directives:
+
+=over
+
+=item B<resolver>
+
+The definition of the resolver plugin to be used.
+
+=item B<preferences>
+
+The definition of the preferences plugin to be used.
+
+=back
 
 =head1 SEE ALSO
 
-YAML::AppConfig, for configuration file format.
+Youri::Config, for additional details about configuration file format.
 
 Each used plugin man page, for available options.
 
