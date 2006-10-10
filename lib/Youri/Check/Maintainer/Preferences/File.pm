@@ -16,7 +16,7 @@ It uses files in maintainer home directories.
 use warnings;
 use strict;
 use Carp;
-use Youri::Config;
+use YAML::AppConfig;
 use base 'Youri::Check::Maintainer::Preferences';
 
 =head1 CLASS METHODS
@@ -50,18 +50,22 @@ sub _load_config {
 
     my ($login) = $maintainer =~ /^(\S+)\@\S+$/;
     my $home = (getpwnam($login))[7];
-    my $config = Youri::Config->new(
-        directories => [ "$home/.youri" ],
-        file_name   => 'check.prefs.conf',
-    );
-    $self->{_config}->{$maintainer} = $config;
+    my $file = "$home/.youri/check.prefs";
 
-    if ($self->{_verbose} > 1) {
-        print
-            "Loading maintainers preferences for $maintainer: " .
-            ($config ? "success" : "failure" ) .
-            "\n";
+    my $config;
+    if (-f $file && -r $file) {
+        print "Found, loading\n" if $self->{_verbose} > 1;
+        eval {
+            $config = YAML::AppConfig->new(file => $file);
+        };
+        if ($@) {
+            print "Invalid format, aborting\n" if $self->{_verbose} > 1;
+        }
+    } else {
+        print "Not found, aborting\n" if $self->{_verbose} > 1;
     }
+
+    $self->{_config}->{$maintainer} = undef;
 }
 
 =head1 COPYRIGHT AND LICENSE
