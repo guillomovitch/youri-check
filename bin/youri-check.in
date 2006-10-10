@@ -159,12 +159,12 @@ use DateTime;
 
 my $config = Youri::Config->new(
     args => {
-        'skip-test=s@'   => 'skip-test',
-        'skip-report=s@' => 'skip-report',
-        'skip-media=s@'  => 'skip-media',
-        'parallel!'      => 'parallel',
-        'test|t!'        => 'test',
-        'list|l!'        => 'list'
+        'skip-test'   => '=s@',
+        'skip-report' => '=s@',
+        'skip-media'  => '=s@',
+        'parallel'    => '!',
+        'test'        => '|t!',
+        'list'        => '|l!'
     },
     directories => [ "$ENV{HOME}/.youri", '@sysconfdir@/youri' ],
     file   => 'check.conf',
