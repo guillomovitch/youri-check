@@ -145,7 +145,7 @@ sub run {
         }
     }
 
-    $self->_finish_report(\@types, \@maintainers);
+    $self->_finish_report(\@test_ids, \@maintainers);
 }
 
 sub _init_report {
