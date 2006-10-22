@@ -106,7 +106,7 @@ sub run {
 
     foreach my $test_id (@test_ids) {
         # get test configuration
-        my $test_config = $self->{_config}->get_config('tests')->{$test_id};
+        my $test_config = $self->{_config}->get_param('tests')->{$test_id};
 
         if (! $test_config) {
             carp "No configuration available for test $test_id, skipping";
