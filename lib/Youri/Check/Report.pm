@@ -14,7 +14,7 @@ This abstract class defines report plugin interface.
 use warnings;
 use strict;
 use Carp;
-use Youri::Utils;
+use UNIVERSAL::require;
 
 =head1 CLASS METHODS
 
@@ -114,7 +114,7 @@ sub run {
         }
 
         my $test_class = $test_config->{class};
-        load_class($test_class);
+        $test_class->require();
         my $test_descriptor = $test_class->get_descriptor();
 
         my $test_filter = $test_config->{options}->{filter};
