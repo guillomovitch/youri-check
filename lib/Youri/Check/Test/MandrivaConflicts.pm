@@ -25,9 +25,10 @@ sub _directory_duplicate_exception {
     return 1 if _multiarch_exception($package1, $package2);
 
     # allow shared modules directories between perl packages
+    my $name = $file->get_name();
     return 1 if 
-        $file->[Youri::Package::FILE_NAME] =~ /^\/usr\/lib\/perl5\/vendor_perl\// &&
-        $file->[Youri::Package::FILE_NAME] !~ /^(auto|[^\/]+-linux)$/;
+        $name =~ /^\/usr\/lib\/perl5\/vendor_perl\// &&
+        $name !~ /^(auto|[^\/]+-linux)$/;
 
     return 0;
 }

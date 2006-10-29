@@ -105,8 +105,8 @@ sub prepare {
         # index files
         foreach my $file ($package->get_files()) {
             push(
-                @{$self->{_files}->{$file->[Youri::Package::FILE_NAME]}},
-                [ $package, $file->[Youri::Package::FILE_MODE], $file->[Youri::Package::FILE_MD5SUM] ]
+                @{$self->{_files}->{$file->get_name()}},
+                [ $package, $file->get_mode(), $file->get_md5sum() ]
             );
         }
     };
@@ -142,7 +142,7 @@ sub run {
         foreach my $file ($package->get_files()) {
 
             my $found =
-                $self->{_files}->{$file->[Youri::Package::FILE_NAME]};
+                $self->{_files}->{$file->get_name()};
 
             my @found = $found ? @$found : ();
 
@@ -152,13 +152,13 @@ sub run {
                 next if conflict($found->[PACKAGE], $package);
                 next if replace($found->[PACKAGE], $package);
                 if (
-                    ($file->[Youri::Package::FILE_MODE] & TYPE_MASK) == TYPE_DIR &&
+                    ($file->is_directory() &&
                     ($found->[MODE] & TYPE_MASK) == TYPE_DIR
                 ) {
                     $result->add_result($self->{_id}, $media, $package, {
                         arch  => $arch,
                         file  => $name,
-                        error => "directory $file->[Youri::Package::FILE_NAME] duplicated with package " . $found->[PACKAGE]->get_name(),
+                        error => "directory " . $file->get_name() . " duplicated with package " . $found->[PACKAGE]->get_name(),
                         level => Youri::Check::Test::WARNING
                     }) unless $self->_directory_duplicate_exception(
                         $package,
@@ -166,11 +166,11 @@ sub run {
                         $file
                     );
                 } else {
-                    if ($found->[MD5SUM] eq $file->[Youri::Package::FILE_MD5SUM]) {
+                    if ($found->[MD5SUM] eq $file->get_md5sum()) {
                         $result->add_result($self->{_id}, $media, $package, {
                             arch  => $arch,
                             file  => $name,
-                            error => "file $file->[Youri::Package::FILE_NAME] duplicated with package " . $found->[PACKAGE]->get_name(),
+                            error => "file ". $file->get_name() . " duplicated with package " . $found->[PACKAGE]->get_name(),
                             level => Youri::Check::Test::WARNING
                         }) unless $self->_file_duplicate_exception(
                             $package,
@@ -181,7 +181,7 @@ sub run {
                         $result->add_result($self->{_id}, $media, $package, {
                             arch  => $arch,
                             file  => $name,
-                            error => "non-explicit conflict on file $file->[Youri::Package::FILE_NAME] with package " . $found->[PACKAGE]->get_name(),
+                            error => "non-explicit conflict on file " . $file->get_name() . " with package " . $found->[PACKAGE]->get_name(),
                             level => Youri::Check::Test::ERROR
                         }) unless $self->_file_conflict_exception(
                             $package,
@@ -242,7 +242,7 @@ sub replace {
     return 1 if $name1 eq $name2;
 
     foreach my $obsolete ($package1->get_obsoletes()) {
-        return 1 if $obsolete->[Youri::Package::DEPENDENCY_NAME] eq $name2;
+        return 1 if $obsolete->get_name() eq $name2;
     }
 
     return 0;

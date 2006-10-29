@@ -89,15 +89,15 @@ sub prepare {
             # index provides
             foreach my $provide ($package->get_provides()) {
                 push(
-                    @{$self->{_provides}->{$provide->[Youri::Package::DEPENDENCY_NAME]}},
-                    [ $media_id, $provide->[Youri::Package::DEPENDENCY_RANGE] ]
+                    @{$self->{_provides}->{$provide->get_name()}},
+                    [ $media_id, $provide->get_range() ]
                 );
             }
 
             # index files
             foreach my $file ($package->get_files()) {
                 push(
-                    @{$self->{_files}->{$file->[Youri::Package::FILE_NAME]}},
+                    @{$self->{_files}->{$file->get_name()}},
                     [ $media_id, undef ]
                 );
             }
@@ -134,10 +134,11 @@ sub run {
 
         foreach my $require ($package->get_requires()) {
 
+            my $require_name = $require->get_name();
             my $found =
-                substr($require->[Youri::Package::DEPENDENCY_NAME], 0, 1) eq '/' ?
-                    $self->{_files}->{$require->[Youri::Package::DEPENDENCY_NAME]} :
-                    $self->{_provides}->{$require->[Youri::Package::DEPENDENCY_NAME]};
+                substr($require_name, 0, 1) eq '/' ?
+                    $self->{_files}->{$require_name} :
+                    $self->{_provides}->{$require_name};
 
             my @found = $found ? @$found : ();
 
@@ -145,7 +146,7 @@ sub run {
                 $resultset->add_result($self->{_id}, $media, $package, {
                     arch  => $arch,
                     file  => $name,
-                    error => "$require->[Youri::Package::DEPENDENCY_NAME] not found",
+                    error => "$require_name not found",
                     level => Youri::Check::Test::ERROR
                 });
                 next;
@@ -159,19 +160,20 @@ sub run {
                 $resultset->add_result($self->{_id}, $media, $package, {
                     arch  => $arch,
                     file  => $name,
-                    error => "$require->[Youri::Package::DEPENDENCY_NAME] found in incorrect media $_->[MEDIA] (allowed $allowed_ids)",
+                    error => "$require_name found in incorrect media $_->[MEDIA] (allowed $allowed_ids)",
                     level => Youri::Check::Test::ERROR
                 }) foreach @found;
                 next;
             }
 
-            next unless $require->[Youri::Package::DEPENDENCY_RANGE];
+            my $require_range = $require->get_range();
+            next unless $require_range;
 
             my @found_in_range =
                 grep {
                     !$_->[RANGE] ||
                     $class->check_ranges_compatibility(
-                        $require->[Youri::Package::DEPENDENCY_RANGE],
+                        $require_range,
                         $_->[RANGE]
                     )
                 } @found_in_media;
@@ -180,7 +182,7 @@ sub run {
                 $resultset->add_result($self->{_id}, $media, $package, {
                     arch  => $arch,
                     file  => $name,
-                    error => "$require->[Youri::Package::DEPENDENCY_NAME] found with incorrect range $_->[RANGE] (needed $require->[Youri::Package::DEPENDENCY_RANGE])",
+                    error => "$require_name found with incorrect range $_->[RANGE] (needed $require_range)",
                     level => Youri::Check::Test::ERROR
                 }) foreach @found_in_media;
                 next;
