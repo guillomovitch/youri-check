@@ -39,7 +39,7 @@ http://gentoo.mirror.sdv.fr/snapshots)
 sub _init {
     my $self    = shift;
     my %options = (
-        url => 'http://gentoo.mirror.sdv.fr/snapshots', # default URL
+        url => 'http://gentoo.modulix.net/gentoo/snapshots', # default URL
         @_
     );
 
