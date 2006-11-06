@@ -2,6 +2,7 @@
 ^cover_db/
 ^blib/
 \.bak$
+\.tmp$
 \.swp$
 \.rej$
 \.orig$
