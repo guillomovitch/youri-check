@@ -152,7 +152,7 @@ sub run {
                 next if conflict($found->[PACKAGE], $package);
                 next if replace($found->[PACKAGE], $package);
                 if (
-                    ($file->is_directory() &&
+                    $file->is_directory() &&
                     ($found->[MODE] & TYPE_MASK) == TYPE_DIR
                 ) {
                     $result->add_result($self->{_id}, $media, $package, {
