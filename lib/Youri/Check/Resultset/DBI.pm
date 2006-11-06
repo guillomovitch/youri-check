@@ -272,7 +272,7 @@ sub _add_package {
         undef;
 
     # lock tables to ensure proper isolation
-    $self->{_dbh}->do('LOCK TABLES packages WRITE');
+    $self->{_dbh}->do('LOCK TABLES packages WRITE') if $self->{_parallel};
 
     my $sth =
         $self->{_sths}->{add_package} ||=
@@ -287,7 +287,7 @@ sub _add_package {
     my $id = $self->{_dbh}->last_insert_id(undef, undef, 'packages', 'id');
 
     # unlock table
-    $self->{_dbh}->do('UNLOCK TABLES');
+    $self->{_dbh}->do('UNLOCK TABLES') if $self->{_parallel};
 
     return $id;
 }
