@@ -17,7 +17,6 @@ use strict;
 use Carp;
 use SOAP::Lite;
 use List::MoreUtils 'any';
-use Youri::Package;
 use base 'Youri::Check::Test::Updates::Source';
 
 =head2 new(%args)
@@ -59,7 +58,7 @@ sub get_version {
     if (ref $package && $package->isa('Youri::Package')) {
         # don't bother checking for non-ruby packages
         if (
-            any { $_->[Youri::Package::DEPENDENCY_NAME] =~ /ruby/ }
+            any { $_->get_name() =~ /ruby/ }
             $package->get_requires()
         ) {
             $name = $package->get_canonical_name();
