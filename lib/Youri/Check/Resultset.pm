@@ -35,7 +35,6 @@ sub new {
         test     => 0,     # test mode
         verbose  => 0,     # verbose mode
         resolver => undef,  # maintainer resolver, 
-        mode     => 'output', # access mode
         @_
     );
 
@@ -45,7 +44,6 @@ sub new {
         _test     => $options{test},
         _verbose  => $options{verbose},
         _resolver => $options{resolver},
-        _mode     => $options{mode}
     }, $class;
 
     $self->_init(%options);
