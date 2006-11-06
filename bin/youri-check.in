@@ -278,7 +278,7 @@ if ($mode eq 'test') {
 
     # prepare resultset
     $resultset->reset();
-    $resultset->set_resolver($resolver);
+    $resultset->set_resolver($resolver) if $resolver;
 
     my $skip_test = $config->get_arg('skip-test');
     my %skip_test = $skip_test ?  map { $_ => 1 } @{$skip_test} : ();
