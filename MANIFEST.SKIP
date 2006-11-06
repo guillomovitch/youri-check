@@ -4,6 +4,8 @@ CVS/.*
 ^blib/
 \.bak$
 \.swp$
+\.rej$
+\.orig$
 \.tar$
 \.tgz$
 \.tar\.gz$
