@@ -117,17 +117,17 @@ sub run {
         my $name = $package->get_name();
 
         my $command = "$self->{_path} -f $config $file";
-        open(RPMLINT, "$command |") or die "Can't run $command: $!";
-        while (<RPMLINT>) {
-            chomp;
-            if (/^E: \Q$name\E (.+)/) {
+        open(my $input, '-|', $command) or croak "Can't run $command: $!";
+        while (my $line = <$input>) {
+            chomp $line;
+            if ($line =~ /^E: \Q$name\E (.+)/) {
                 $resultset->add_result($self->{_id}, $media, $package, { 
                     arch  => $arch,
                     file  => $name,
                     error => $1,
                     level => Youri::Check::Test::ERROR
                 });
-            } elsif (/^W: \Q$name\E (.+)/) {
+            } elsif ($line =~ /^W: \Q$name\E (.+)/) {
                 $resultset->add_result($self->{_id}, $media, $package, { 
                     arch  => $arch,
                     file  => $name,
@@ -136,7 +136,7 @@ sub run {
                 });
             }
         }
-        close(RPMLINT);
+        close $input;
     };
 
     $media->traverse_files($check);

@@ -49,12 +49,13 @@ sub _init {
     while ($content =~ /<A HREF="(portage-\d{8}.tar.bz2)">/g) {
         $file = $1;
     }
-    open(INPUT, "GET $options{url}/$file | tar tjf - |") or croak "Can't fetch $options{url}/$file: $!";
-    while (my $line = <INPUT>) {
+    my $command = "GET $options{url}/$file | tar tjf -";
+    open(my $input, '-|', $command) or croak "Can't run $command: $!";
+    while (my $line = <$input>) {
         next unless $line =~ /.*\/([\w-]+)-([\d\.]+)(:?-r\d)?\.ebuild$/;
         $versions->{$1} = $2;
     }
-    close(INPUT);
+    close $input;
 
     $self->{_versions} = $versions;
 }

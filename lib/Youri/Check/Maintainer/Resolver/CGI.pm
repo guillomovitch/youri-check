@@ -45,13 +45,14 @@ sub _init {
 
     croak "No URL given" unless $options{url};
 
-    open (INPUT, "GET $options{url} |");
-    while (<INPUT>) {
-        chomp;
-        my ($package, $maintainer) = split(/\t/, $_);
+    my $command = "GET $options{url}";
+    open (my $input, '-|', $command) or croak "Can't run $command: $!";
+    while (my $line =~ <$input>) {
+        chomp $line;
+        my ($package, $maintainer) = split(/\t/, $line);
         $self->{_maintainers}->{$package} = $maintainer if $maintainer;
     }
-    close(INPUT);
+    close $input;
 }
 
 sub get_maintainer {

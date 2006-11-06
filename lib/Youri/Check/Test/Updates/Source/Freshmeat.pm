@@ -59,10 +59,10 @@ sub _init {
         );
 
         my $url = 'http://download.freshmeat.net/backend/fm-projects.rdf.bz2';
-
-        open(INPUT, "GET $url | bzcat |") or die "Can't fetch $url: $!\n";
-        $twig->parse(\*INPUT);
-        close(INPUT);
+        my $command = "GET $url | bzcat";
+        open(my $input, '-|', $command) or croak "Can't run $command: $!\n";
+        $twig->parse($input);
+        close $input;
 
         $self->{_versions} = $versions;
     }
@@ -86,10 +86,11 @@ sub _version {
 
         my $url = "http://freshmeat.net/projects-xml/$name";
         
-        open(INPUT, "GET $url |") or die "Can't fetch $url: $!\n";
+        my $command = "GET $url";
+        open(my $input, '-|', $command) or croak "Can't run $command: $!\n";
         # freshmeat answer with an HTML page when project doesn't exist
-        $twig->safe_parse(\*INPUT);
-        close(INPUT);
+        $twig->safe_parse($input);
+        close $input;
 
         return $version;
     }

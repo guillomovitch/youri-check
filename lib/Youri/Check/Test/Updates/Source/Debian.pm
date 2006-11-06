@@ -41,14 +41,15 @@ sub _init {
     );
 
     my $versions;
-    open(INPUT, "GET $options{url} | zcat |") or croak "Can't fetch $options{url}: $!";
-    while (my $line = <INPUT>) {
+    my $command = "GET $options{url} | zcat";
+    open(my $input, '-|', $command) or croak "Can't fetch $options{url}: $!";
+    while (my $line = <$input>) {
         next unless $line =~ /([\w\.-]+)_([\d\.]+)\.orig\.tar\.gz$/;
         my $name = $1;
         my $version = $2;
         $versions->{$name} = $version;
     }
-    close(INPUT);
+    close $input;
 
     $self->{_versions} = $versions;
 }

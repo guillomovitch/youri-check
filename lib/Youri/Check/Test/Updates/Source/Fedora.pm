@@ -42,12 +42,13 @@ sub _init {
     );
 
     my $versions;
-    open(INPUT, "GET $options{url} |") or die "Can't fetch $options{url}: $!\n";
-    while (<INPUT>) {
-        next unless $_ =~ />([\w-]+)-([\w\.]+)-[\w\.]+\.src\.rpm<\/a>/;
+    my $command = "GET $options{url}";
+    open(my $input, '-|', $command) or croak "Can't run $command: $!";
+    while (my $line = <$input>) {
+        next unless $line =~ />([\w-]+)-([\w\.]+)-[\w\.]+\.src\.rpm<\/a>/;
         $versions->{$1} = $2;
     }
-    close(INPUT);
+    close $input;
 
     $self->{_versions} = $versions;
 }

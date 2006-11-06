@@ -194,7 +194,7 @@ Hook called by default B<url()> implementation after name translation.
 
 sub _url {
     my ($self, $name) = @_;
-    return undef;
+    return;
 }
 
 =head2 _name($name)

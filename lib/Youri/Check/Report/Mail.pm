@@ -140,9 +140,10 @@ sub _send_mail {
     if ($self->{_test}) {
         $mail->print(\*STDOUT);
     } else {
-        open(MAIL, "| $self->{_mta} -t -oi -oem") or die "Can't open MTA program: $!";
-        $mail->print(\*MAIL);
-        close MAIL;
+        my $command = "$self->{_mta} -t -oi -oem";
+        open(my $output, '|-', $command) or croak "Can't run $command: $!";
+        $mail->print($output);
+        close $output;
     }
 }
 
