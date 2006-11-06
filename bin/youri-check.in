@@ -189,8 +189,9 @@ pod2usage(
 my $mode = $ARGV[0];
 
 # convenient global flags
-my $test    = $config->get_arg('test');
-my $verbose = $config->get_arg('verbose');
+my $test     = $config->get_arg('test');
+my $verbose  = $config->get_arg('verbose');
+my $parallel = $config->get_arg('parallel');
 
 # libnet configuration
 my $netconfig_conf = $config->get_param('netconfig');
@@ -207,8 +208,9 @@ my $resultset = create_instance(
     'Youri::Check::Resultset',
     $resultset_conf,
     {
-        test    => $test,
-        verbose => $verbose > 0 ? $verbose - 1 : 0,
+        test     => $test,
+        verbose  => $verbose > 0 ? $verbose - 1 : 0,
+        parallel => $parallel
     }
 );
 
@@ -303,7 +305,7 @@ if ($mode eq 'test') {
         if ($@) {
             print STDERR "Failed to create test $id: $@\n";
         } else {
-            if ($config->get_arg('parallel')) {
+            if ($parallel) {
                 # fork
                 my $pid = fork;
                 die "Can't fork: $!" unless defined $pid;
@@ -320,7 +322,7 @@ if ($mode eq 'test') {
                 print STDERR "Failed to prepare test $id: $@\n";
             } else {
                 # clone resultset in child process
-                $resultset = $config->get_arg('parallel') ?
+                $resultset = $parallel ?
                     $resultset->clone() :
                     $resultset;
 
@@ -336,7 +338,7 @@ if ($mode eq 'test') {
                     }
                 }
             }
-            if ($config->get_arg('parallel')) {
+            if ($parallel) {
                 # child process
                 exit;
             }
@@ -367,7 +369,7 @@ if ($mode eq 'test') {
         if ($@) {
             print STDERR "Failed to create report $id: $@\n";
         } else {
-            if ($config->get_arg('parallel')) {
+            if ($parallel) {
                 # fork
                 my $pid = fork;
                 die "Can't fork: $!" unless defined $pid;
@@ -379,7 +381,7 @@ if ($mode eq 'test') {
             }
 
             # clone resultset in child process
-            $resultset = $config->get_arg('parallel') ?
+            $resultset = $parallel ?
                 $resultset->clone() :
                 $resultset;
 
@@ -391,7 +393,7 @@ if ($mode eq 'test') {
                 print STDERR "Failed to run report $id: $@\n";
             }
 
-            if ($config->get_arg('parallel')) {
+            if ($parallel) {
                 # child process
                 exit;
             }
