@@ -19,10 +19,10 @@ use base 'Youri::Check::Test';
 my $descriptor = Youri::Check::Descriptor::Row->new(
     cells => [
         Youri::Check::Descriptor::Cell->new(
-            name        => 'package',
-            description => 'package',
+            name        => 'source package',
+            description => 'source package',
             mergeable   => 1,
-            value       => 'package',
+            value       => 'source_package',
             type        => 'string',
         ),
         Youri::Check::Descriptor::Cell->new(
@@ -40,10 +40,10 @@ my $descriptor = Youri::Check::Descriptor::Row->new(
             type        => 'string',
         ),
         Youri::Check::Descriptor::Cell->new(
-            name        => 'file',
-            description => 'file',
+            name        => 'package',
+            description => 'package',
             mergeable   => 0,
-            value       => 'file',
+            value       => 'package',
             type        => 'string',
         ),
         Youri::Check::Descriptor::Cell->new(
@@ -106,9 +106,9 @@ sub run {
             });
         } elsif ($key ne $self->{_key}) {
             $resultset->add_result($self->{_id}, $media, $package, { 
-                arch  => $arch,
-                file  => $name,
-                error => "invalid key id $key for package $name (allowed $self->{_key})"
+                arch    => $arch,
+                package => $name,
+                error   => "invalid key id $key for package $name (allowed $self->{_key})"
             });
         }
         

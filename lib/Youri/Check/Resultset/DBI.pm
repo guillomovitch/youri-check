@@ -20,21 +20,21 @@ use DBI 1.38;
 use base 'Youri::Check::Resultset';
 
 my %tables = (
-    packages => {
+    source_packages => {
         id         => 'SERIAL PRIMARY KEY',
-        package    => 'TEXT',
+        name       => 'TEXT',
         media      => 'TEXT',
         maintainer => 'TEXT',
     }
 );
 
 my %queries = (
-    add_package =>
-        'INSERT INTO packages (package, media, maintainer) VALUES (?, ?, ?)',
-    get_package_id =>
-        'SELECT id FROM packages WHERE package = ?',
+    add_source_package =>
+        'INSERT INTO source_packages (name, media, maintainer) VALUES (?, ?, ?)',
+    get_source_package_id =>
+        'SELECT id FROM source_packages WHERE name = ?',
     get_maintainers =>
-        'SELECT DISTINCT(maintainer) FROM packages WHERE maintainer IS NOT NULL',
+        'SELECT DISTINCT(maintainer) FROM source_packages WHERE maintainer IS NOT NULL',
 );
 
 =head1 CLASS METHODS
@@ -169,11 +169,11 @@ sub add_result {
     unless ($sth) {
         my @fields = keys %$values;
         $self->_create_table($type, {
-            'package_id' => 'INT',
+            'source_package_id' => 'INT',
             map { $_ => 'TEXT' } @fields
         });
         my $query = "INSERT INTO $type (" .
-           join(',', 'package_id', @fields) .
+           join(',', 'source_package_id', @fields) .
           ") VALUES (" .
            join(',', '?', map { '?' } @fields) .
           ")";
@@ -185,7 +185,7 @@ sub add_result {
         if $self->{_verbose} > 0;
 
     $sth->execute(
-        $self->_get_package_id(
+        $self->_get_source_package_id(
             $package->get_canonical_name(),
             $media->get_name(),
         ),
@@ -229,13 +229,13 @@ sub _get_iterator_query {
     my ($self, $table, $sort, $filter) = @_;
 
     my @fields =
-        grep { ! /package_id/ }
+        grep { ! /source_package_id/ }
         $self->_get_columns($table);
 
     my $query = "SELECT DISTINCT " .
-        join(',', qw/package media maintainer/, @fields) .
-        " FROM $table, packages" .
-        " WHERE packages.id = $table.package_id";
+        join(',', 'name as source_package', 'media', 'maintainer', @fields) .
+        " FROM $table, source_packages" .
+        " WHERE packages.id = $table.source_package_id";
 
     if ($filter) {
         foreach my $column (keys %{$filter}) {
@@ -252,19 +252,19 @@ sub _get_iterator_query {
     return $query;
 }
 
-sub _get_package_id {
+sub _get_source_package_id {
     my ($self, $package, $media) = @_;
 
     my $id = $self->_get_single_value(
-        'get_package_id',
+        'get_source_package_id',
         $package
     );
-    $id = $self->_add_package($package, $media) unless $id;
+    $id = $self->_add_source_package($package, $media) unless $id;
 
     return $id;
 }
 
-sub _add_package {
+sub _add_source_package {
     my ($self, $package, $media) = @_;
 
     my $maintainer = $self->{_resolver} ? 
@@ -272,11 +272,11 @@ sub _add_package {
         undef;
 
     # lock tables to ensure proper isolation
-    $self->{_dbh}->do('LOCK TABLES packages WRITE') if $self->{_parallel};
+    $self->{_dbh}->do('LOCK TABLES source_packages WRITE') if $self->{_parallel};
 
     my $sth =
-        $self->{_sths}->{add_package} ||=
-        $self->{_dbh}->prepare($queries{add_package});
+        $self->{_sths}->{add_source_package} ||=
+        $self->{_dbh}->prepare($queries{add_source_package});
 
     $sth->execute(
         $package,
@@ -284,7 +284,7 @@ sub _add_package {
         $maintainer
     );
 
-    my $id = $self->{_dbh}->last_insert_id(undef, undef, 'packages', 'id');
+    my $id = $self->{_dbh}->last_insert_id(undef, undef, 'source_packages', 'id');
 
     # unlock table
     $self->{_dbh}->do('UNLOCK TABLES') if $self->{_parallel};

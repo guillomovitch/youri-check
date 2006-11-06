@@ -34,10 +34,10 @@ my $compatibility = {
 my $descriptor = Youri::Check::Descriptor::Row->new(
     cells => [
         Youri::Check::Descriptor::Cell->new(
-            name        => 'package',
-            description => 'package',
+            name        => 'source package',
+            description => 'source package',
             mergeable   => 1,
-            value       => 'package',
+            value       => 'source_package',
             type        => 'string',
         ),
         Youri::Check::Descriptor::Cell->new(
@@ -55,10 +55,10 @@ my $descriptor = Youri::Check::Descriptor::Row->new(
             type        => 'string',
         ),
         Youri::Check::Descriptor::Cell->new(
-            name        => 'file',
-            description => 'file',
+            name        => 'package',
+            description => 'package',
             mergeable   => 0,
-            value       => 'file',
+            value       => 'package',
             type        => 'string',
         ),
         Youri::Check::Descriptor::Cell->new(
@@ -148,10 +148,10 @@ sub run {
                 next if replace($found->[PACKAGE], $package);
                 if ($file->is_directory() && $found->[DIRECTORY]) {
                     $result->add_result($self->{_id}, $media, $package, {
-                        arch  => $arch,
-                        file  => $name,
-                        error => "directory " . $file->get_name() . " duplicated with package " . $found->[PACKAGE]->get_name(),
-                        level => Youri::Check::Test::WARNING
+                        arch    => $arch,
+                        package => $name,
+                        error   => "directory " . $file->get_name() . " duplicated with package " . $found->[PACKAGE]->get_name(),
+                        level   => Youri::Check::Test::WARNING
                     }) unless $self->_directory_duplicate_exception(
                         $package,
                         $found->[PACKAGE],
@@ -160,10 +160,10 @@ sub run {
                 } else {
                     if ($found->[MD5SUM] eq $file->get_md5sum()) {
                         $result->add_result($self->{_id}, $media, $package, {
-                            arch  => $arch,
-                            file  => $name,
-                            error => "file ". $file->get_name() . " duplicated with package " . $found->[PACKAGE]->get_name(),
-                            level => Youri::Check::Test::WARNING
+                            arch    => $arch,
+                            package => $name,
+                            error   => "file ". $file->get_name() . " duplicated with package " . $found->[PACKAGE]->get_name(),
+                            level   => Youri::Check::Test::WARNING
                         }) unless $self->_file_duplicate_exception(
                             $package,
                             $found->[PACKAGE],
@@ -171,10 +171,10 @@ sub run {
                         );
                     } else {
                         $result->add_result($self->{_id}, $media, $package, {
-                            arch  => $arch,
-                            file  => $name,
-                            error => "non-explicit conflict on file " . $file->get_name() . " with package " . $found->[PACKAGE]->get_name(),
-                            level => Youri::Check::Test::ERROR
+                            arch    => $arch,
+                            package => $name,
+                            error   => "non-explicit conflict on file " . $file->get_name() . " with package " . $found->[PACKAGE]->get_name(),
+                            level  => Youri::Check::Test::ERROR
                         }) unless $self->_file_conflict_exception(
                             $package,
                             $found->[PACKAGE],

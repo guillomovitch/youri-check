@@ -20,10 +20,10 @@ use base 'Youri::Check::Test';
 my $descriptor = Youri::Check::Descriptor::Row->new(
     cells => [
         Youri::Check::Descriptor::Cell->new(
-            name        => 'package',
-            description => 'package',
+            name        => 'source package',
+            description => 'source package',
             mergeable   => 1,
-            value       => 'package',
+            value       => 'source_package',
             type        => 'string',
         ),
         Youri::Check::Descriptor::Cell->new(
@@ -34,10 +34,10 @@ my $descriptor = Youri::Check::Descriptor::Row->new(
             type        => 'email',
         ),
         Youri::Check::Descriptor::Cell->new(
-            name        => 'component',
-            description => 'component',
+            name        => 'package',
+            description => 'distribution unit',
             mergeable   => 0,
-            value       => 'component',
+            value       => 'package',
             type        => 'string',
         ),
         Youri::Check::Descriptor::Cell->new(

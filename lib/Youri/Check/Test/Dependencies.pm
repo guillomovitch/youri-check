@@ -23,10 +23,10 @@ use constant RANGE => 1;
 my $descriptor = Youri::Check::Descriptor::Row->new(
     cells => [
         Youri::Check::Descriptor::Cell->new(
-            name        => 'package',
-            description => 'package',
+            name        => 'source package',
+            description => 'source package',
             mergeable   => 1,
-            value       => 'package',
+            value       => 'source_package',
             type        => 'string',
         ),
         Youri::Check::Descriptor::Cell->new(
@@ -44,10 +44,10 @@ my $descriptor = Youri::Check::Descriptor::Row->new(
             type        => 'string',
         ),
         Youri::Check::Descriptor::Cell->new(
-            name        => 'file',
-            description => 'file',
+            name        => 'package',
+            description => 'package',
             mergeable   => 0,
-            value       => 'file',
+            value       => 'package',
             type        => 'string',
         ),
         Youri::Check::Descriptor::Cell->new(
@@ -142,10 +142,10 @@ sub run {
 
             if (!@found) {
                 $resultset->add_result($self->{_id}, $media, $package, {
-                    arch  => $arch,
-                    file  => $name,
-                    error => "$require_name not found",
-                    level => Youri::Check::Test::ERROR
+                    arch    => $arch,
+                    package => $name,
+                    error   => "$require_name not found",
+                    level   => Youri::Check::Test::ERROR
                 });
                 next;
             }
@@ -156,10 +156,10 @@ sub run {
 
             if (!@found_in_media) {
                 $resultset->add_result($self->{_id}, $media, $package, {
-                    arch  => $arch,
-                    file  => $name,
-                    error => "$require_name found in incorrect media $_->[MEDIA] (allowed $allowed_ids)",
-                    level => Youri::Check::Test::ERROR
+                    arch    => $arch,
+                    package => $name,
+                    error   => "$require_name found in incorrect media $_->[MEDIA] (allowed $allowed_ids)",
+                    level   => Youri::Check::Test::ERROR
                 }) foreach @found;
                 next;
             }
@@ -178,10 +178,10 @@ sub run {
 
             if (!@found_in_range) {
                 $resultset->add_result($self->{_id}, $media, $package, {
-                    arch  => $arch,
-                    file  => $name,
-                    error => "$require_name found with incorrect range $_->[RANGE] (needed $require_range)",
-                    level => Youri::Check::Test::ERROR
+                    arch    => $arch,
+                    package => $name,
+                    error   => "$require_name found with incorrect range $_->[RANGE] (needed $require_range)",
+                    level   => Youri::Check::Test::ERROR
                 }) foreach @found_in_media;
                 next;
             }
