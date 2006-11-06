@@ -20,12 +20,9 @@ use Youri::Check::Descriptor::Row;
 use Youri::Check::Descriptor::Cell;
 use base 'Youri::Check::Test';
 
-use constant TYPE_MASK => 0170000; 
-use constant TYPE_DIR  => 0040000;
-
-use constant PACKAGE => 0;
-use constant MODE    => 1;
-use constant MD5SUM  => 2;
+use constant PACKAGE   => 0;
+use constant DIRECTORY => 1;
+use constant MD5SUM    => 2;
 
 my $compatibility = {
     x86_64  => 'i586',
@@ -106,7 +103,7 @@ sub prepare {
         foreach my $file ($package->get_files()) {
             push(
                 @{$self->{_files}->{$file->get_name()}},
-                [ $package, $file->get_mode(), $file->get_md5sum() ]
+                [ $package, $file->is_directory(), $file->get_md5sum() ]
             );
         }
     };
@@ -151,10 +148,7 @@ sub run {
                 next unless compatible($found->[PACKAGE], $package);
                 next if conflict($found->[PACKAGE], $package);
                 next if replace($found->[PACKAGE], $package);
-                if (
-                    $file->is_directory() &&
-                    ($found->[MODE] & TYPE_MASK) == TYPE_DIR
-                ) {
+                if ($file->is_directory() && $found->[DIRECTORY]) {
                     $result->add_result($self->{_id}, $media, $package, {
                         arch  => $arch,
                         file  => $name,
