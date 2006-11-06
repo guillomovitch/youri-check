@@ -139,10 +139,7 @@ sub run {
             my $dependency = $2;
             my $condition = $3;
             my $status = $4;
-            if ($status eq 'NOT AVAILABLE') {
-                print "$name est pété a cause de $dependency ($condition)\n";
-                last DEPENDENCY;
-            }
+            last DEPENDENCY if $status eq 'NOT AVAILABLE';
         }
         my $package = $self->{_packages}->{$media_id}->{$name};
         my $arch = $package->get_arch();
@@ -151,7 +148,6 @@ sub run {
             arch  => $arch,
             file  => $name
         });
-        print "package: $package\n";
     }
     close $input;
 }
