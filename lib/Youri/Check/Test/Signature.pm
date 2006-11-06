@@ -14,8 +14,6 @@ This plugin checks packages signature, and report unsigned ones.
 use warnings;
 use strict;
 use Carp;
-use Youri::Check::Descriptor::Row;
-use Youri::Check::Descriptor::Cell;
 use base 'Youri::Check::Test';
 
 my $descriptor = Youri::Check::Descriptor::Row->new(

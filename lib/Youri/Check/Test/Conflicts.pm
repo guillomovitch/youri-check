@@ -16,8 +16,6 @@ use strict;
 use Carp;
 use constant;
 use Youri::Package;
-use Youri::Check::Descriptor::Row;
-use Youri::Check::Descriptor::Cell;
 use base 'Youri::Check::Test';
 
 use constant PACKAGE   => 0;

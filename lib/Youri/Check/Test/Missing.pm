@@ -15,8 +15,6 @@ use warnings;
 use strict;
 use Carp;
 use List::MoreUtils qw/all any/;
-use Youri::Check::Descriptor::Row;
-use Youri::Check::Descriptor::Cell;
 use base 'Youri::Check::Test';
 
 my $descriptor = Youri::Check::Descriptor::Row->new(
