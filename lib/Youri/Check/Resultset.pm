@@ -34,7 +34,8 @@ sub new {
     my %options = (
         test     => 0,     # test mode
         verbose  => 0,     # verbose mode
-        resolver => undef,  # maintainer resolver, 
+        parallel => 0,     # parallel mode
+        resolver => undef, # maintainer resolver, 
         @_
     );
 
@@ -43,6 +44,7 @@ sub new {
     my $self = bless {
         _test     => $options{test},
         _verbose  => $options{verbose},
+        _parallel => $options{parallel},
         _resolver => $options{resolver},
     }, $class;
 
