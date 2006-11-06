@@ -156,7 +156,7 @@ my $config = Youri::Config->new(
         'skip-test'   => '=s@',
         'skip-report' => '=s@',
         'skip-media'  => '=s@',
-        'parallel'    => '!',
+        'parallel'    => '|p!',
         'test'        => '|t!',
         'list'        => '|l!'
     },
