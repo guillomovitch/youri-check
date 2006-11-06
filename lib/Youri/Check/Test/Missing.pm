@@ -133,7 +133,7 @@ sub run {
         if ($src_revision) {
             # check if revision match
             unless ($src_revision eq $bin_revision) {
-                if ($class->compare_versions($src_revision, $bin_revision) > 0) {
+                if ($class->compare_revisions($src_revision, $bin_revision) > 0) {
                     # binary package is obsolete
                     $resultset->add_result($self->{_id}, $media, $package, {
                         component => $package->get_name(),
