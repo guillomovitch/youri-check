@@ -235,7 +235,7 @@ sub _get_iterator_query {
     my $query = "SELECT DISTINCT " .
         join(',', 'name as source_package', 'media', 'maintainer', @fields) .
         " FROM $table, source_packages" .
-        " WHERE packages.id = $table.source_package_id";
+        " WHERE source_packages.id = $table.source_package_id";
 
     if ($filter) {
         foreach my $column (keys %{$filter}) {
