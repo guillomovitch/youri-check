@@ -46,7 +46,7 @@ sub _init {
     my $command = "GET $options{url}";
     open(my $input, '-|', $command) or croak "Can't run $command: $!";
     while (my $line = <$input>) {
-        next unless $_ =~ />([\w-]+)-([\d\.]+)\.tar\.gz<\/a>/;
+        next unless $line =~ />([\w-]+)-([\d\.]+)\.tar\.gz<\/a>/;
         $versions->{$1} = $2;
     }
     close $input;
