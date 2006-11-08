@@ -15,6 +15,7 @@ available from CPAN.
 use warnings;
 use strict;
 use Carp;
+use LWP::UserAgent;
 use base 'Youri::Check::Test::Updates::Source';
 
 =head2 new(%args)
@@ -42,16 +43,26 @@ sub _init {
         @_
     );
 
-    my $versions;
-    my $command = "GET $options{url}";
-    open(my $input, '-|', $command) or croak "Can't run $command: $!";
-    while (my $line = <$input>) {
-        next unless $line =~ />([\w-]+)-([\d\.]+)\.tar\.gz<\/a>/o;
-        $versions->{$1} = $2;
-    }
-    close $input;
+    my $agent = LWP::UserAgent->new();
+    my $buffer = '';
+    my $callback = sub {
+        my ($data, $response, $protocol) = @_;
 
-    $self->{_versions} = $versions;
+        # prepend text remaining from previous run
+        $data = $buffer . $data;
+
+        # process current chunk
+        while ($data =~ m/(.*)\n/ogc) {
+            my $line = $1;
+            next unless $line =~ />([\w-]+)-([\d\.]+)\.tar\.gz<\/a>/o;
+            $self->{_versions}->{$1} = $2;
+        }
+
+        # store remaining text
+        $buffer = substr($data, pos $data);
+    };
+
+    $agent->get($options{url}, ':content_cb' => $callback);
 }
 
 sub _url {
