@@ -74,7 +74,7 @@ sub _global_report {
 
     my $iterator = $resultset->get_iterator(
         $type,
-        [ 'package' ],
+        [ 'source_package' ],
         $filter
     );
 
@@ -94,7 +94,7 @@ sub _individual_report {
 
     my $iterator = $resultset->get_iterator(
         $type,
-        [ 'package' ],
+        [ 'source_package' ],
         {
             ($filter ? %$filter : () ),
             maintainer => [ $maintainer ]
@@ -130,7 +130,9 @@ sub _report {
     # content creation
     my @results;
     while (my $result = $iterator->get_result()) {
-        if (@results && $result->{package} ne $results[0]->{package}) {
+        if (@results &&
+            $result->{source_package} ne $results[0]->{source_package}
+        ) {
             foreach my $format (@{$self->{_formats}}) {
                 $format->add_results(
                     \@results,

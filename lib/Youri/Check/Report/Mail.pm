@@ -69,7 +69,7 @@ sub _global_report {
     foreach my $format (@{$self->{_formats}}) {
         my $iterator = $resultset->get_iterator(
             $type,
-            [ 'package' ]
+            [ 'source_package' ]
         );
 
         return if $self->{_noempty} && ! $iterator->has_results();
@@ -98,7 +98,7 @@ sub _individual_report {
     foreach my $format (@{$self->{_formats}}) {
         my $iterator = $resultset->get_iterator(
             $type,
-            [ 'package' ],
+            [ 'source_package' ],
             { maintainer => [ $maintainer ] }
         );
 
