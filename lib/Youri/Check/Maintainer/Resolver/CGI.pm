@@ -45,14 +45,26 @@ sub _init {
 
     croak "No URL given" unless $options{url};
 
-    my $command = "GET $options{url}";
-    open (my $input, '-|', $command) or croak "Can't run $command: $!";
-    while (my $line =~ <$input>) {
-        chomp $line;
-        my ($package, $maintainer) = split(/\t/, $line);
-        $self->{_maintainers}->{$package} = $maintainer if $maintainer;
-    }
-    close $input;
+    my $agent = LWP::UserAgent->new();
+    my $buffer = '';
+    my $callback = sub {
+        my ($data, $response, $protocol) = @_;
+
+        # prepend text remaining from previous run
+        $data = $buffer . $data;
+
+        # process current chunk
+        while ($data =~ m/(.*)\n/ogc) {
+            my $line = $1;
+            next unless $line =~ /^(\S+)\t(\S+)$/o;
+            $self->{_maintainers}->{$1} = $2;
+        }
+
+        # store remaining text
+        $buffer = substr($data, pos $data);
+    };
+
+    $agent->get($options{url}, ':content_cb' => $callback);
 }
 
 sub get_maintainer {
