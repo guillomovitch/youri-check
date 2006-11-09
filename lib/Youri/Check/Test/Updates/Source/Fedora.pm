@@ -40,15 +40,26 @@ sub _init {
         url => 'http://fr.rpmfind.net/linux/fedora/core/development/SRPMS',
         @_
     );
+    my $agent = LWP::UserAgent->new();
+    my $buffer = '';
+    my $callback = sub {
+        my ($data, $response, $protocol) = @_;
 
-    my $versions;
-    my $command = "GET $options{url}";
-    open(my $input, '-|', $command) or croak "Can't run $command: $!";
-    while (my $line = <$input>) {
-        next unless $line =~ />([\w-]+)-([\w\.]+)-[\w\.]+\.src\.rpm<\/a>/;
-        $versions->{$1} = $2;
-    }
-    close $input;
+        # prepend text remaining from previous run
+        $data = $buffer . $data;
+
+        # process current chunk
+        while ($data =~ m/(.*)\n/ogc) {
+            my $line = $1;
+            next unless $line =~ />([\w-]+)-([\w\.]+)-[\w\.]+\.src\.rpm<\/a>/o;
+            $self->{_versions}->{$1} = $2;
+        }
+
+        # store remaining text
+        $buffer = substr($data, pos $data);
+    };
+
+    $agent->get($options{url}, ':content_cb' => $callback);
 
     $self->{_versions} = $versions;
 }
