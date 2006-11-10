@@ -40,6 +40,7 @@ sub _init {
         url => 'http://fr.rpmfind.net/linux/fedora/core/development/SRPMS',
         @_
     );
+
     my $agent = LWP::UserAgent->new();
     my $buffer = '';
     my $callback = sub {
@@ -60,8 +61,6 @@ sub _init {
     };
 
     $agent->get($options{url}, ':content_cb' => $callback);
-
-    $self->{_versions} = $versions;
 }
 
 =head1 COPYRIGHT AND LICENSE
