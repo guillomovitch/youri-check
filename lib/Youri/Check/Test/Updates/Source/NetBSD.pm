@@ -15,8 +15,8 @@ This source plugin for L<Youri::Check::Test::Updates> collects updates
 use warnings;
 use strict;
 use Carp;
+use LWP::UserAgent;
 use base 'Youri::Check::Test::Updates::Source';
-use IO::Ftp;
 
 =head2 new(%args)
 
@@ -41,22 +41,29 @@ sub _init {
         @_
     );
 
-    my $versions;
-    my $urls;
+    my $agent = LWP::UserAgent->new();
+    my $buffer = '';
+    my $callback = sub {
+        my ($data, $response, $protocol) = @_;
 
-    my $in = IO::Ftp->new('<',$options{url}) or croak "Can't fetch $options{url}: $!";
-    while (my $line = <$in>) {
-        next unless $line =~ /<!-- (.+)-([^-]*?)(nb\d*)? \(for sorting\).*?href="([^"]+)"/;
-        my $name = $1;
-        my $version = $2;
-        $versions->{$name} = $version;
-        $urls->{$name} = $4;
-    }
-    close($in);
+        # prepend text remaining from previous run
+        $data = $buffer . $data;
 
-    $self->{_versions} = $versions;
-    $self->{_urls} = $urls;
-    $self->{_url} = $options{url};
+        # process current chunk
+        while ($data =~ m/(.*)\n/ogc) {
+            my $line = $1;
+            next unless $line =~ /<!-- (.+)-([^-]*?)(?:nb\d*)? \(for sorting\).*?href="([^"]+)"/o;
+            my $name = $1;
+            my $version = $2;
+            $self->{_versions}->{$1} = $2;
+            $self->{_urls}->{$1} = $3;
+        }
+
+        # store remaining text
+        $buffer = substr($data, pos $data);
+    };
+
+    $agent->get($options{url}, ':content_cb' => $callback);
 }
 
 sub _url {
