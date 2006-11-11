@@ -16,6 +16,7 @@ It uses a remote CGI to resolve maintainers.
 use warnings;
 use strict;
 use Carp;
+use LWP::UserAgent;
 use base 'Youri::Check::Maintainer::Resolver';
 
 =head1 CLASS METHODS

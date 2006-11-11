@@ -15,6 +15,7 @@ available from Fedora.
 use warnings;
 use strict;
 use Carp;
+use LWP::UserAgent;
 use base 'Youri::Check::Test::Updates::Source';
 
 =head2 new(%args)

@@ -15,7 +15,6 @@ available from Gentoo.
 use warnings;
 use strict;
 use Carp;
-use LWP::Simple;
 use base 'Youri::Check::Test::Updates::Source';
 
 =head2 new(%args)
