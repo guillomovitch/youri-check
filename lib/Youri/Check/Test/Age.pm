@@ -21,10 +21,10 @@ use base 'Youri::Check::Test';
 my $descriptor = Youri::Check::Descriptor::Row->new(
     cells => [
         Youri::Check::Descriptor::Cell->new(
-            name        => 'package',
-            description => 'package',
+            name        => 'source_package',
+            description => 'source package',
             mergeable   => 1,
-            value       => 'package',
+            value       => 'source_package',
             type        => 'string',
         ),
         Youri::Check::Descriptor::Cell->new(
