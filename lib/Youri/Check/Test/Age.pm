@@ -98,9 +98,8 @@ sub run {
     my ($self, $media, $resultset) = @_;
     croak "Not a class method" unless ref $self;
 
-    my $max_age_string = $media->max_age() ?
-        $media->max_age() :
-        $self->{_max_age};
+    my $max_age_string =
+        $media->get_option($self->{_id}, 'max') || $self->{_max_age};
 
     my $max_age = $self->{_format}->parse_duration($max_age_string);
 

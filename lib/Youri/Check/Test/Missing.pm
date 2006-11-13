@@ -105,7 +105,7 @@ sub run {
     # this is a binary media check only
     return unless $media->get_type() eq 'binary';
 
-    my @allowed_ids = $media->allow_srcs();
+    my @allowed_ids = $media->get_option($self->{_id}, 'allowed');
 
     # abort unless all allowed medias are present
     foreach my $id (@allowed_ids) {

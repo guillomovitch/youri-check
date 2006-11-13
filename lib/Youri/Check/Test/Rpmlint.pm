@@ -104,9 +104,8 @@ sub run {
     my ($self, $media, $resultset) = @_;
     croak "Not a class method" unless ref $self;
 
-    my $config = $media->rpmlint_config() ?
-        $media->rpmlint_config() :
-        $self->{_config};
+    my $config =
+        $media->get_option($self->{_id}, 'config') || $self->{_config};
 
     my $check = sub {
         my ($file, $package) = @_;

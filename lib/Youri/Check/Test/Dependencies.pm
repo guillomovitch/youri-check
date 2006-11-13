@@ -108,7 +108,7 @@ sub run {
     my ($self, $media, $resultset) = @_;
     croak "Not a class method" unless ref $self;
 
-    my @allowed_ids = $media->allow_deps();
+    my @allowed_ids = $media->get_option($self->{_id}, 'allowed');
 
     # abort unless all allowed medias are present
     foreach my $id (@allowed_ids) {
