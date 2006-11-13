@@ -63,7 +63,7 @@ Specific parameters:
 
 =over
 
-=item max_age $age
+=item max $age
 
 Maximum age allowed (default: 1 year)
 
@@ -78,7 +78,7 @@ Pattern used to describe age (default: %Y year)
 sub _init {
     my $self    = shift;
     my %options = (
-        max_age => '1 year',
+        max     => '1 year',
         pattern => '%Y year',
         @_
     );
@@ -99,7 +99,7 @@ sub run {
     croak "Not a class method" unless ref $self;
 
     my $max_age_string =
-        $media->get_option($self->{_id}, 'max') || $self->{_max_age};
+        $media->get_option($self->{_id}, 'max') || $self->{_max};
 
     my $max_age = $self->{_format}->parse_duration($max_age_string);
 
