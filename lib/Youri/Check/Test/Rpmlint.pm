@@ -113,7 +113,10 @@ sub run {
         my $arch = $package->get_arch();
         my $name = $package->get_name();
 
-        my $command = "$self->{_path} -f $config $file";
+        my $command = $config ?
+            "$self->{_path} -f $config $file" :
+            "$self->{_path}";
+
         open(my $input, '-|', $command) or croak "Can't run $command: $!";
         while (my $line = <$input>) {
             chomp $line;
