@@ -115,7 +115,7 @@ sub run {
 
         my $command = $config ?
             "$self->{_path} -f $config $file" :
-            "$self->{_path}";
+            "$self->{_path} $file";
 
         open(my $input, '-|', $command) or croak "Can't run $command: $!";
         while (my $line = <$input>) {
