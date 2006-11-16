@@ -104,43 +104,56 @@ sub run {
     my ($self, $media, $resultset) = @_;
     croak "Not a class method" unless ref $self;
 
+    # index packages first
+    my $packages;
+    my $index = sub {
+        my ($package) = @_;
+
+        $packages->{$package->get_name()} = $package;
+    };
+
+    $media->traverse_headers($index);
+
+    # then run rpmlint
     my $config =
         $media->get_option($self->{_id}, 'config') || $self->{_config};
 
-    my $check = sub {
-        my ($file, $package) = @_;
+    my $command =
+        $self->{_path} . ' ' .
+        ($config ? "-f $config " : '' ) . 
+        $media->get_path();
 
-        my $arch = $package->get_arch();
-        my $name = $package->get_name();
+    open(my $input, '-|', $command) or croak "Can't run $command: $!";
 
-        my $command =
-            $self->{_path} . ' ' .
-            ($config ? "-f $config " : '' ) . 
-            $file;
-
-        open(my $input, '-|', $command) or croak "Can't run $command: $!";
-        while (my $line = <$input>) {
-            chomp $line;
-            if ($line =~ /^E: \Q$name\E (.+)/) {
-                $resultset->add_result($self->{_id}, $media, $package, { 
-                    arch    => $arch,
-                    package => $name,
-                    error   => $1,
-                    level   => Youri::Check::Test::ERROR
-                });
-            } elsif ($line =~ /^W: \Q$name\E (.+)/) {
-                $resultset->add_result($self->{_id}, $media, $package, { 
-                    arch    => $arch,
-                    package => $name,
-                    error   => $1,
-                    level   => Youri::Check::Test::WARNING
-                });
-            }
+    # results for each packages will be given consecutively
+    # keeping track of previous package should allow to spare
+    # many hash lookup
+    my $last_name;
+    my $last_package;
+    while (my $line = <$input>) {
+        next unless $line =~ /^([EW]): (\S+) (.+)$/o;
+        my $level = $1;
+        my $name  = $2;
+        my $error = $3;
+        my $package;
+        if ($name eq $last_name) {
+            $package = $last_package;
+        } else {
+            $package = $packages->{$name};
+            $last_name = $name;
+            $last_package = $package;
         }
-        close $input;
-    };
+        $resultset->add_result($self->{_id}, $media, $package, { 
+            arch    => $package->get_arch(),
+            package => $name,
+            error   => $error,
+            level   => $level eq 'E' ? 
+                Youri::Check::Test::ERROR :
+                Youri::Check::Test::WARNING
+        });
+    }
 
-    $media->traverse_files($check);
+    close $input;
 }
 
 =head1 COPYRIGHT AND LICENSE
