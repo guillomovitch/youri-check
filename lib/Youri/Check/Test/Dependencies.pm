@@ -108,10 +108,10 @@ sub run {
     my ($self, $media, $resultset) = @_;
     croak "Not a class method" unless ref $self;
 
-    my @allowed_ids = $media->get_option($self->{_id}, 'allowed');
+    my $allowed_ids = $media->get_option($self->{_id}, 'allowed');
 
     # abort unless all allowed medias are present
-    foreach my $id (@allowed_ids) {
+    foreach my $id (@{$allowed_ids}) {
         unless ($self->{_medias}->{$id}) {
             carp "Missing media $id, aborting";
             return;
@@ -119,8 +119,8 @@ sub run {
     }
 
     # index allowed medias
-    my %allowed_ids = map { $_ => 1 } @allowed_ids;
-    my $allowed_ids = join(",", @allowed_ids);
+    my %allowed_ids = map { $_ => 1 } @{$allowed_ids};
+    my $allowed_ids = join(",", @{$allowed_ids});
 
     my $class = $media->get_package_class();
 

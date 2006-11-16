@@ -105,10 +105,10 @@ sub run {
     # this is a binary media check only
     return unless $media->get_type() eq 'binary';
 
-    my @allowed_ids = $media->get_option($self->{_id}, 'allowed');
+    my $allowed_ids = $media->get_option($self->{_id}, 'allowed');
 
     # abort unless all allowed medias are present
-    foreach my $id (@allowed_ids) {
+    foreach my $id (@{$allowed_ids}) {
     unless ($self->{_medias}->{$id}) {
             carp "Missing media $id, aborting";
             return;
@@ -125,7 +125,7 @@ sub run {
             $package->get_version() . '-' . $package->get_release();
 
         my $src_revision;
-        foreach my $id (@allowed_ids) {
+        foreach my $id (@{$allowed_ids}) {
             $src_revision = $self->{_srcs}->{$id}->{$canonical_name};
             last if $src_revision;
         }
