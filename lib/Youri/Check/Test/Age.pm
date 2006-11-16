@@ -91,7 +91,7 @@ sub _init {
         epoch => time()
     );
 
-    $self->{_max_age} = $options{max_age};
+    $self->{_max} = $options{max};
 }
 
 sub run {
