@@ -121,7 +121,8 @@ sub run {
     my $command =
         $self->{_path} . ' ' .
         ($config ? "-f $config " : '' ) . 
-        $media->get_path();
+        $media->get_path() .
+        ' 2>/dev/null';
 
     open(my $input, '-|', $command) or croak "Can't run $command: $!";
 
