@@ -92,19 +92,6 @@ sub prepare {
         my $media_id = $media->get_id();
         my $hdlist = $media->get_hdlist();
         system("zcat $hdlist 2>/dev/null > $self->{_hdlists}/$media_id");
-
-        next if $media->skip_test($self->{_id});
-
-        print STDERR "Indexing media $media_id packages\n"
-            if $self->{_verbose};
-
-        my $index = sub {
-            my ($package) = @_;
-
-            $self->{_packages}->{$media_id}->{$package->get_name()} = $package;
-        };
-
-        $media->traverse_headers($index);
     }
 }
 
@@ -113,6 +100,16 @@ sub run {
     my ($self, $media, $resultset) = @_;
     croak "Not a class method" unless ref $self;
 
+    # index packages first
+    my $packages;
+    my $index = sub {
+        my ($package) = @_;
+
+        $packages->{$package->get_name()} = $package;
+    };
+    $media->traverse_headers($index);
+
+    # then run rpmcheck
     my $media_id = $media->get_id();
     my $command =
         "zcat " . $media->get_hdlist() . " 2>/dev/null |" .
@@ -141,7 +138,7 @@ sub run {
             my $status = $4;
             last DEPENDENCY if $status eq 'NOT AVAILABLE';
         }
-        my $package = $self->{_packages}->{$media_id}->{$name};
+        my $package = $packages->{$name};
         my $arch = $package->get_arch();
         $resultset->add_result(
             $self->{_id}, $media, $package, { 
