@@ -46,6 +46,13 @@ my $descriptor = Youri::Check::Descriptor::Row->new(
             mergeable   => 0,
             value       => 'package',
             type        => 'string',
+        ),
+        Youri::Check::Descriptor::Cell->new(
+            name        => 'reason',
+            description => 'reason',
+            mergeable   => 0,
+            value       => 'reason',
+            type        => 'string',
         )
     ]
 );
@@ -121,30 +128,56 @@ sub run {
     PACKAGE: while (my $line = <$input>) {
         next unless $line =~ /^(\S+) \(= \S+\): FAILED$/o;
         my $name = $1;
-        # skip next line
-        $line = <$input>;
-        # read each following line until final missing dependency
-        DEPENDENCY: while ($line = <$input>) {
-            $line =~ /^ \s+
-                (\S+) \s
-                \([^)]+\) \s
-                depends \s on \s
-                (\S+) \s
-               (?:\(([^)]+)\) \s)?
-                \{([^}]+)\}
-                $/xo;
-            my $dependency = $2;
-            my $condition = $3;
-            my $status = $4;
-            last DEPENDENCY if $status eq 'NOT AVAILABLE';
-        }
         my $package = $packages->{$name};
         my $arch = $package->get_arch();
-        $resultset->add_result(
-            $self->{_id}, $media, $package, { 
-            arch    => $arch,
-            package => $name
-        });
+        # skip next line
+        $line = <$input>;
+        # read first reason
+        $line = <>;
+        $line =~ /^ \s+
+            \S+ \s
+            \([^)]+\) \s
+            depends \s on \s
+            (\S+) \s
+           (?:\(([^)]+)\) \s)?
+            \{([^}]+)\}
+            $/xo;
+        my $dependency = $1;
+        my $condition = $2;
+        my $status = $3;
+        if ($status eq 'NOT AVAILABLE') {
+            # an direct dependency is missing
+            $resultset->add_result(
+                $self->{_id}, $media, $package, { 
+                arch    => $arch,
+                package => $name,
+                reason  => "$dependency " .
+                    ($condition ? "($condition) " : '' ) .
+                    "is missing"
+            });
+        } else {
+            # a direct dependency is uninstallable
+            $resultset->add_result(
+                $self->{_id}, $media, $package, { 
+                arch    => $arch,
+                package => $name,
+                reason  => "$status is not installable"
+            });
+
+            # exhaust indirect reasons
+            while ($status ne 'NOT AVAILABLE') {
+                $line = <>;
+                $line =~ /^ \s+
+                    \S+ \s
+                    \([^)]+\) \s
+                    depends \s on \s
+                    \S+ \s
+                   (?:\([^)]+\) \s)?
+                    \{([^}]+)\}
+                    $/xo;
+                $status = $1;
+            }
+        }
     }
     close $input;
 }
