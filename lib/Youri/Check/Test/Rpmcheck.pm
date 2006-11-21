@@ -1,4 +1,4 @@
-# $Id: /local/youri/soft/check/trunk/lib/Youri/Check/Test/Rpmlint.pm 2282 2006-11-05T19:12:24.668092Z guillaume  $
+# $Id$
 package Youri::Check::Test::Rpmcheck;
 
 =head1 NAME
