@@ -110,12 +110,12 @@ sub run {
     $media->traverse_headers($index);
 
     # then run rpmcheck
-    my $media_id = $media->get_id();
     my $command =
         "zcat " . $media->get_hdlist() . " 2>/dev/null |" .
         "$self->{_path} -explain -failures 2>/dev/null";
-    foreach my $other_media_id ($media->allow_deps()) {
-        $command .= " -base $self->{_hdlists}/$other_media_id";
+    my $allowed_ids = $media->get_option($self->{_id}, 'allowed');
+    foreach my $allowed_id (@{$allowed_ids}) {
+        $command .= " -base $self->{_hdlists}/$allowed_id";
     }
     open(my $input, '-|', $command) or croak "Can't run $command: $!";
     PACKAGE: while (my $line = <$input>) {
