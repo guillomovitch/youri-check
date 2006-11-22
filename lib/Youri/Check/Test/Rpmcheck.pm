@@ -138,7 +138,7 @@ sub run {
             \S+ \s
             \([^)]+\) \s
             (depends \s on \s|conflicts \s with \s)
-            (\S+ (?:\s \([^)]+\)?) \s
+            (\S+ (?:\s \([^)]+\))?) \s
             \{([^}]+)\}
             $/xo;
         my $problem = $1;
@@ -170,7 +170,7 @@ sub run {
                     \S+ \s
                     \([^)]+\) \s
                     (?:depends \s on \s|conflicts \s with \s)
-                    \S+ (?:\s \([^)]+\)? \s
+                    \S+ (?:\s \([^)]+\))? \s
                     \{([^}]+)\}
                     $/xo;
                 $status = $1;
