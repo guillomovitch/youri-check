@@ -133,7 +133,7 @@ sub run {
         # skip next line
         $line = <$input>;
         # read first reason
-        $line = <>;
+        $line = <$input>;
         $line =~ /^ \s+
             \S+ \s
             \([^)]+\) \s
@@ -166,7 +166,7 @@ sub run {
 
             # exhaust indirect reasons
             while ($status ne 'NOT AVAILABLE') {
-                $line = <>;
+                $line = <$input>;
                 $line =~ /^ \s+
                     \S+ \s
                     \([^)]+\) \s
