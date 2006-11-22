@@ -137,13 +137,12 @@ sub run {
         $line =~ /^ \s+
             \S+ \s
             \([^)]+\) \s
-            depends \s on \s
-            (\S+) \s
-           (?:\(([^)]+)\) \s)?
+            (depends \s on \s|conflicts \s with \s)
+            (\S+ (?:\s \([^)]+\)?) \s
             \{([^}]+)\}
             $/xo;
-        my $dependency = $1;
-        my $condition = $2;
+        my $problem = $1;
+        my $dependency = $2;
         my $status = $3;
         if ($status eq 'NOT AVAILABLE') {
             # an direct dependency is missing
@@ -151,9 +150,7 @@ sub run {
                 $self->{_id}, $media, $package, { 
                 arch    => $arch,
                 package => $name,
-                reason  => "$dependency " .
-                    ($condition ? "($condition) " : '' ) .
-                    "is missing"
+                reason  => "$dependency is missing"
             });
         } else {
             # a direct dependency is uninstallable
@@ -161,7 +158,9 @@ sub run {
                 $self->{_id}, $media, $package, { 
                 arch    => $arch,
                 package => $name,
-                reason  => "$status is not installable"
+                reason  => $problem eq 'depends on' ?
+                    "$dependency is not installable" :
+                    "conflict with $dependency"
             });
 
             # exhaust indirect reasons
@@ -170,9 +169,8 @@ sub run {
                 $line =~ /^ \s+
                     \S+ \s
                     \([^)]+\) \s
-                    depends \s on \s
-                    \S+ \s
-                   (?:\([^)]+\) \s)?
+                    (?:depends \s on \s|conflicts \s with \s)
+                    \S+ (?:\s \([^)]+\)? \s
                     \{([^}]+)\}
                     $/xo;
                 $status = $1;
