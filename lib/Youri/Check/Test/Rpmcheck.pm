@@ -165,7 +165,7 @@ sub run {
             });
 
             # exhaust indirect reasons
-            while ($status ne 'NOT AVAILABLE') {
+            while ($line && $status ne 'NOT AVAILABLE') {
                 $line = <$input>;
                 $line =~ /^ \s+
                     \S+ \s
