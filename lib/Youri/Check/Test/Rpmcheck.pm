@@ -140,6 +140,7 @@ sub run {
             (depends \s on|conflicts \s with) \s
             (\S+ (?:\s \([^)]+\))?) \s
             \{([^}]+)\}
+            (?: \s on \s file \s \S+)?
             $/xo;
         my $problem = $1;
         my $dependency = $2;
@@ -172,6 +173,7 @@ sub run {
                     (?:depends \s on \s|conflicts \s with \s)
                     \S+ (?:\s \([^)]+\))? \s
                     \{([^}]+)\}
+                    (?: \s on \s file \s \S+)?
                     $/xo;
                 $status = $1;
             }
