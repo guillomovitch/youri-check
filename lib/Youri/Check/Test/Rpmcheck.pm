@@ -137,7 +137,7 @@ sub run {
         $line =~ /^ \s+
             \S+ \s
             \([^)]+\) \s
-            (depends \s on \s|conflicts \s with \s)
+            (depends \s on|conflicts \s with) \s
             (\S+ (?:\s \([^)]+\))?) \s
             \{([^}]+)\}
             $/xo;
