@@ -92,7 +92,7 @@ sub prepare {
     my ($self, @medias) = @_;
     croak "Not a class method" unless ref $self;
 
-    $self->{_hdlists} = tempdir();
+    $self->{_hdlists} = tempdir(CLEANUP => 1);
 
     foreach my $media (@medias) {
         # uncompress hdlist, as rpmcheck does not handle them
