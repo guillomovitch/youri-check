@@ -126,7 +126,10 @@ sub run {
     }
     open(my $input, '-|', $command) or croak "Can't run $command: $!";
     PACKAGE: while (my $line = <$input>) {
-        next unless $line =~ /^(\S+) \(= \S+\): FAILED$/o;
+        if ($line !~ /^(\S+) \(= \S+\): FAILED$/o) {
+            warn "$line doesn't conform to expected format";
+            next PACKAGE;
+        }
         my $name = $1;
         my $package = $packages->{$name};
         my $arch = $package->get_arch();
@@ -134,14 +137,17 @@ sub run {
         $line = <$input>;
         # read first reason
         $line = <$input>;
-        $line =~ /^ \s+
+        if ($line !~ /^ \s+
             \S+ \s
             \([^)]+\) \s
             (depends \s on|conflicts \s with) \s
             (\S+ (?:\s \([^)]+\))?) \s
             \{([^}]+)\}
             (?: \s on \s file \s \S+)?
-            $/xo;
+            $/xo) {
+            warn "$line doesn't conform to expected format";
+            next PACKAGE;
+        }
         my $problem = $1;
         my $dependency = $2;
         my $status = $3;
@@ -167,14 +173,17 @@ sub run {
             # exhaust indirect reasons
             while ($line && $status ne 'NOT AVAILABLE') {
                 $line = <$input>;
-                $line =~ /^ \s+
+                if ($line !~ /^ \s+
                     \S+ \s
                     \([^)]+\) \s
                     (?:depends \s on \s|conflicts \s with \s)
                     \S+ (?:\s \([^)]+\))? \s
                     \{([^}]+)\}
                     (?: \s on \s file \s \S+)?
-                    $/xo;
+                    $/xo) {
+                    warn "$line doesn't conform to expected format";
+                    next REASON;
+                }
                 $status = $1;
             }
         }
