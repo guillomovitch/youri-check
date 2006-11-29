@@ -89,7 +89,7 @@ sub _init {
 
     # try to connect to base URL directly, and abort if not available
     my $response = $agent->head($options{url});
-    die "Unavailable URL $options{url}: " . $response->status_line()
+    croak "Unavailable URL $options{url}: " . $response->status_line()
         unless $response->is_success();
 
     if ($options{preload}) {

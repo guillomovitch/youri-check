@@ -210,11 +210,11 @@ sub get_maintainers {
 sub get_iterator {
     my ($self, $id, $sort, $filter) = @_;
 
-    die 'No id given, aborting'
+    croak 'No id given, aborting'
         unless $id;
-    die 'sort should be an arrayref'
+    croak 'sort should be an arrayref'
         if $sort and ref $sort ne 'ARRAY';
-    die 'filter should be an hashref'
+    croak 'filter should be an hashref'
         if $filter and ref $filter ne 'HASH';
         
     my $query = $self->_get_iterator_query($id, $sort, $filter);
