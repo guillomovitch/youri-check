@@ -41,10 +41,11 @@ sub _init {
     );
 
     my $versions;
+    my $pattern = qr/([\w\.-]+)_([\d\.]+)\.orig\.tar\.gz$/;
     my $command = "GET $options{url} | zcat";
     open(my $input, '-|', $command) or croak "Can't fetch $options{url}: $!";
     while (my $line = <$input>) {
-        next unless $line =~ /([\w\.-]+)_([\d\.]+)\.orig\.tar\.gz$/;
+        next unless $line =~ $pattern;
         my $name = $1;
         my $version = $2;
         $versions->{$name} = $version;

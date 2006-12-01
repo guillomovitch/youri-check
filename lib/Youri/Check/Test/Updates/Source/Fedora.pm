@@ -44,6 +44,7 @@ sub _init {
 
     my $agent = LWP::UserAgent->new();
     my $buffer = '';
+    my $pattern = qr/>([\w-]+)-([\w\.]+)-[\w\.]+\.src\.rpm<\/a>/;
     my $callback = sub {
         my ($data, $response, $protocol) = @_;
 
@@ -51,9 +52,9 @@ sub _init {
         $data = $buffer . $data;
 
         # process current chunk
-        while ($data =~ m/(.*)\n/ogc) {
+        while ($data =~ m/(.*)\n/gc) {
             my $line = $1;
-            next unless $line =~ />([\w-]+)-([\w\.]+)-[\w\.]+\.src\.rpm<\/a>/o;
+            next unless $line =~ $pattern;
             $self->{_versions}->{$1} = $2;
         }
 

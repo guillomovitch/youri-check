@@ -29,11 +29,7 @@ my %status = (
     binary_test  => 2
 );
 
-my $status_pattern = '^('
-    . join('|', keys %status)
-    . ')_\S+-[^-]+-[^-]+\.src\.rpm\.\d+\.log$';
 
-my $package_pattern = '^(\S+)-([^-]+)-([^-]+)\.src\.rpm\/$';
 
 =head1 CLASS METHODS
 
@@ -102,9 +98,10 @@ sub _init {
                 print $response->status_line() . "\n" if $self->{_verbose} > 1;
                 if ($response->is_success()) {
                     my $parser = HTML::TokeParser->new(\$response->content());
+                    my $pattern = qr/^(\S+)-([^-]+)-([^-]+)\.src\.rpm\/$/;
                     while (my $token = $parser->get_tag('a')) {
                         my $href = $token->[1]->{href};
-                        next unless $href =~ /$package_pattern/o;
+                        next unless $href =~ $pattern;
                         my $name = $1;
                         my $version = $2;
                         my $release = $3;
@@ -182,9 +179,16 @@ sub _get_package_result {
     print $response->status_line() . "\n" if $self->{_verbose} > 1;
     if ($response->is_success()) {
         my $parser = HTML::TokeParser->new(\$response->content());
+        my $pattern = qr/^
+            (@{[join('|', keys %status)]}) # any status
+            _
+            \S+-[^-]+-[^-]+\.src\.rpm      # package name
+            \.\d+
+            \.log                     
+            $/xo;
         while (my $token = $parser->get_tag('a')) {
             my $href = $token->[1]->{href};
-            next unless $href =~ /$status_pattern/o;
+            next unless $href =~ $pattern;
             my $status  = $1;
             if (
                 !$result->{status} ||

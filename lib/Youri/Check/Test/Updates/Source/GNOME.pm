@@ -49,9 +49,10 @@ sub _init {
     my $response = $self->{_agent}->get($options{url});
     if($response->is_success()) {
         my $parser = HTML::TokeParser->new(\$response->content());
+        my $pattern = qr/^([-\w]+)\/$/;
         while (my $token = $parser->get_tag('a')) {
             my $href = $token->[1]->{href};
-            next unless $href =~ /^([-\w]+)\/$/o;
+            next unless $href =~ $pattern;
             $self->{_names}->{$1} = 1;
         }
     }
@@ -69,9 +70,10 @@ sub _version {
     if($response->is_success()) {
         my $major;
         my $parser = HTML::TokeParser->new(\$response->content());
+        my $pattern = qr/^([.\d]+)\/$/;
         while (my $token = $parser->get_tag('a')) {
             my $href = $token->[1]->{href};
-            next unless $href =~ /^([.\d]+)\/$/o;
+            next unless $href =~ $pattern;
             $major = $1;
         }
         return unless $major;
@@ -79,9 +81,10 @@ sub _version {
         $response = $self->{_agent}->get("$self->{_url}/$name/$major/");
         if($response->is_success()) {
             $parser = HTML::TokeParser->new(\$response->content());
+            $pattern = qr/^LATEST-IS-([.\d]+)$/;
             while (my $token = $parser->get_tag('a')) {
                 my $href = $token->[1]->{href};
-                next unless $href =~ /^LATEST-IS-([.\d]+)$/o;
+                next unless $href =~ $pattern;
                 return $1;
             }
         }

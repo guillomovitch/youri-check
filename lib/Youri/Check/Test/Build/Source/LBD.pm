@@ -35,7 +35,6 @@ my @status = qw/
     unpackaged_files
 /;
 
-my $package_pattern = '^(\S+)-([^-]+)-([^-]+)(?:\.gz)?$';
 
 =head1 CLASS METHODS
 
@@ -105,9 +104,10 @@ sub _init {
                     print $response->status_line() . "\n" if $self->{_verbose} > 1;
                     if ($response->is_success()) {
                         my $parser = HTML::TokeParser->new(\$response->content());
+                        my $pattern = qr/^(\S+)-([^-]+)-([^-]+)(?:\.gz)?$/;
                         while (my $token = $parser->get_tag('a')) {
                             my $href = $token->[1]->{href};
-                            next unless $href =~ /$package_pattern/o;
+                            next unless $href =~ $pattern;
                             my $name    = $1;
                             my $version = $2;
                             my $release = $3;
@@ -151,9 +151,10 @@ sub fails {
             print $response->status_line() . "\n" if $self->{_verbose} > 1;
             if ($response->is_success()) {
                 my $parser = HTML::TokeParser->new(\$response->content());
+                my $pattern = qr/^$name-$version-$release(?:\.gz)?$/;
                 while (my $token = $parser->get_tag('a')) {
                     my $href = $token->[1]->{href};
-                    next unless $href =~ /^$name-$version-$release(?:\.gz)?$/o;
+                    next unless $href =~ $pattern;
                     my $result;
                     $result->{status} = $status;
                     $result->{url}    = $url . '/' . $href;

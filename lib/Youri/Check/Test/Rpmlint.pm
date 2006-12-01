@@ -125,6 +125,7 @@ sub run {
         ' 2>/dev/null';
 
     open(my $input, '-|', $command) or croak "Can't run $command: $!";
+    my $pattern = qr/^([EW]): (\S+) (.+)$/;
 
     # results for each packages will be given consecutively
     # keeping track of previous package should allow to spare
@@ -132,7 +133,7 @@ sub run {
     my $last_name;
     my $last_package;
     while (my $line = <$input>) {
-        next unless $line =~ /^([EW]): (\S+) (.+)$/o;
+        next unless $line =~ $pattern;
         my $level = $1;
         my $name  = $2;
         my $error = $3;

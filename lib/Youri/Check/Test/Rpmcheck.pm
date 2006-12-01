@@ -125,8 +125,22 @@ sub run {
         $command .= " -base $self->{_hdlists}/$allowed_id";
     }
     open(my $input, '-|', $command) or croak "Can't run $command: $!";
+    my $package_pattern = qr/^
+        (\S+) \s
+        \(= \s \S+\):
+        \s FAILED
+        $/x;
+    my $reason_pattern  = qr/^
+        \s+
+        \S+ \s
+        \([^)]+\) \s
+        (depends \s on|conflicts \s with) \s
+        (\S+ (?:\s \([^)]+\))?) \s
+        \{([^}]+)\}
+        (?: \s on \s file \s \S+)?
+        $/x;
     PACKAGE: while (my $line = <$input>) {
-        if ($line !~ /^(\S+) \(= \S+\): FAILED$/o) {
+        if ($line !~ $package_pattern) {
             warn "$line doesn't conform to expected format";
             next PACKAGE;
         }
@@ -137,14 +151,7 @@ sub run {
         $line = <$input>;
         # read first reason
         $line = <$input>;
-        if ($line !~ /^ \s+
-            \S+ \s
-            \([^)]+\) \s
-            (depends \s on|conflicts \s with) \s
-            (\S+ (?:\s \([^)]+\))?) \s
-            \{([^}]+)\}
-            (?: \s on \s file \s \S+)?
-            $/xo) {
+        if ($line !~ $reason_pattern) {
             warn "$line doesn't conform to expected format";
             next PACKAGE;
         }
@@ -173,18 +180,11 @@ sub run {
             # exhaust indirect reasons
             while ($line && $status ne 'NOT AVAILABLE') {
                 $line = <$input>;
-                if ($line !~ /^ \s+
-                    \S+ \s
-                    \([^)]+\) \s
-                    (?:depends \s on \s|conflicts \s with \s)
-                    \S+ (?:\s \([^)]+\))? \s
-                    \{([^}]+)\}
-                    (?: \s on \s file \s \S+)?
-                    $/xo) {
+                if ($line !~ $reason_pattern) {
                     warn "$line doesn't conform to expected format";
                     next REASON;
                 }
-                $status = $1;
+                $status = $3;
             }
         }
     }
