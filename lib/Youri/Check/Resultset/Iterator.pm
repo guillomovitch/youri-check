@@ -1,4 +1,4 @@
-# $Id: Base.pm 483 2005-08-01 21:39:05Z guillomovitch $
+# $Id$
 package Youri::Check::Resultset::Iterator;
 
 =head1 INSTANCE METHODS

@@ -1,4 +1,4 @@
-# $Id: Text.pm 523 2005-10-11 08:36:49Z misc $
+# $Id$
 package Youri::Check::Report::File;
 
 =head1 NAME

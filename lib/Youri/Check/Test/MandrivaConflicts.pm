@@ -1,4 +1,4 @@
-# $Id: Conflicts.pm 533 2005-10-20 07:08:03Z guillomovitch $
+# $Id$
 package Youri::Check::Test::MandrivaConflicts;
 
 =head1 NAME

@@ -1,4 +1,4 @@
-# $Id: Rpmlint.pm 567 2005-12-12 21:24:56Z guillomovitch $
+# $Id$
 package Youri::Check::Test::Signature;
 
 =head1 NAME

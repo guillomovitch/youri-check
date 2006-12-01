@@ -1,4 +1,4 @@
-# $Id: Result.pm 485 2005-08-01 21:48:21Z guillomovitch $
+# $Id$
 package Youri::Check::Resultset::DBI;
 
 =head1 NAME

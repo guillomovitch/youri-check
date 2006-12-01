@@ -1,4 +1,4 @@
-# $Id: Mail.pm 580 2006-01-11 22:59:36Z guillomovitch $
+# $Id$
 package Youri::Check::Report::Mail::Format::HTML;
 
 =head1 NAME

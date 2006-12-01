@@ -1,4 +1,4 @@
-# $Id: /local/youri/soft/trunk/lib/Youri/Check/Output.pm 1442 2006-04-11T20:35:09.765140Z guillomovitch  $
+# $Id$
 package Youri::Check::Descriptor::Row;
 
 =head1 NAME

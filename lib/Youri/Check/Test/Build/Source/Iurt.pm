@@ -1,4 +1,4 @@
-# $Id: LBD.pm 574 2005-12-27 14:31:16Z guillomovitch $
+# $Id$
 package Youri::Check::Test::Build::Source::Iurt;
 
 =head1 NAME

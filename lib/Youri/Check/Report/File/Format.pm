@@ -1,4 +1,4 @@
-# $Id: Base.pm 579 2006-01-09 21:17:54Z guillomovitch $
+# $Id$
 package Youri::Check::Report::File::Format;
 
 =head1 NAME
