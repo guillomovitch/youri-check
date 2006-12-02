@@ -17,6 +17,7 @@ use Carp;
 use Youri::Utils;
 use Youri::Check::Descriptor::Row;
 use Youri::Check::Descriptor::Cell;
+use base qw/Youri::Check::Plugin/;
 
 use constant WARNING => 'warning';
 use constant ERROR => 'error';
@@ -71,19 +72,6 @@ sub _init {
 }
 
 =head1 INSTANCE METHODS
-
-=head2 get_id()
-
-Returns plugin identity.
-
-=cut
-
-sub get_id {
-    my ($self) = @_;
-    croak "Not a class method" unless ref $self;
-
-    return $self->{_id};
-}
 
 =head2 prepare(@medias)
 
