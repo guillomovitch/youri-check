@@ -178,7 +178,7 @@ sub run {
             });
 
             # exhaust indirect reasons
-            while ($line && $status ne 'NOT AVAILABLE') {
+            REASON: while ($line && $status ne 'NOT AVAILABLE') {
                 $line = <$input>;
                 if ($line !~ $reason_pattern) {
                     warn "$line doesn't conform to expected format";
