@@ -117,13 +117,12 @@ sub run {
     $media->traverse_headers($index);
 
     # then run rpmcheck
-    my $command =
-        "zcat " . $media->get_hdlist() . " 2>/dev/null |" .
-        "$self->{_path} -explain -failures 2>/dev/null";
+    my $command = "$self->{_path} -explain -failures";
     my $allowed_ids = $media->get_option($self->{_id}, 'allowed');
     foreach my $allowed_id (@{$allowed_ids}) {
         $command .= " -base $self->{_hdlists}/$allowed_id";
     }
+    $command .= " <$self->{_hdlists}/" . $media->get_id() . " 2>/dev/null";
     open(my $input, '-|', $command) or croak "Can't run $command: $!";
     my $package_pattern = qr/^
         (\S+) \s
