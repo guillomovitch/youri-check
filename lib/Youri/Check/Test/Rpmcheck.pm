@@ -141,7 +141,7 @@ sub run {
         (depends \s on|conflicts \s with) \s
         (\S+ (?:\s \([^)]+\))?) \s
         \{([^}]+)\}
-        (?: \s on \s file \s \S+)?
+        (?: \s on \s file \s (\S+))?
         $/x;
     PACKAGE: while (my $line = <$input>) {
         if ($line !~ $package_pattern) {
@@ -162,35 +162,41 @@ sub run {
         my $problem = $1;
         my $dependency = $2;
         my $status = $3;
-        if ($status eq 'NOT AVAILABLE') {
-            # an direct dependency is missing
-            $resultset->add_result(
-                $self->{_id}, $media, $package, { 
-                arch    => $arch,
-                package => $name,
-                reason  => "$dependency is missing"
-            });
-        } else {
-            # a direct dependency is uninstallable
-            $resultset->add_result(
-                $self->{_id}, $media, $package, { 
-                arch    => $arch,
-                package => $name,
-                reason  => $problem eq 'depends on' ?
-                    "$dependency is not installable" :
-                    "conflict with $dependency"
-            });
+        my $file = $4;
 
-            # exhaust indirect reasons
-            REASON: while ($line && $status ne 'NOT AVAILABLE') {
-                $line = <$input>;
-                if ($line !~ $reason_pattern) {
-                    warn "$line doesn't conform to expected format";
-                    next REASON;
+        # find the exact problem reason
+        my $reason;
+        if ($problem eq 'depends on') {
+            if ($status eq 'NOT AVAILABLE') {
+                $reason = "$dependency is missing";
+            } else {
+                $reason = "$dependency is not installable";
+                # exhaust indirect reasons
+                REASON: while ($line 
+                    && $status ne 'NOT AVAILABLE'
+                    && $problem ne 'conflicts with'
+                ) {
+                    $line = <$input>;
+                    if ($line !~ $reason_pattern) {
+                        warn "$line doesn't conform to expected format";
+                        next REASON;
+                    }
+                    $problem = $1;
+                    $status = $3;
                 }
-                $status = $3;
             }
+        } else {
+            $reason = $file ?
+                "implicit conflict with $dependency on file $file" :
+                "explicit conflict with $dependency";
         }
+
+        $resultset->add_result(
+            $self->{_id}, $media, $package, { 
+            arch    => $arch,
+            package => $name,
+            reason  => $reason
+        });
     }
     close $input;
 }
