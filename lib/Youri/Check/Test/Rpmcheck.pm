@@ -119,10 +119,15 @@ sub run {
     # then run rpmcheck
     my $command = "$self->{_path} -explain -failures";
     my $allowed_ids = $media->get_option($self->{_id}, 'allowed');
+    my $id = $media->get_id();
     foreach my $allowed_id (@{$allowed_ids}) {
+        if ($allowed_id eq $id) {
+            carp "incorrect value in $self->{_id} allowed option for media $id: media self-reference";
+            next;
+        }
         $command .= " -base $self->{_hdlists}/$allowed_id";
     }
-    $command .= " <$self->{_hdlists}/" . $media->get_id() . " 2>/dev/null";
+    $command .= " <$self->{_hdlists}/$id 2>/dev/null";
     open(my $input, '-|', $command) or croak "Can't run $command: $!";
     my $package_pattern = qr/^
         (\S+) \s
