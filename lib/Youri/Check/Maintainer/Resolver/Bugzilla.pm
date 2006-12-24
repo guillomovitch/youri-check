@@ -52,26 +52,15 @@ Bugzilla database password.
 sub _init {
     my $self    = shift;
     my %options = (
-        host => '', # host of the bug database
-        base => '', # name of the bug database
-        user => '', # user of the bug database
-        pass => '', # pass of the bug database
+        lib     => undef,
+        project => undef,
         @_
     );
 
-    croak "No host given" unless $options{host};
-    croak "No base given" unless $options{base};
-    croak "No user given" unless $options{user};
-    croak "No pass given" unless $options{pass};
-
-    my $bugzilla = Youri::Bugzilla->new(
-        $options{host},
-        $options{base},
-        $options{user},
-        $options{pass}
+    $self->{_bugzilla} = Youri::Bugzilla->new(
+        $options{lib}     ? (lib     => $options{lib})     : (),
+        $options{project} ? (project => $options{project}) : (),
     );
-
-    $self->{_bugzilla} = $bugzilla;
 }
 
 sub get_maintainer {
