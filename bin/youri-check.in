@@ -11,7 +11,7 @@ Version 1.0
 
 =head1 SYNOPSIS
 
-youri-check [options] <mode>
+youri-check [options] <test|report>
 
 Options:
 
