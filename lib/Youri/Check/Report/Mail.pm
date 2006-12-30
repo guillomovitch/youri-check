@@ -27,7 +27,7 @@ sub _init {
         reply_to => '', # mail reply-to header
         mta      => '', # mta path
         noempty  => 1,  # don't generate empty reports
-        formats  => {},
+        formats  => undef,
         @_
     );
 
@@ -57,7 +57,7 @@ sub _init {
                 )
             );
         };
-        print STDERR "Failed to create format $id: $@\n" if $@;
+        carp "Failed to create format $id: $@\n" if $@;
     }
 
     croak "no formats created" unless @{$self->{_formats}};

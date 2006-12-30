@@ -53,7 +53,7 @@ sub _init {
                 )
             );
         };
-        print STDERR "Failed to create format $id: $@\n" if $@;
+        carp "Failed to create format $id: $@\n" if $@;
     }
 
     croak "no formats created" unless @{$self->{_formats}};
