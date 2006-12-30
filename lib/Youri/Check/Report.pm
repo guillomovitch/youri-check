@@ -107,9 +107,9 @@ sub run {
 
         my $test_filter = $test_config->{options}->{filter};
 
-
         if ($self->{_global}) {
-            print STDERR "generating global report for $test_id\n" if $self->{_verbose};
+            print "generating $test_id global report\n"
+                if $self->{_verbose};
             $self->_global_report(
                 $resultset,
                 $test_id,
@@ -120,8 +120,8 @@ sub run {
 
         if ($self->{_individual}) {
             foreach my $maintainer (@maintainers) {
-                print STDERR "generating individual report for $test_id and $maintainer\n" if $self->{_verbose};
-
+                print "generating $test_id individual report for $maintainer\n"
+                    if $self->{_verbose};
                 $self->_individual_report(
                     $resultset,
                     $test_id,

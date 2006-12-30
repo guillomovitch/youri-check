@@ -43,12 +43,12 @@ sub _init {
             push(
                 @{$self->{_formats}},
                 create_instance(
-                    'Youri::Check::Report::File::Format',
+                    'Youri::Check::Report::Format',
                     $format_conf,
                     {
-                        id        => $id,
-                        test      => $options{test},
-                        verbose   => $options{verbose},
+                        id      => $id,
+                        test    => $options{test},
+                        verbose => $options{verbose},
                     }
                 )
             );
@@ -120,10 +120,9 @@ sub _report {
     # initialisation
     foreach my $format (@{$self->{_formats}}) {
         $format->init_report(
-            $path,
-            $type,
             $title,
             $descriptor,
+            $type
         );
     }
 
@@ -134,56 +133,87 @@ sub _report {
             $result->{source_package} ne $results[0]->{source_package}
         ) {
             foreach my $format (@{$self->{_formats}}) {
-                $format->add_results(
-                    \@results,
-                    $descriptor,
-                );
+                $format->add_results(\@results);
             }
             @results = ();
         }
         push(@results, $result);
     }
 
-    # finalisation
+    my @extensions;
+    my $now = DateTime->now(time_zone => 'local');
+    my $footer = "Page generated the " . $now->ymd() . " at " . $now->hms();
     foreach my $format (@{$self->{_formats}}) {
-        if (@results) {
-            # last results
-            $format->add_results(
-                \@results,
-                $descriptor,
-            );
-        }
-        $format->finish_report();
+        $format->add_results(\@results) if @results;
+
+        $format->finish_report($footer);
+
+        my $extension = $format->get_extension();
+
+        $self->_write_file(
+            $path,
+            "$type.$extension",
+            $format->get_content()
+        );
+
+        push(@extensions, $extension);
     }
 
     # return list of file formats created
-    return
-        map { $_->extension() }
-        @{$self->{_formats}};
+    return @extensions;
 }
 
 sub _finish_report {
     my ($self, $types, $maintainers) = @_;
 
+    my $now = DateTime->now(time_zone => 'local');
+    my $footer = "Page generated the " . $now->ymd() . " at " . $now->hms();
     foreach my $format (@{$self->{_formats}}) {
         next unless $format->can('create_index');
-        print STDERR "writing global index page\n" if $self->{_verbose};
+        print "writing global index page\n" if $self->{_verbose};
         $format->create_index(
-            $self->{_to},
             "QA global report",
             $self->{_files}->{global},
             [ keys %{$self->{_files}->{maintainers}} ],
+            $footer
+        );
+
+        my $extension = $format->get_extension();
+        $self->_write_file(
+            $self->{_to},
+            "index.$extension",
+            $format->get_content()
         );
 
         foreach my $maintainer (@$maintainers) {
-            print STDERR "writing index page for $maintainer\n" if $self->{_verbose};
+            print "writing index page for $maintainer\n" if $self->{_verbose};
             $format->create_index(
-                "$self->{_to}/$maintainer",
                 "QA report for $maintainer",
                 $self->{_files}->{maintainers}->{$maintainer},
-                undef
+                undef,
+                $footer
+            );
+
+            $self->_write_file(
+                "$self->{_to}/$maintainer",
+                "index.$extension",
+                $format->get_content()
             );
         }
+    }
+}
+
+sub _write_file {
+    my ($self, $dir, $file, $content) = @_;
+
+    if ($self->{_test}) {
+        print STDOUT $$content;
+    } else {
+        mkpath($dir) unless -d $dir;
+        my $path = "$dir/$file";
+        open(my $out, '>', $path) or croak "Can't open file $path: $!";
+        print $out $$content;
+        close $out;
     }
 }
 

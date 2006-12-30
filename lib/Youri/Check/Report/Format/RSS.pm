@@ -1,14 +1,13 @@
 # $Id$
-package Youri::Check::Report::File::Format::RSS;
+package Youri::Check::Report::Format::RSS;
 
 =head1 NAME
 
-Youri::Check::Report::File::Format::RSS - File RSS format support
+Youri::Check::Report::Format::RSS - RSS format support
 
 =head1 DESCRIPTION
 
-This format plugin for L<Youri::Check::Report::File> provides RSS format
-support.
+This report format plugin provides RSS format support.
 
 =cut
 
@@ -16,35 +15,33 @@ use warnings;
 use strict;
 use Carp;
 use XML::RSS;
-use base 'Youri::Check::Report::File::Format';
+use base 'Youri::Check::Report::Format';
 
-sub extension {
+sub get_extension {
     return 'rss';
 }
 
 sub init_report {
-    my ($self, $path, $type, $title, $descriptor) = @_;
+    my ($self, $title, $descriptor, $type) = @_;
+    croak "Not a class method" unless ref $self;
 
-    my $rss = XML::RSS->new(version => '2.0');
-    $rss->channel(
+    $self->{_cell_values} =
+        map { $_->get_value() }
+        $descriptor->get_cells();
+    $self->{_type} = $type;
+
+    $self->{_rss} = XML::RSS->new(version => '2.0');
+    $self->{_rss}->channel(
         title       => $title,
         description => $title,
         language    => 'en',
         ttl         => 1440
     );
-
-    $self->{_rss} = $rss;
-    $self->{_type} = $type;
-    $self->open_output($path, $type . '.rss');
 }
 
 sub add_results {
-    my ($self, $results, $descriptor) = @_;
+    my ($self, $results) = @_;
     
-    my @cells_values =
-        map { $_->get_value() }
-        $descriptor->get_cells();
-
     foreach my $result (@{$results}) {
         if ($self->{_type} eq 'updates') {
             $self->{_rss}->add_item(
@@ -59,7 +56,7 @@ sub add_results {
                 title       => "[$self->{_type}] $result->{package}",
                 description => join(
                     "\n",
-                    (map { $result->{$_} || '' } @cells_values
+                    (map { $result->{$_} || '' } @{$self->{_cells_values}}
                     )),
                 link        => $result->{url},
                 guid        => "$self->{_type}-$result->{package}"
@@ -69,11 +66,10 @@ sub add_results {
 
 }
 
-sub finish_report {
+sub get_content {
     my ($self) = @_;
 
-    $self->{_out}->print($self->{_rss}->as_string());
-    $self->close_output();
+    return \$self->{_rss}->as_string();
 }
 
 

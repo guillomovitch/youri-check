@@ -1,14 +1,14 @@
 # $Id$
-package Youri::Check::Report::Mail::Format;
+package Youri::Check::Report::Format;
 
 =head1 NAME
 
-Youri::Check::Report::Mail::Format - Abstract mail format support
+Youri::Check::Report::Format - Abstract format support
 
 =head1 DESCRIPTION
 
 This abstract class defines the format support interface for
-L<Youri::Check::Report::Mail>.
+L<Youri::Check::Report::File>.
 
 =cut
 
@@ -53,6 +53,19 @@ sub get_id {
     croak "Not a class method" unless ref $self;
 
     return $self->{_id};
+}
+
+sub get_content {
+    my ($self) = @_;
+    croak "Not a class method" unless ref $self;
+
+    return \$self->{_content};
+}
+
+sub init_report {
+}
+
+sub finish_report {
 }
 
 =head1 COPYRIGHT AND LICENSE
