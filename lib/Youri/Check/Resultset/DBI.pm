@@ -367,6 +367,11 @@ sub get_result {
         $self->{_sth}->fetchrow_hashref();
 }
 
+sub DESTROY {
+    my ($self) = @_;
+    $self->{_sth}->finish();
+}
+
 =head1 COPYRIGHT AND LICENSE
 
 Copyright (C) 2002-2006, YOURI project
