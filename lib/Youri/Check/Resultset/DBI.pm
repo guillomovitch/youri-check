@@ -21,10 +21,10 @@ use base 'Youri::Check::Resultset';
 
 my %tables = (
     source_packages => {
-        id         => 'SERIAL PRIMARY KEY',
-        name       => 'TEXT',
-        media      => 'TEXT',
-        maintainer => 'TEXT',
+        id         => 'key',
+        name       => 'text',
+        media      => 'text',
+        maintainer => 'text',
     }
 );
 
@@ -147,12 +147,26 @@ sub _get_columns {
 sub _create_table {
     my ($self, $name, $fields) = @_;
 
-    my $query = "CREATE TABLE $name (" .
-        join(',',
-            map { "$_ $fields->{$_}" }
-            keys %$fields
-        ) .
-        ")";
+    my @fields;
+    while (my ($name, $type) = each %$fields) {
+        my $field = $name;
+        if ($type eq 'key') {
+            if ($self->{_dbh}->{Driver}->{Name} eq 'SQLite') {
+                $field .= ' INTEGER';
+            } else { 
+                $field .= ' SERIAL';
+            }
+            $field .= ' PRIMARY KEY';
+        } elsif ($type eq 'keyref') {
+            $field .= ' INTEGER';
+        } elsif ($type eq 'text') {
+            $field .= ' TEXT';
+        } else {
+            croak "Unknown field type $type";
+        }
+        push(@fields, $field);
+    }
+    my $query = "CREATE TABLE $name (" .  join(',', @fields) .  ")";
     $self->{_dbh}->do($query);
 }
 
@@ -169,8 +183,8 @@ sub add_result {
     unless ($sth) {
         my @fields = keys %$values;
         $self->_create_table($type, {
-            'source_package_id' => 'INT',
-            map { $_ => 'TEXT' } @fields
+            'source_package_id' => 'keyref',
+            map { $_ => 'text' } @fields
         });
         my $query = "INSERT INTO $type (" .
            join(',', 'source_package_id', @fields) .
