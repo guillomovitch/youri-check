@@ -211,7 +211,7 @@ sub is_newer {
     # One is a large number (like date or revision) and the other one not, or
     # has different length
     if (($v1 =~ /^\d{3,}$/ || $v2 =~ /^\d{3,}$/) 
-       && (join('0',split(/\d/, $v1."X")) ne join('0',split(/\d/, $v2."X")))) { 
+       && (join('0',split(/\d/, $v1."X")) ne join('0',split(/\d/, $v2."X")))) {
       carp "strange : $v1 vs $v2";
       return 0;
     }
@@ -230,6 +230,11 @@ sub is_newer {
         for my $i (0 .. $#v1) {
           $v1[$i] ||= 0;
           $v2[$i] ||= 0;
+          # Reject too much different numbers, usually a strange numbering
+	  if (abs(length($v1[$i])-length($v2[$i]))>1) {
+            carp "strange : $v1 vs $v2";
+            return 0;
+          }   
           return 1 if $v1[$i] > $v2[$i];
           return 0 if $v1[$i] < $v2[$i];
         }
