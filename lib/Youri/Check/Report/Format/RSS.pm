@@ -45,21 +45,21 @@ sub add_results {
     foreach my $result (@{$results}) {
         if ($self->{_type} eq 'updates') {
             $self->{_rss}->add_item(
-                title       => "$result->{package} $result->{available} is available",
+                title       => "$result->{source_package} $result->{available} is available",
                 description => "Current version is $result->{current}",
                 link        => $result->{url} ?
                     $result->{url} : $result->{source},
-                guid => "$result->{package}-$result->{available}"
+                guid => "$result->{source_package}-$result->{available}"
             );
         } else {
             $self->{_rss}->add_item(
-                title       => "[$self->{_type}] $result->{package}",
+                title       => "[$self->{_type}] $result->{source_package}",
                 description => join(
                     "\n",
                     (map { $result->{$_} || '' } @{$self->{_cells_values}}
                     )),
                 link        => $result->{url},
-                guid        => "$self->{_type}-$result->{package}"
+                guid        => "$self->{_type}-$result->{source_package}"
             );
         }
     }
