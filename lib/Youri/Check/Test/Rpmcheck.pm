@@ -143,9 +143,11 @@ sub run {
         \{([^}]+)\}
         (?: \s on \s file \s (\S+))?
         $/x;
-    PACKAGE: while (my $line = <$input>) {
+    my $line;
+    PACKAGE: while ($line = <$input>) {
         if ($line !~ $package_pattern) {
-            warn "$line doesn't conform to expected format";
+            chomp $line;
+            warn "'$line' doesn't conform to expected format";
             next PACKAGE;
         }
         my $name = $1;
@@ -153,50 +155,56 @@ sub run {
         my $arch = $package->get_arch();
         # skip next line
         $line = <$input>;
-        # read first reason
-        $line = <$input>;
-        if ($line !~ $reason_pattern) {
-            warn "$line doesn't conform to expected format";
-            next PACKAGE;
-        }
-        my $problem = $1;
-        my $dependency = $2;
-        my $status = $3;
-        my $file = $4;
-
-        # find the exact problem reason
-        my $reason;
-        if ($problem eq 'depends on') {
-            if ($status eq 'NOT AVAILABLE') {
-                $reason = "$dependency is missing";
+        # fetch all reasons
+        my @reasons;
+        REASON: while ($line = <$input>) {
+            if ($line =~ /^\s+/) {
+                push(@reasons, $line);
             } else {
-                $reason = "$dependency is not installable";
-                # exhaust indirect reasons
-                REASON: while ($line 
-                    && $status ne 'NOT AVAILABLE'
-                    && $problem ne 'conflicts with'
-                ) {
-                    $line = <$input>;
-                    if ($line !~ $reason_pattern) {
-                        warn "$line doesn't conform to expected format";
-                        next REASON;
-                    }
-                    $problem = $1;
-                    $status = $3;
-                }
+                last REASON;
             }
-        } else {
-            $reason = $file ?
-                "implicit conflict with $dependency on file $file" :
-                "explicit conflict with $dependency";
         }
 
-        $resultset->add_result(
-            $self->{_id}, $media, $package, { 
-            arch    => $arch,
-            package => $name,
-            reason  => $reason
-        });
+        # check first reason
+        if ($reasons[0] !~ $reason_pattern) {
+            chomp $reasons[0];
+            warn "'$reasons[0]' doesn't conform to expected format, skipping";
+        } else {
+            my $problem = $1;
+            my $dependency = $2;
+            my $status = $3;
+            my $file = $4;
+
+            # analyse problem
+            my $reason;
+            if ($problem eq 'depends on') {
+                if ($status eq 'NOT AVAILABLE') {
+                    $reason = "$dependency is missing";
+                } else {
+                    $reason = "$dependency is not installable";
+                    if ($reasons[-1] !~ $reason_pattern) {
+                        warn "$reasons[-1] doesn't conform to expected format";
+                    } else {
+                        $problem = $1;
+                        $status = $3;
+                    }
+                }
+            } else {
+                $reason = $file ?
+                    "implicit conflict with $dependency on file $file" :
+                    "explicit conflict with $dependency";
+            }
+
+            $resultset->add_result(
+                $self->{_id}, $media, $package, { 
+                arch    => $arch,
+                package => $name,
+                reason  => $reason
+            });
+        }
+
+        # restart loop
+        redo PACKAGE if $line;
     }
     close $input;
 }
