@@ -77,7 +77,7 @@ sub _global_report {
         $descriptor,
         $type,
         "$type global report",
-        $self->{_to},
+        $self->{_to}
     );
 }
 
@@ -98,7 +98,7 @@ sub _individual_report {
         $descriptor,
         $type,
         "$type individual report for $maintainer",
-        $self->{_to},
+        $maintainer
     );
 
 }
