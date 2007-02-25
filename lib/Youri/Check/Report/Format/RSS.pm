@@ -49,7 +49,13 @@ sub add_results {
                 description => "Current version is $result->{current}",
                 link        => $result->{url} ?
                     $result->{url} : $result->{source},
-                guid => "$result->{source_package}-$result->{available}"
+                guid => "youri-updates-$result->{source_package}-$result->{available}"
+            );
+        } elsif ($self->{_type} eq 'age') {
+           $self->{_rss}->add_item(
+                title       => "$result->{source_package} ($result->{arch}) is too old",
+                description => "The package was not rebuilt since $result->{buildtime}",
+                guid => "youri-age-$result->{source_package}-$result->{buildtime}"
             );
         } else {
             $self->{_rss}->add_item(
@@ -59,7 +65,7 @@ sub add_results {
                     (map { $result->{$_} || '' } @{$self->{_cells_values}}
                     )),
                 link        => $result->{url},
-                guid        => "$self->{_type}-$result->{source_package}"
+                guid        => "youri-$self->{_type}-$result->{source_package}"
             );
         }
     }
@@ -75,7 +81,7 @@ sub get_content {
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2002-2006, YOURI project
+Copyright (C) 2002-2007, YOURI project
 
 This program is free software; you can redistribute it and/or modify it under the same terms as Perl itself.
 
