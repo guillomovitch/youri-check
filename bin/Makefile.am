@@ -1,8 +1,7 @@
 bin_SCRIPTS = youri-check
 man1_MANS   = youri-check.1
 
-CLEANFILES = youri-check \
-	     youri-check.1
+CLEANFILES = $(bin_SCRIPTS) $(man1_MANS)
 EXTRA_DIST = youri-check.in
 
 youri-check: youri-check.in
