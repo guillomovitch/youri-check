@@ -16,7 +16,7 @@ It uses Bugzilla SQL database for resolving maintainers.
 use warnings;
 use strict;
 use Carp;
-use Youri::Bugzilla;
+use Youri::BTS::Bugzilla;
 use base 'Youri::Check::Maintainer::Resolver';
 
 =head1 CLASS METHODS
