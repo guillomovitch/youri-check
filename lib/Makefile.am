@@ -1,5 +1,3 @@
-perllibdir = $(pkgdatadir)/lib
-
 nobase_perllib_DATA = Youri/Check/Test/Build/Source/LBD.pm \
 		      Youri/Check/Test/Build/Source/Iurt.pm \
 		      Youri/Check/Test/Build/Source.pm \
