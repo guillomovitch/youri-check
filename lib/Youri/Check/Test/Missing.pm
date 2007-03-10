@@ -136,7 +136,7 @@ sub run {
                 if ($class->compare_revisions($src_revision, $bin_revision) > 0) {
                     # binary package is obsolete
                     $resultset->add_result($self->{_id}, $media, $package, {
-                        component => $package->get_name(),
+                        package   => $package->get_name(),
                         arch      => $package->get_arch(),
                         revision  => $bin_revision,
                         error     => "Obsolete binaries (source $src_revision found)",
@@ -144,7 +144,7 @@ sub run {
                 } else {
                     # source package is obsolete
                     $resultset->add_result($self->{_id}, $media, $package, {
-                        component => $package->get_canonical_name(),
+                        package   => $package->get_canonical_name(),
                         arch      => 'src',
                         revision  => $src_revision,
                         error     => "Obsolete source (binaries $bin_revision found)",
@@ -153,7 +153,7 @@ sub run {
             }
         } else {
             $resultset->add_result($self->{_id}, $media, $package, {
-                component => $package->get_name(),
+                package   => $package->get_name(),
                 arch      => $package->get_arch(),
                 revision  => $bin_revision,
                 error     => "Missing source package",
