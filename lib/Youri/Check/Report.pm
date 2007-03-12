@@ -119,13 +119,17 @@ sub run {
         }
 
         if ($self->{_individual}) {
+            # remove redundant columns from descriptor
+            my $test_descriptor_light = $test_descriptor->clone();
+            $test_descriptor_light->drop_cell('maintainer');
+
             foreach my $maintainer (@maintainers) {
                 print "generating $test_id individual report for $maintainer\n"
                     if $self->{_verbose};
                 $self->_individual_report(
                     $resultset,
                     $test_id,
-                    $test_descriptor,
+                    $test_descriptor_light,
                     $test_filter,
                     $maintainer,
                 );
