@@ -50,6 +50,21 @@ sub clone {
     );
 }
 
+sub drop_cell {
+    my ($self, $name) = @_;
+    croak "Not a class method" unless ref $self;
+
+    my $found;
+    for my $i (0 .. $#{$self->{_cells}}) {
+        next unless $self->{_cells}->[$i]->get_name() eq $name;
+        splice @{$self->{_cells}}, $i, 1;
+        $found = 1;
+        last;
+    }
+
+    warn "No such cell $name" unless $found;
+}
+
 sub get_cells {
     my ($self) = @_;
     croak "Not a class method" unless ref $self;
