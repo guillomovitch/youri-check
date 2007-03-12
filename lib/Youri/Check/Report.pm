@@ -119,7 +119,9 @@ sub run {
         }
 
         if ($self->{_individual}) {
-            # remove redundant columns from descriptor
+            # skip non-relevant tests
+            next unless $test_descriptor->has_cell('maintainer');
+            # remove redundant columns
             my $test_descriptor_light = $test_descriptor->clone();
             $test_descriptor_light->drop_cell('maintainer');
 
