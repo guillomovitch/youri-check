@@ -33,6 +33,7 @@ sub new {
 
     my $self = bless {
         _cells => $options{cells},
+        _index => { map { $_->get_name() => 1 } @{$options{cells}} }
     }, $class;
 
     return $self;
@@ -50,19 +51,25 @@ sub clone {
     );
 }
 
+sub has_cell {
+    my ($self, $name) = @_;
+    croak "Not a class method" unless ref $self;
+    return $self->{_index}->{$name};
+}
+
 sub drop_cell {
     my ($self, $name) = @_;
     croak "Not a class method" unless ref $self;
 
-    my $found;
-    for my $i (0 .. $#{$self->{_cells}}) {
-        next unless $self->{_cells}->[$i]->get_name() eq $name;
-        splice @{$self->{_cells}}, $i, 1;
-        $found = 1;
-        last;
+    if ($self->{_index}->{$name}) {
+        delete $self->{_index}->{$name};
+        $self->{_cells} = [
+            grep { $_->get_name() ne $name }
+            @{$self->{_cells}}
+        ];
+    } else {
+        warn "No such cell $name";
     }
-
-    warn "No such cell $name" unless $found;
 }
 
 sub get_cells {
