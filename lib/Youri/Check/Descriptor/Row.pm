@@ -38,6 +38,18 @@ sub new {
     return $self;
 }
 
+sub clone {
+    my ($self) = @_;
+    my $class = ref $self;
+    croak "Not a class method" unless $class;
+
+    my $clone = $class->new(
+        cells => [ 
+            map { $_->clone() } @{$self->{_cells}}
+        ]
+    );
+}
+
 sub get_cells {
     my ($self) = @_;
     croak "Not a class method" unless ref $self;

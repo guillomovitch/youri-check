@@ -48,6 +48,20 @@ sub new {
     return $self;
 }
 
+sub clone {
+    my ($self) = @_;
+    my $class = ref $self;
+    croak "Not a class method" unless $class;
+
+    return $class->new(
+        name        => $self->{_name},
+        description => $self->{_description},
+        mergeable   => $self->{_mergeable},
+        value       => $self->{_value},
+        type        => $self->{_type},
+    );
+}
+
 sub get_name {
     my ($self) = @_;
     croak "Not a class method" unless ref $self;
