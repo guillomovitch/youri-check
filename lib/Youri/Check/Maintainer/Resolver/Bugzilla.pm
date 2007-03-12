@@ -57,7 +57,7 @@ sub _init {
         @_
     );
 
-    $self->{_bugzilla} = Youri::Bugzilla->new(
+    $self->{_bugzilla} = Youri::BTS::Bugzilla->new(
         $options{lib}     ? (lib     => $options{lib})     : (),
         $options{project} ? (project => $options{project}) : (),
     );
