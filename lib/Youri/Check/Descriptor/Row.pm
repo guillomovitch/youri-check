@@ -43,7 +43,7 @@ sub clone {
     my $class = ref $self;
     croak "Not a class method" unless $class;
 
-    my $clone = $class->new(
+    return $class->new(
         cells => [ 
             map { $_->clone() } @{$self->{_cells}}
         ]
