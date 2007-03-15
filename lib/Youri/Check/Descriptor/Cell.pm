@@ -59,6 +59,8 @@ sub clone {
         mergeable   => $self->{_mergeable},
         value       => $self->{_value},
         type        => $self->{_type},
+        link        => $self->{_link},
+        mergeable   => $self->{_mergeable},
     );
 }
 
