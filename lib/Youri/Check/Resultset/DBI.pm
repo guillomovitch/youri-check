@@ -196,7 +196,7 @@ sub add_result {
     }
 
     print "adding result for type $type and package $package\n"
-        if $self->{_verbose} > 0;
+        if $self->{_verbose} > 1;
 
     $sth->execute(
         $self->_get_source_package_id(
