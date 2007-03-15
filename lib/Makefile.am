@@ -42,59 +42,18 @@ nobase_perllib_DATA = Youri/Check/Test/Build/Source/LBD.pm \
 		      Youri/Check/Descriptor/Row.pm \
 		      Youri/Check/Descriptor/Cell.pm
 
-noinst_man3_MANS = Youri/Check/Test/Build/Source/LBD.3pm \
-	    Youri/Check/Test/Build/Source/Iurt.3pm \
-	    Youri/Check/Test/Build/Source.3pm \
-	    Youri/Check/Test/Conflicts.3pm \
-	    Youri/Check/Test/Rpmlint.3pm \
-	    Youri/Check/Test/Updates.3pm \
-	    Youri/Check/Test/Dependencies.3pm \
-	    Youri/Check/Test/MandrivaConflicts.3pm \
-	    Youri/Check/Test/Missing.3pm \
-	    Youri/Check/Test/Orphans.3pm \
-	    Youri/Check/Test/Updates/Source/GNOME.3pm \
-	    Youri/Check/Test/Updates/Source/Gentoo.3pm \
-	    Youri/Check/Test/Updates/Source/Freshmeat.3pm \
-	    Youri/Check/Test/Updates/Source/NetBSD.3pm \
-	    Youri/Check/Test/Updates/Source/Fedora.3pm \
-	    Youri/Check/Test/Updates/Source/CPAN.3pm \
-	    Youri/Check/Test/Updates/Source/Debian.3pm \
-	    Youri/Check/Test/Updates/Source/RAA.3pm \
-	    Youri/Check/Test/Updates/Source/Sourceforge.3pm \
-	    Youri/Check/Test/Updates/Source.3pm \
- 	    Youri/Check/Test/Age.3pm \
- 	    Youri/Check/Test/Rpmcheck.3pm \
-	    Youri/Check/Test/Build.3pm \
-	    Youri/Check/Test/Signature.3pm \
-	    Youri/Check/Resultset.3pm \
-	    Youri/Check/Report.3pm \
-	    Youri/Check/Test.3pm \
-	    Youri/Check/Plugin.3pm \
-	    Youri/Check/Maintainer/Preferences/File.3pm \
-	    Youri/Check/Maintainer/Resolver/Bugzilla.3pm \
-	    Youri/Check/Maintainer/Resolver/CGI.3pm \
-	    Youri/Check/Maintainer/Preferences.3pm \
-	    Youri/Check/Maintainer/Resolver.3pm \
-	    Youri/Check/Resultset/Iterator.3pm \
-	    Youri/Check/Resultset/DBI.3pm \
-	    Youri/Check/Report/File.3pm \
-	    Youri/Check/Report/Mail.3pm \
-	    Youri/Check/Report/Format.3pm \
-	    Youri/Check/Report/Format/HTML.3pm \
-	    Youri/Check/Report/Format/Text.3pm \
-	    Youri/Check/Report/Format/RSS.3pm \
-	    Youri/Check/Descriptor/Row.3pm \
-	    Youri/Check/Descriptor/Cell.3pm
-
-CLEANFILES = $(noinst_man3_MANS)
-
 EXTRA_DIST = $(nobase_perllib_DATA)
 
-.pm.3pm:
-	$(POD2MAN) $< > $@
-
 install-hook:
-	for page in $(noinst_man3_MANS); do \
-	    $(INSTALL) -m 644 $$page \
-	        $(DESTDIR)$(mandir)/man3/`echo $$page | sed -e 's/\//::/g'`; \
+	$(INSTALL) -d -m 755 $(DESTDIR)$(mandir)/man3
+	for file in $(nobase_perllib_DATA); do \
+	    page=`echo $$file | sed -e 's/\//::/g' -e 's/\.pm$$/.3pm/'`; \
+	    $(POD2MAN) --section=3 $(srcdir)/$$file \
+	        $(DESTDIR)$(mandir)/man3/$$page; \
+	done
+
+uninstall-hook:
+	for file in $(nobase_perllib_DATA); do \
+	    page=`echo $$file | sed -e 's/\//::/g' -e 's/\.pm$$/.3pm/'`; \
+	    rm -f $(DESTDIR)$(mandir)/man3/$$page; \
 	done
