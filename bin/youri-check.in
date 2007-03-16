@@ -150,13 +150,13 @@ use Youri::Config;
 use Youri::Utils;
 use Pod::Usage;
 use Net::Config qw/%NetConfig/;
-use DateTime;
 
 my $config = Youri::Config->new(
     args => {
         'skip-test'   => '=s@',
         'skip-report' => '=s@',
         'skip-media'  => '=s@',
+        'timestamp'   => '!',
         'parallel'    => '|p!',
         'test'        => '|t!',
         'list'        => '|l!'
@@ -190,9 +190,10 @@ pod2usage(
 my $mode = $ARGV[0];
 
 # convenient global flags
-my $test     = $config->get_arg('test');
-my $verbose  = $config->get_arg('verbose');
-my $parallel = $config->get_arg('parallel');
+my $test      = $config->get_arg('test');
+my $verbose   = $config->get_arg('verbose');
+my $timestamp = $config->get_arg('timestamp');
+my $parallel  = $config->get_arg('parallel');
 
 # libnet configuration
 my $netconfig_conf = $config->get_param('netconfig');
@@ -204,7 +205,7 @@ if ($netconfig_conf) {
 my $resultset_conf = $config->get_param('resultset');
 die "No resultset defined" unless $resultset_conf;
 
-report("Creating resultset");
+log_message("Creating resultset", $timestamp, $parallel);
 my $resultset = create_instance(
     'Youri::Check::Resultset',
     $resultset_conf,
@@ -224,7 +225,7 @@ if ($mode eq 'test') {
     my $resolver;
     my $resolver_conf = $config->get_param('resolver');
     if ($resolver_conf) {
-        report("Creating maintainer resolver");
+        log_message("Creating maintainer resolver", $timestamp, $parallel);
         eval {
             $resolver = create_instance(
                 'Youri::Check::Maintainer::Resolver',
@@ -241,7 +242,7 @@ if ($mode eq 'test') {
     my $preferences;
     my $preferences_conf = $config->get_param('preferences');
     if ($preferences_conf) {
-        report("Creating maintainer preferences");
+        log_message("Creating maintainer preferences", $timestamp, $parallel);
         eval {
             $preferences = create_instance(
                 'Youri::Check::Maintainer::Preferences',
@@ -260,7 +261,7 @@ if ($mode eq 'test') {
     my %skip_media = $skip_media ?  map { $_ => 1 } @{$skip_media} : ();
     foreach my $id (keys %{$config->get_param('medias')}) {
         next if $skip_media{$id};
-        report("Creating media $id");
+        log_message("Creating media $id", $timestamp, $parallel);
         my $media_conf = $config->get_param('medias')->{$id};
         eval {
             push(
@@ -287,7 +288,7 @@ if ($mode eq 'test') {
     my %skip_test = $skip_test ?  map { $_ => 1 } @{$skip_test} : ();
     foreach my $id (keys %{$config->get_param('tests')}) {
         next if $skip_test{$id};
-        report("Creating test $id");
+        log_message("Creating test $id", $timestamp, $parallel);
         my $test;
         my $test_conf = $config->get_param('tests')->{$id};
         eval {
@@ -315,7 +316,7 @@ if ($mode eq 'test') {
                     $children++;
                     next;
                 } else {
-                    report("Forking child process $id");
+                    log_message("Forking child process $id", $timestamp, $parallel);
                 }
             }
             eval {
@@ -332,7 +333,7 @@ if ($mode eq 'test') {
                 foreach my $media (@medias) {
                     next if $media->skip_test($id);
                     my $media_id = $media->get_id();
-                    report("running test $id on media $media_id");
+                    log_message("running test $id on media $media_id", $timestamp, $parallel);
                     eval {
                         $test->run($media, $resultset);
                     };
@@ -343,7 +344,7 @@ if ($mode eq 'test') {
             }
             if ($parallel) {
                 # child process
-                report("Finishing child process $id");
+                log_message("Finishing child process $id", $timestamp, $parallel);
                 exit;
             }
         }
@@ -355,7 +356,7 @@ if ($mode eq 'test') {
     my %skip_report = $skip_report ?  map { $_ => 1 } @{$skip_report} : ();
     foreach my $id (keys %{$config->get_param('reports')}) {
         next if $skip_report{$id};
-        report("Creating report $id");
+        log_message("Creating report $id", $timestamp, $parallel);
         my $report;
         my $report_conf = $config->get_param('reports')->{$id};
         eval {
@@ -382,7 +383,7 @@ if ($mode eq 'test') {
                     $children++;
                     next;
                 } else {
-                    report("Forking child process $id");
+                    log_message("Forking child process $id", $timestamp, $parallel);
                 }
             }
 
@@ -391,7 +392,7 @@ if ($mode eq 'test') {
                 $resultset->clone() :
                 $resultset;
 
-            report("running report $id");
+            log_message("running report $id", $timestamp, $parallel);
             eval {
                 $report->run($resultset);
             };
@@ -401,7 +402,7 @@ if ($mode eq 'test') {
 
             if ($parallel) {
                 # child process
-                report("Finishing child process $id");
+                log_message("Finishing child process $id", $timestamp, $parallel);
                 exit;
             }
         }
@@ -414,12 +415,4 @@ if ($mode eq 'test') {
 while ($children) {
     wait;
     $children--;
-}
-
-sub report {
-    my ($message) = @_;
-    print DateTime->now()->strftime('[%H:%M:%S] ')
-        if $verbose > 1;
-    print "$message\n"
-        if $verbose > 0;
 }
