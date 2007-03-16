@@ -314,6 +314,8 @@ if ($mode eq 'test') {
                     # parent process
                     $children++;
                     next;
+                } else {
+                    report("Forking child process $id");
                 }
             }
             eval {
@@ -341,6 +343,7 @@ if ($mode eq 'test') {
             }
             if ($parallel) {
                 # child process
+                report("Finishing child process $id");
                 exit;
             }
         }
@@ -378,6 +381,8 @@ if ($mode eq 'test') {
                     # parent process
                     $children++;
                     next;
+                } else {
+                    report("Forking child process $id");
                 }
             }
 
@@ -396,6 +401,7 @@ if ($mode eq 'test') {
 
             if ($parallel) {
                 # child process
+                report("Finishing child process $id");
                 exit;
             }
         }
