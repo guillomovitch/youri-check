@@ -90,8 +90,10 @@ sub prepare {
 
         my $index = sub {
             my ($package) = @_;
-            $self->{_srcs}->{$media_id}->{$package->get_name()} =
-                $package->get_version() . '-' . $package->get_release();
+            $self->{_srcs}->{$media_id}->{$package->get_name()} = {
+    		    'revision' => $package->get_version() . '-' . $package->get_release(),
+		    'package' => $package
+	    };
         };
 
         $media->traverse_headers($index);
@@ -119,18 +121,21 @@ sub run {
 
     my $check_package = sub {
         my ($package) = @_;
+        my $id;
         my $canonical_name = $package->get_canonical_name();
 
         my $bin_revision =
             $package->get_version() . '-' . $package->get_release();
 
         my $src_revision;
-        foreach my $id (@{$allowed_ids}) {
-            $src_revision = $self->{_srcs}->{$id}->{$canonical_name};
+        foreach $id (@{$allowed_ids}) {
+            $src_revision = $self->{_srcs}->{$id}->{$canonical_name}->{revision};
             last if $src_revision;
         }
 
         if ($src_revision) {
+	    # we found at least one binary from this source
+            undef $self->{_srcs}->{$id}->{$canonical_name}->{package};
             # check if revision match
             unless ($src_revision eq $bin_revision) {
                 if ($class->compare_revisions($src_revision, $bin_revision) > 0) {
@@ -162,6 +167,21 @@ sub run {
     };
 
     $media->traverse_headers($check_package);
+
+    foreach my $id (@{$allowed_ids}) {
+        foreach my $src (keys %{$self->{_srcs}->{$id}}) {
+            my $package = $self->{_srcs}->{$id}->{$src}->{package};
+            if ($package) {
+                # source package has no binary
+                $resultset->add_result($self->{_id}, $media, $package, {
+                    package   => $src,
+                    arch      => 'src',
+                    revision  => $self->{_srcs}->{$id}->{$src}->{revision},
+                    error     => "Source without binaries",
+                });
+            }
+        }
+    };
 }
 
 
