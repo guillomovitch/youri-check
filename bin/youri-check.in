@@ -416,3 +416,5 @@ while ($children) {
     wait;
     $children--;
 }
+
+log_message("Finishing", $timestamp, $parallel);
