@@ -1,2 +1,17 @@
+2007-03-22 Guillaume Rousse <guillomovitch@zarb.org> 0.10
+	* internal changes:
+	    - large code cleanup
+	    - namespace changes:
+	        . Youri::Check::Input -> Youri::Check::Test
+	        . Youri::Check::Output -> Youri::Check::Report
+	* installation:
+	    - autotools based installation system
+	    - modules are now installed under private directory
+	* YAML-based configuration
+	* new rpmcheck test
+	* binaries:
+	    - parallel mode
+	    - --list option for runtime configuration
+
 2006-04-23 Guillaume Rousse <guillomovitch@zarb.org> 0.9
 	* initial release
