@@ -134,8 +134,10 @@ sub run {
         }
 
         if ($src_revision) {
-	    # we found at least one binary from this source
-            undef $self->{_srcs}->{$id}->{$canonical_name}->{package};
+            # we found at least one binary from this source
+            foreach my $id (@{$allowed_ids}) {
+                undef $self->{_srcs}->{$id}->{$canonical_name}->{package};
+            }
             # check if revision match
             unless ($src_revision eq $bin_revision) {
                 if ($class->compare_revisions($src_revision, $bin_revision) > 0) {
