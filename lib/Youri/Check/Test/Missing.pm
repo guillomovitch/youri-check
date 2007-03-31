@@ -92,7 +92,6 @@ sub prepare {
             my ($package) = @_;
             $self->{_srcs}->{$media_id}->{$package->get_name()} = {
     		    'revision' => $package->get_version() . '-' . $package->get_release(),
-		    'package' => $package
 	    };
         };
 
@@ -134,10 +133,6 @@ sub run {
         }
 
         if ($src_revision) {
-            # we found at least one binary from this source
-            foreach my $id (@{$allowed_ids}) {
-                undef $self->{_srcs}->{$id}->{$canonical_name}->{package};
-            }
             # check if revision match
             unless ($src_revision eq $bin_revision) {
                 if ($class->compare_revisions($src_revision, $bin_revision) > 0) {
@@ -169,21 +164,6 @@ sub run {
     };
 
     $media->traverse_headers($check_package);
-
-    foreach my $id (@{$allowed_ids}) {
-        foreach my $src (keys %{$self->{_srcs}->{$id}}) {
-            my $package = $self->{_srcs}->{$id}->{$src}->{package};
-            if ($package) {
-                # source package has no binary
-                $resultset->add_result($self->{_id}, $media, $package, {
-                    package   => $src,
-                    arch      => 'src',
-                    revision  => $self->{_srcs}->{$id}->{$src}->{revision},
-                    error     => "Source without binaries",
-                });
-            }
-        }
-    };
 }
 
 
