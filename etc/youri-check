@@ -28,7 +28,8 @@ _youri-check()
 
     if [[ "$cur" == -* ]]; then
 	COMPREPLY=( $( compgen -W '--config --skip-test --skip-report \
-		--skip-media -h --help -t --test -v --verbose' -- $cur ) )
+		--skip-media -h --help -t --test -v --verbose -p --parallel \
+		--timestamps' -- $cur ) )
     else
     	_count_args
 	case $args in
