@@ -1,32 +1,28 @@
-YOURI project
--------------
+youri-check
+-----------
 
 YOURI stands for "Youri Offers an Upload & Repository Infrastucture". It aims
 to build tools making management of a coherent set of packages easier.
 
-Description
------------
-Managing a package repository involves many tasks, such as keeping packages
-tree tidy, generating packages indexes, synchronising bug report system,
-running coherency checks, checking for available updates, etc...
+youri-check is a generic package checking tools. It runs a list of tests on a
+list of package sets, and produces corresponding reports.
 
-Instead of a gazillion project-specific scripts, we aim to provide a generic package-format independant framework, so as to build coherent and robust tools.
+Dependencies
+------------
+The following perl modules are required:
+- Youri::Config
+- Youri::Media
+- Youri::Package
+- Youri::Utils
 
-Components
-----------
-Available software in this release
-- youri-check allows to check packages
-- youri-upload allows to upload packages
+Depending on exact list of tests and reports, other modules may be needed also.
 
 Installation
 ------------
 To install, just use:
-perl Makefile.PL
+./configure
 make
-make test
-
-All standard MakeMaker variables are usable, with the addition of SYSCONFDIR to
-specify configuration files destination.
+make install
 
 Copyright and License
 ---------------------
@@ -39,7 +35,3 @@ Authors
 -------
 Guillaume Rousse <guillomovitch@zarb.org>,
 Pascal Terjan <pterjan@zarb.org>
-Damien Krotkine <dams@zarb.org>
-Olivier Thauvin <nanardon@zarb.org>
-Ville Skyttä <ville.skytta@iki.fi>
-
