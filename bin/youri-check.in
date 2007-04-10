@@ -21,6 +21,7 @@ Options:
     --skip-report <report> skip report <report>
     --parallel             parallel run
     --verbose              verbose run
+    --timestamp            add timestamps in output
     --test                 test run
     --list <category>      list items from given category
     --help                 print this help message
@@ -60,7 +61,11 @@ Run all plugins parallelously
 
 =item B<--verbose>
 
-Produce more verbose report (can be used more than once)
+Produce more verbose output (can be used more than once)
+
+=item B<--timestamp>
+
+Add timestamps in output.
 
 =item B<--test>
 
@@ -117,6 +122,10 @@ The list of available report plugins, indexed by their identity.
 Additional optional top-level directives:
 
 =over
+
+=item B<netconfig>
+
+libnet configuration options (see Net::Config).
 
 =item B<resolver>
 
