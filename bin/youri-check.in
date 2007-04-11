@@ -35,6 +35,13 @@ test plugins, each of them storing their result in a persistent resultset. In
 report mode, this resultset is passed to a list of report plugins, each of them
 producing arbitrary effects.
 
+In normal run, all tests or reports are processed sequentially, whereas they
+are processed simultaneously in parallel run (using B<--parallel> option). The
+second one is faster, but generally more expensive in term of memory usage,
+even if parsed headers caching is automatically desactivated. Also, some
+configurations (such as the use of sqlite as result database) are not
+compatible with parallel mode.
+
 =head1 OPTIONS
 
 =over
