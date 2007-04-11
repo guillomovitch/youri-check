@@ -144,6 +144,47 @@ The definition of the preferences plugin to be used.
 
 =back
 
+Here is a sample configuration:
+
+    # Use a local sqlite database for storing results
+    resultset:
+        class: Youri::Check::Resultset::DBI
+        options:
+            driver: sqlite
+            base: youri
+
+    # Test packages older than 12 months
+    checks:
+        age:
+            class: Youri::Check::Test::Age
+            options:
+                max: 12 months
+                pattern: %m months
+
+    # Reports results as HTML files
+    reports:
+        file:
+            class: Youri::Check::Report::File
+            options:
+                to: ${home}/youri
+                global: 1
+                individual: 1
+                formats:
+                    html:
+                        class: Youri::Check::Report::File::Format::HTML
+
+    # Test PLF free media for cooker/i586
+    medias:
+        free:
+            class: Youri::Media::URPM
+            options:
+                name: free
+                type: binary
+                hdlist: ftp://ftp.free.fr/pub/Distributions_Linux/plf/mandriva/cooker/free/binary/i586/hdlist.cz
+
+See commented configuration files in the distribution for more complex
+examples.
+
 =head1 SEE ALSO
 
 Youri::Config, for additional details about configuration file format.
