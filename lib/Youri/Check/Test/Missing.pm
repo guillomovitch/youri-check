@@ -127,7 +127,7 @@ sub run {
             $package->get_version() . '-' . $package->get_release();
 
         my $src_revision;
-        foreach $id (@{$allowed_ids}) {
+        foreach my $id (@{$allowed_ids}) {
             $src_revision = $self->{_srcs}->{$id}->{$canonical_name}->{revision};
             last if $src_revision;
         }
