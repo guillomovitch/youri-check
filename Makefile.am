@@ -1,4 +1,4 @@
-SVNPATH = SVNPATH = svn+ssh://youri.zarb.org/home/projects/youri/svn/soft/check
+SVNPATH = svn+ssh://youri.zarb.org/home/projects/youri/svn/soft/check
 
 SUBDIRS = bin lib etc t
 
