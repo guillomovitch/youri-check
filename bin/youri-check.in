@@ -396,7 +396,7 @@ if ($mode eq 'test') {
                     next if $media->skip_test($id);
                     my $media_id = $media->get_id();
                     log_message(
-                        "running test $id on media $media_id",
+                        "Running test $id on media $media_id",
                         $timestamp,
                         $parallel
                     ) if $verbose;
@@ -462,7 +462,7 @@ if ($mode eq 'test') {
                 $resultset->clone() :
                 $resultset;
 
-            log_message("running report $id", $timestamp, $parallel)
+            log_message("Running report $id", $timestamp, $parallel)
                 if $verbose;
             eval {
                 $report->run($resultset);
