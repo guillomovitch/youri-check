@@ -57,6 +57,12 @@ sub add_results {
                 description => "The package was not rebuilt since $result->{buildtime}",
                 guid => "youri-age-$result->{source_package}-$result->{buildtime}"
             );
+        } elsif ($self->{_type} eq 'rpmcheck') {
+           $self->{_rss}->add_item(
+                title       => "$result->{package} ($result->{arch}) can not be installed",
+                description => "$result->{reason}",
+                guid => "youri-rpmcheck-$result->{package}-$result->{arch}"
+            );
         } else {
             $self->{_rss}->add_item(
                 title       => "[$self->{_type}] $result->{source_package}",
