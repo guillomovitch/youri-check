@@ -51,12 +51,14 @@ sub _init {
     my $self    = shift;
     my %options = (
         resolver => undef,
+        nobody => undef,
         @_
     );
 
     croak "No resolver defined" unless $options{resolver};
 
     $self->{_resolver} = $options{resolver};
+    $self->{_nobody} = $options{nobody};
 }
 
 sub run {
@@ -68,9 +70,11 @@ sub run {
 
     my $check = sub {
         my ($package) = @_;
+        my $maint = $self->{_resolver}->get_maintainer($package);
+        $maint = undef if ($self->{_nobody} eq $maint);
         $resultset->add_result($self->{_id}, $media, $package, {
             error => "unmaintained package"
-        }) unless $self->{_resolver}->get_maintainer($package);
+        }) unless $maint;
     };
 
     $media->traverse_headers($check);
