@@ -1,5 +1,4 @@
-TESTS = perlcritic.t \
-	version.t
+TESTS = perlcritic.t
 
 TESTS_ENVIRONMENT = perl -I $(top_srcdir)/lib
 
