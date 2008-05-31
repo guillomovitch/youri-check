@@ -93,6 +93,22 @@ sub set_resolver {
 
 Clone resultset object.
 
+=cut
+
+sub clone {
+    my ($self) = @_;
+    croak "Not a class method" unless ref $self;
+
+    my $clone = bless {
+        _test     => $self->{_test},
+        _verbose  => $self->{_verbose},
+        _resolver => $self->{_resolver},
+        _schema   => $self->{_dbh}->schema
+    }, ref $self;
+
+    return $clone;
+}
+
 =head2 reset()
 
 Reset resultset object, by deleting all contained results.
