@@ -1,13 +1,13 @@
 # $Id$
-package Youri::Check::Resultset;
+package Youri::Check::Database;
 
 =head1 NAME
 
-Youri::Check::Resultset - Abstract resultset
+Youri::Check::Database - Result database
 
 =head1 DESCRIPTION
 
-This abstract class defines Youri::Check::Resultset interface
+This is the youri-check result database.
 
 =cut
 
@@ -21,11 +21,7 @@ use Youri::Utils;
 
 =head2 new(%hash)
 
-Creates and returns a new Youri::Check::Resultset object.
-
-No generic parameters (subclasses may define additional ones).
-
-Warning: do not call directly, call subclass constructor instead.
+Creates and returns a new Youri::Check::Database object.
 
 =cut
 
@@ -39,16 +35,12 @@ sub new {
         @_
     );
 
-    croak "Abstract class" if $class eq __PACKAGE__;
-
     my $self = bless {
         _test     => $options{test},
         _verbose  => $options{verbose},
         _parallel => $options{parallel},
         _resolver => $options{resolver},
     }, $class;
-
-    $self->_init(%options);
 
     return $self;
 }
