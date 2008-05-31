@@ -16,6 +16,7 @@ use strict;
 use Carp;
 use Scalar::Util qw/blessed/;
 use Youri::Utils;
+use Youri::Check::Schema;
 
 =head1 CLASS METHODS
 
@@ -28,6 +29,11 @@ Creates and returns a new Youri::Check::Database object.
 sub new {
     my $class   = shift;
     my %options = (
+        driver   => '', # driver
+        base     => '', # base
+        port     => '', # port
+        user     => '', # user
+        pass     => '', # pass
         test     => 0,     # test mode
         verbose  => 0,     # verbose mode
         parallel => 0,     # parallel mode
@@ -35,11 +41,30 @@ sub new {
         @_
     );
 
+     croak "No driver defined" unless $options{driver};
+    croak "No base defined" unless $options{base};
+
+    my $datasource = "DBI:$options{driver}:dbname=$options{base}";
+    $datasource .= ";host=$options{host}" if $options{host};
+    $datasource .= ";port=$options{port}" if $options{port};
+
+    my $schema = Youri::Check::Schema->connect(
+        $datasource,
+        $options{user},
+        $options{pass},
+        {
+            RaiseError => 1,
+            PrintError => 0,
+            AutoCommit => 1
+        }
+    ) or croak "Unable to connect: $DBI::errstr";
+
     my $self = bless {
         _test     => $options{test},
         _verbose  => $options{verbose},
         _parallel => $options{parallel},
         _resolver => $options{resolver},
+        _schema   => $schema
     }, $class;
 
     return $self;
