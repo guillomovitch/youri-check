@@ -15,7 +15,6 @@ use warnings;
 use strict;
 use Carp;
 use Scalar::Util qw/blessed/;
-use Youri::Utils;
 use Youri::Check::Schema;
 
 =head1 CLASS METHODS
@@ -68,10 +67,6 @@ sub new {
     }, $class;
 
     return $self;
-}
-
-sub _init {
-    # do nothing
 }
 
 =head1 INSTANCE METHODS
