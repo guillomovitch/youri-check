@@ -31,8 +31,8 @@ Options:
 B<youri-check> allows to check packages in a repository.
 
 In test mode, all medias defined in configuration are passed to a list of
-test plugins, each of them storing their result in a persistent resultset. In
-report mode, this resultset is passed to a list of report plugins, each of them
+test plugins, each of them storing their result in a persistent database. In
+report mode, this database is passed to a list of report plugins, each of them
 producing arbitrary effects.
 
 In normal run, all tests or reports are processed sequentially, whereas they
@@ -108,9 +108,9 @@ mandatory top-level directives:
 
 =over
 
-=item B<resultset>
+=item B<database>
 
-The definition of the resultset plugin to be used.
+The definition of the database plugin to be used.
 
 =item B<medias>
 
@@ -147,7 +147,7 @@ The definition of the preferences plugin to be used.
 Here is a sample configuration:
 
     # Use a local sqlite database for storing results
-    resultset:
+    database:
         class: Youri::Check::Resultset::DBI
         options:
             driver: sqlite
@@ -258,19 +258,16 @@ if ($netconfig_conf) {
     $NetConfig{$_} = $netconfig_conf->{$_} foreach keys %{$netconfig_conf};
 }
 
-# resultset creation
-my $resultset_conf = $config->get_param('resultset');
-die "No resultset defined" unless $resultset_conf;
+# database creation
+my $database_conf = $config->get_param('database');
+die "No database defined" unless $database_conf;
 
-log_message("Creating resultset", $timestamp, $parallel) if $verbose;
-my $resultset = create_instance(
-    'Youri::Check::Resultset',
-    $resultset_conf,
-    {
-        test     => $test,
-        verbose  => $verbose > 0 ? $verbose - 1 : 0,
-        parallel => $parallel
-    }
+log_message("Creating database", $timestamp, $parallel) if $verbose;
+my $database = Youri::Check::Database->new(
+    %$database_conf,
+    test     => $test,
+    verbose  => $verbose > 0 ? $verbose - 1 : 0,
+    parallel => $parallel
 );
 
 my $children;
@@ -340,9 +337,9 @@ if ($mode eq 'test') {
         print STDERR "Failed to create media $id: $@\n" if $@;
     }
 
-    # prepare resultset
-    $resultset->reset();
-    $resultset->set_resolver($resolver) if $resolver;
+    # prepare database
+    $database->reset();
+    $database->set_resolver($resolver) if $resolver;
 
     my $skip_test = $config->get_arg('skip-test');
     my %skip_test = $skip_test ?  map { $_ => 1 } @{$skip_test} : ();
@@ -387,10 +384,10 @@ if ($mode eq 'test') {
             if ($@) {
                 print STDERR "Failed to prepare test $id: $@\n";
             } else {
-                # clone resultset in child process
-                $resultset = $parallel ?
-                    $resultset->clone() :
-                    $resultset;
+                # clone database in child process
+                $database = $parallel ?
+                    $database->clone() :
+                    $database;
 
                 foreach my $media (@medias) {
                     next if $media->skip_test($id);
@@ -401,7 +398,7 @@ if ($mode eq 'test') {
                         $parallel
                     ) if $verbose;
                     eval {
-                        $test->run($media, $resultset);
+                        $test->run($media, $database);
                     };
                     if ($@) {
                         print STDERR "Failed to run test $id on media $media_id: $@\n";
@@ -457,15 +454,15 @@ if ($mode eq 'test') {
                 }
             }
 
-            # clone resultset in child process
-            $resultset = $parallel ?
-                $resultset->clone() :
-                $resultset;
+            # clone database in child process
+            $database = $parallel ?
+                $database->clone() :
+                $database;
 
             log_message("Running report $id", $timestamp, $parallel)
                 if $verbose;
             eval {
-                $report->run($resultset);
+                $report->run($database);
             };
             if ($@) {
                 print STDERR "Failed to run report $id: $@\n";
