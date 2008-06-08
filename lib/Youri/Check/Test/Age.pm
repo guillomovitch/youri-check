@@ -56,6 +56,8 @@ sub get_descriptor {
     return $descriptor;
 }
 
+Youri::Check::Schema->load_classes("Youri::Check::Schema::Age");
+
 =head2 new(%args)
 
 Creates and returns a new Youri::Check::Test::Age object.
