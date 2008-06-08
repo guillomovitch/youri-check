@@ -22,7 +22,7 @@ nobase_perllib_DATA = Youri/Check/Test/Build/Source/LBD.pm \
 		      Youri/Check/Test/Rpmcheck.pm \
 		      Youri/Check/Test/Build.pm \
 		      Youri/Check/Test/Signature.pm \
-		      Youri/Check/Resultset.pm \
+		      Youri/Check/Database.pm \
 		      Youri/Check/Report.pm \
 		      Youri/Check/Test.pm \
 		      Youri/Check/Plugin.pm \
@@ -31,14 +31,15 @@ nobase_perllib_DATA = Youri/Check/Test/Build/Source/LBD.pm \
 		      Youri/Check/Maintainer/Resolver/CGI.pm \
 		      Youri/Check/Maintainer/Preferences.pm \
 		      Youri/Check/Maintainer/Resolver.pm \
-		      Youri/Check/Resultset/Iterator.pm \
-		      Youri/Check/Resultset/DBI.pm \
 		      Youri/Check/Report/File.pm \
+		      Youri/Check/Report/File/Format.pm \
+		      Youri/Check/Report/File/Format/HTML.pm \
+		      Youri/Check/Report/File/Format/Text.pm \
+		      Youri/Check/Report/File/Format/RSS.pm \
 		      Youri/Check/Report/Mail.pm \
-		      Youri/Check/Report/Format.pm \
-		      Youri/Check/Report/Format/HTML.pm \
-		      Youri/Check/Report/Format/Text.pm \
-		      Youri/Check/Report/Format/RSS.pm \
+		      Youri/Check/Report/Mail/Format.pm \
+		      Youri/Check/Report/Mail/Format/HTML.pm \
+		      Youri/Check/Report/Mail/Format/Text.pm \
 		      Youri/Check/Descriptor/Row.pm \
 		      Youri/Check/Descriptor/Cell.pm
 
