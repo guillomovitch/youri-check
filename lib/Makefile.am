@@ -53,7 +53,7 @@ install-data-hook:
 	        $(DESTDIR)$(mandir)/man3/$$page; \
 	done
 
-uninstall-data-hook:
+uninstall-hook:
 	for file in $(nobase_perllib_DATA); do \
 	    page=`echo $$file | sed -e 's/\//::/g' -e 's/\.pm$$/.3pm/'`; \
 	    rm -f $(DESTDIR)$(mandir)/man3/$$page; \
