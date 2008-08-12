@@ -167,11 +167,14 @@ sub run {
 
         foreach my $source (@{$self->{_sources}}) {
             my $available_version = $source->get_version($package);
-            if (
-                $available_version &&
-                (! $current_stable || is_stable($available_version)) &&
-                is_newer($available_version, $max_version)
-            ) {
+
+            # skip if no available version
+            next unless $available_version;
+            # skip if available version is unstable,
+            # unless current version isn't stable either
+            next unless is_stable($available_version) || ! $current_stable;
+
+            if (is_newer($available_version, $max_version)) {
                 $max_version = $available_version;
                 $max_source  = $source->get_id();
                 $max_url     = $source->get_url($name);
