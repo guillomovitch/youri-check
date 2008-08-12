@@ -102,7 +102,13 @@ sub _init {
         croak "aliases should be an hashref" unless ref $options{aliases} eq 'HASH';
     }
 
-    foreach my $id (keys %{$options{sources}}) {
+    # sort sources according to their order
+    foreach my $id (
+        map  { $_->[1] }
+        sort { $a->[0] <=> $b->[0] }
+        map  { [ $options{sources}->{$_}->{order} || 0 , $_ ] }
+        keys %{$sources}
+    ) {
         print "Creating source $id\n" if $options{verbose};
         eval {
             # add global aliases if defined
