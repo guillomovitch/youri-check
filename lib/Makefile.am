@@ -44,7 +44,7 @@ nobase_perllib_DATA = Youri/Check/Test/Build/Source/LBD.pm \
 
 EXTRA_DIST = $(nobase_perllib_DATA)
 
-install-hook:
+install-data-hook:
 	$(INSTALL) -d -m 755 $(DESTDIR)$(mandir)/man3
 	for file in $(nobase_perllib_DATA); do \
 	    page=`echo $$file | sed -e 's/\//::/g' -e 's/\.pm$$/.3pm/'`; \
@@ -52,7 +52,7 @@ install-hook:
 	        $(DESTDIR)$(mandir)/man3/$$page; \
 	done
 
-uninstall-hook:
+uninstall-data-hook:
 	for file in $(nobase_perllib_DATA); do \
 	    page=`echo $$file | sed -e 's/\//::/g' -e 's/\.pm$$/.3pm/'`; \
 	    rm -f $(DESTDIR)$(mandir)/man3/$$page; \
