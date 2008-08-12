@@ -11,6 +11,7 @@ nobase_perllib_DATA = Youri/Check/Test/Build/Source/LBD.pm \
 		      Youri/Check/Test/Updates/Source/GNOME.pm \
 		      Youri/Check/Test/Updates/Source/Gentoo.pm \
 		      Youri/Check/Test/Updates/Source/Freshmeat.pm \
+		      Youri/Check/Test/Updates/Source/JPackage.pm \
 		      Youri/Check/Test/Updates/Source/NetBSD.pm \
 		      Youri/Check/Test/Updates/Source/Fedora.pm \
 		      Youri/Check/Test/Updates/Source/CPAN.pm \
