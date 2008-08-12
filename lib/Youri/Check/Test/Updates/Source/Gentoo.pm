@@ -56,7 +56,7 @@ sub _init {
 
 sub _url {
     my ($self, $name) = @_;
-    return "http://packages.gentoo.org/search/?sstring=$name";
+    return "http://packages.gentoo.org/package/$name";
 }
 
 =head1 COPYRIGHT AND LICENSE
