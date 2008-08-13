@@ -128,7 +128,9 @@ sub reset {
 
 sub _get_tables {
     my ($self) = @_;
+
     my $char = $self->{_dbh}->get_info(29);
+
     my @tables;
     foreach my $table ($self->{_dbh}->tables(undef, undef, '%', 'TABLE')) {
         # drop schema
@@ -138,7 +140,6 @@ sub _get_tables {
         push @tables, $table;
     }
 
-    @tables = map { substr($_, 1 , -1) } @tables if $char;
     return @tables;
 }
 
