@@ -128,9 +128,16 @@ sub reset {
 
 sub _get_tables {
     my ($self) = @_;
-    my @tables = $self->{_dbh}->tables(undef, undef, '%', 'TABLE');
-    # unquote table name if needed
     my $char = $self->{_dbh}->get_info(29);
+    my @tables;
+    foreach my $table ($self->{_dbh}->tables(undef, undef, '%', 'TABLE')) {
+        # drop schema
+        ($table) = $table =~ /(?:[^.]+\.)?([^.]+)/;
+        # unquote
+        $table = substr($table, 1 , -1) if $char;
+        push @tables, $table;
+    }
+
     @tables = map { substr($_, 1 , -1) } @tables if $char;
     return @tables;
 }
