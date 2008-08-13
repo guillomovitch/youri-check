@@ -107,7 +107,7 @@ sub _init {
         map  { $_->[1] }
         sort { $a->[0] <=> $b->[0] }
         map  { [ $options{sources}->{$_}->{order} || 0 , $_ ] }
-        keys %{$sources}
+        keys %{$options{sources}}
     ) {
         print "Creating source $id\n" if $options{verbose};
         eval {
