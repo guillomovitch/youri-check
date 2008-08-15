@@ -45,7 +45,7 @@ sub _init {
 
     my $agent = LWP::UserAgent->new();
     my $buffer = '';
-    my $pattern = qr/>([\w-]+)-([\d\.]+)\.tar\.gz<\/a>/;
+    my $pattern = qr/>([\w-]+)-v?([\d\.]+)\.tar\.gz<\/a>/;
     my $callback = sub {
         my ($data, $response, $protocol) = @_;
 
