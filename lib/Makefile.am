@@ -18,6 +18,7 @@ nobase_perllib_DATA = Youri/Check/Test/Build/Source/LBD.pm \
 		      Youri/Check/Test/Updates/Source/Debian.pm \
 		      Youri/Check/Test/Updates/Source/RAA.pm \
 		      Youri/Check/Test/Updates/Source/Sourceforge.pm \
+		      Youri/Check/Test/Updates/Source/PEAR.pm \
 		      Youri/Check/Test/Updates/Source.pm \
 		      Youri/Check/Test/Age.pm \
 		      Youri/Check/Test/Rpmcheck.pm \
