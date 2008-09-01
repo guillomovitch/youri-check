@@ -51,8 +51,12 @@ sub _init {
          # get version, if available
          my $a = $pi->first_child('a');
          if ($a) {
-             my $version = $a->first_child('r')->first_child('v')->text();
-             $self->{_versions}->{$name} = $version;
+             foreach my $r ($a->children('r')) {
+                 next unless $r->first_child('s')->text() eq 'stable';
+                 my $version = $r->first_child('v')->text();
+                 $self->{_versions}->{$name} = $version;
+                 last;
+             }
          }
          $twig->purge();
     };
