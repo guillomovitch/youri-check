@@ -199,7 +199,9 @@ Checks if given version is stable.
 
 sub is_stable {
     my ($version) = @_;
-    return $version !~ /alpha|beta|pre|rc|cvs|svn/i;
+    return 0 if $version =~ /(:?alpha|beta|pre|rc|cvs|svn)/i;
+    return 0 if $version =~ /(:?a|b)\d+$/i;
+    return 1;
     
 }
 

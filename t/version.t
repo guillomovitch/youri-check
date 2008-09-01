@@ -37,7 +37,20 @@ my @equals = (
     [ '0.1', '2003-09-28' ],
 );
 
-plan tests => 2 * @differents + 2 * @equals;
+my @stables = (
+    '0.98',
+    '3.02pl2',
+    '5.1p1'
+);
+
+my @unstables = (
+    '1.0beta',
+    '1.2.0a1',
+    '0.76b1',
+    '0.98a15'
+);
+
+plan tests => 2 * @differents + 2 * @equals + @stables + @unstables;
 
 foreach my $different (@differents) {
     ok(
@@ -72,3 +85,20 @@ foreach my $equal (@equals) {
         "$equal->[1] is equal as $equal->[0]"
     );
 }
+
+foreach my $stable (@stables) {
+    ok(
+        Youri::Check::Test::Updates::is_stable($stable),
+        "$stable is stable"
+    );
+
+}
+
+foreach my $unstable (@unstables) {
+    ok(
+        !Youri::Check::Test::Updates::is_stable($unstable),
+        "$unstable is unstable"
+    );
+
+}
+
