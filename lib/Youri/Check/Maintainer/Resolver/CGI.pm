@@ -40,7 +40,8 @@ CGI's URL.
 sub _init {
     my $self    = shift;
     my %options = (
-        url => '', # url to fetch maintainers
+        url        => '', # url to fetch maintainers
+        exceptions => undef,
         @_
     );
 
@@ -49,6 +50,14 @@ sub _init {
     my $agent = LWP::UserAgent->new();
     my $buffer = '';
     my $pattern = qr/^(\S+)\t(\S+)$/;
+
+    my %exceptions;
+    if ($options{exceptions}) {
+        croak "exceptions should be a listref"
+            unless ref $options{exceptions} eq 'ARRAY';
+        %exceptions = map { $_ => 1 } @{$options{exceptions}};
+    }
+
     my $callback = sub {
         my ($data, $response, $protocol) = @_;
 
@@ -59,7 +68,9 @@ sub _init {
         while ($data =~ m/(.*)\n/gc) {
             my $line = $1;
             next unless $line =~ $pattern;
-            $self->{_maintainers}->{$1} = $2;
+            my ($package, $maintainer) = ($1, $2);
+            next if %exceptions and $exceptions{$maintainer};
+            $self->{_maintainers}->{$package} = $maintainer;
         }
 
         # store remaining text
