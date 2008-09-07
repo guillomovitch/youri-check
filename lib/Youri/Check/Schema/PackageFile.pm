@@ -1,10 +1,10 @@
-# $Id$
-package Youri::Check::Schema::Package;
+# $Id: Package.pm 1994 2008-06-08 17:34:58Z guillomovitch $
+package Youri::Check::Schema::PackageFile;
 
 use base qw/DBIx::Class/;
 
 __PACKAGE__->load_components(qw/Core/);
-__PACKAGE__->table('packages');
+__PACKAGE__->table('package_files');
 __PACKAGE__->add_columns(
     id => {
         data_type         => 'integer',
@@ -14,26 +14,18 @@ __PACKAGE__->add_columns(
         data_type         => 'varchar',
         is_auto_increment => 0,
     },
-    version => {
+    arch => {
         data_type         => 'varchar',
         is_auto_increment => 0,
     },
-    release => {
-        data_type         => 'varchar',
+    package_id => {
+        data_type         => 'integer',
         is_auto_increment => 0,
     },
-    section => {
-        data_type         => 'varchar',
-        is_auto_increment => 0,
-    },
-    maintainer => {
-        data_type         => 'varchar',
-        is_auto_increment => 0,
-    }
 );
 __PACKAGE__->set_primary_key('id');
-__PACKAGE__->has_many(
-    'files' => 'Youri::Check::Schema::PackageFile', 'package_id'
+__PACKAGE__->belongs_to(
+    'package_id' => 'Youri::Check::Schema::Package'
 );
 
 1;

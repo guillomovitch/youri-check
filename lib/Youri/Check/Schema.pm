@@ -3,6 +3,6 @@ package Youri::Check::Schema;
 
 use base qw/DBIx::Class::Schema/;
 
-__PACKAGE__->load_classes(qw/Package/);
+__PACKAGE__->load_classes(qw/Package PackageFile/);
 
 1;
