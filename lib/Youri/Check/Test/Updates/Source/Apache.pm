@@ -45,7 +45,7 @@ sub _init {
 
     my $agent = LWP::UserAgent->new();
     my $buffer = '';
-    my $pattern = qr/<td bgcolor="#EEEEEE"><b>(\w+)<\/b><\/td><td bgcolor="#EEEEEE" align="right">Version <b><i>([.\w]+)<\/i><\/b><\/td>/;
+    my $pattern = qr/<td bgcolor="#EEEEEE"><b>([-\w]+)<\/b><\/td><td bgcolor="#EEEEEE" align="right">Version <b><i>([.\w]+)<\/i><\/b><\/td>/;
     my $callback = sub {
         my ($data, $response, $protocol) = @_;
 
