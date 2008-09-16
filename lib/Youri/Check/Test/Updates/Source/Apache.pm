@@ -60,7 +60,12 @@ sub _init {
         }
 
         # store remaining text
-        $buffer = substr($data, pos $data);
+        my $pos = pos $data;
+        if ($pos) {
+            $buffer = substr($data, pos $data);
+        } else {
+            $buffer = $data;
+        }
     };
 
     $agent->get($options{url}, ':content_cb' => $callback);
