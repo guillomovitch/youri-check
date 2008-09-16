@@ -22,18 +22,24 @@ __PACKAGE__->add_columns(
         data_type         => 'varchar',
         is_auto_increment => 0,
     },
-    section => {
-        data_type         => 'varchar',
+    section_id => {
+        data_type         => 'integer',
         is_auto_increment => 0,
     },
-    maintainer => {
-        data_type         => 'varchar',
+    maintainer_id => {
+        data_type         => 'integer',
         is_auto_increment => 0,
     }
 );
 __PACKAGE__->set_primary_key('id');
 __PACKAGE__->has_many(
     'files' => 'Youri::Check::Schema::PackageFile', 'package_id'
+);
+__PACKAGE__->belongs_to(
+    'section_id' => 'Youri::Check::Schema::Section'
+);
+__PACKAGE__->belongs_to(
+    'maintainer_id' => 'Youri::Check::Schema::Maintainer'
 );
 
 1;
