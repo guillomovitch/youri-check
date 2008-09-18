@@ -16,6 +16,7 @@ use warnings;
 use strict;
 use Carp;
 use LWP::UserAgent;
+use HTML::TableExtract;
 use base 'Youri::Check::Test::Updates::Source';
 
 =head2 new(%args)
@@ -44,32 +45,28 @@ sub _init {
     );
 
     my $agent = LWP::UserAgent->new();
-    my $buffer = '';
-    my $pattern = qr/<td bgcolor="#EEEEEE"><b>([-\w]+)<\/b><\/td><td bgcolor="#EEEEEE" align="right">Version <b><i>([.\w]+)<\/i><\/b><\/td>/;
-    my $callback = sub {
-        my ($data, $response, $protocol) = @_;
-
-        # prepend text remaining from previous run
-        $data = $buffer . $data;
-
-        # process current chunk
-        while ($data =~ m/(.*)\n/gc) {
-            my $line = $1;
-            next unless $line =~ $pattern;
-            $self->{_versions}->{$1} = $2;
+    my $response = $agent->get($options{url});
+    if ($response->is_success()) {
+        my $parser = HTML::TableExtract->new(
+            attribs   => {width => '100%'},
+            keep_html => 1
+        );
+        $parser->parse($response->content());
+        foreach my $table ($parser->tables) {
+            my ($name) = $table->cell(0,0) =~ /^<b>([^<]+)<\/b>$/;
+            my ($version) = $table->cell(0,1) =~ /<i>([^<]+)<\/i>/;
+            my ($id) = $table->cell(4,0) =~ /href="\/search.php\?id=(\d+)"/;
+            $self->{_versions}->{$name} = $version;
+            $self->{_ids}->{$name} = $id;
         }
-
-        # store remaining text
-        my $pos = pos $data;
-        if ($pos) {
-            $buffer = substr($data, pos $data);
-        } else {
-            $buffer = $data;
-        }
-    };
-
-    $agent->get($options{url}, ':content_cb' => $callback);
+    }
 }
+
+sub _url {
+    my ($self, $name) = @_;
+    return "http://modules.apache.org/search.php?id=" . $self->{_ids}->{$name};
+}
+
 
 sub _name {
     my ($self, $name) = @_;
