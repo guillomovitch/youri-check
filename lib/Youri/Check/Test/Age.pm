@@ -11,13 +11,42 @@ This plugin checks packages age, and report the ones exceeding maximum limit.
 
 =cut
 
-use warnings;
-use strict;
+use Moose::Policy 'Moose::Policy::FollowPBP';
+use Moose;
+use Moose::Util::TypeConstraints;
 use Carp;
 use DateTime;
 use DateTime::Format::Duration;
-use base 'Youri::Check::Test';
+use Youri::Check::Descriptor::Row;
+use Youri::Check::Descriptor::Cell;
 use version; our $VERSION = qv('0.1.0');
+
+extends 'Youri::Check::Test';
+
+subtype 'DateTime::Format::Duration'
+    => as 'Object'
+    => where { $_->isa('DateTime::Format::Duration') };
+
+coerce 'DateTime::Format::Duration'
+    => from 'Str'
+    => via { DateTime::Format::Duration->new(pattern => $_) };
+
+has 'max'     => (
+    is => 'rw',
+    isa => 'Str',
+    default => '1 year'
+);
+has 'now'     => (
+    is => 'ro',
+    isa => 'DateTime',
+    default => sub { DateTime->from_epoch(epoch => time()) }
+);
+has 'format'  => (
+    is => 'rw',
+    isa => 'DateTime::Format::Duration',
+    coerce => 1,
+    default => sub { DateTime::Format::Duration->new(pattern => '%Y year') }
+);
 
 my $descriptor = Youri::Check::Descriptor::Row->new(
     cells => [
@@ -56,7 +85,11 @@ sub get_descriptor {
     return $descriptor;
 }
 
-Youri::Check::Schema->load_classes("Youri::Check::Schema::Age");
+use constant MONIKER => 'Age';
+
+sub get_moniker {
+    return MONIKER;
+}
 
 =head2 new(%args)
 
@@ -70,41 +103,22 @@ Specific parameters:
 
 Maximum age allowed (default: 1 year)
 
-=item pattern $pattern
+=item format $format
 
-Pattern used to describe age (default: %Y year)
+Format used to describe age (default: %Y year)
 
 =back
 
 =cut
 
-sub _init {
-    my $self    = shift;
-    my %options = (
-        max     => '1 year',
-        pattern => '%Y year',
-        @_
-    );
-
-    $self->{_format} = DateTime::Format::Duration->new(
-        pattern => $options{pattern}
-    );
-
-    $self->{_now} = DateTime->from_epoch(
-        epoch => time()
-    );
-
-    $self->{_max} = $options{max};
-}
-
 sub run {
-    my ($self, $media, $resultset) = @_;
+    my ($self, $media) = @_;
     croak "Not a class method" unless ref $self;
 
     my $max_age_string =
-        $media->get_option($self->{_id}, 'max') || $self->{_max};
+        $media->get_option($self->get_id(), 'max') || $self->get_max();
 
-    my $max_age = $self->{_format}->parse_duration($max_age_string);
+    my $max_age = $self->get_format()->parse_duration($max_age_string);
 
     my $check = sub {
         my ($package) = @_;
@@ -113,15 +127,20 @@ sub run {
             epoch => $package->get_age()
         );
         
-        my $age = $self->{_now}->subtract_datetime($buildtime);
+        my $age = $self->get_now()->subtract_datetime($buildtime);
 
         if (DateTime::Duration->compare($age, $max_age) > 0) {
             my $date = $buildtime->strftime("%a %d %b %G");
 
-            $resultset->add_result($self->{_id}, $media, $package, {
-                arch      => $package->get_arch(),
-                buildtime => $date
-            });
+            $self->get_database()->add_package_file_result(
+                MONIKER,
+                $media,
+                $package,
+                {
+                    arch      => $package->get_arch(),
+                    buildtime => $date
+                }
+            );
         }
     };
     $media->traverse_headers($check);

@@ -11,11 +11,15 @@ This abstract class defines report plugin interface.
 
 =cut
 
-use warnings;
-use strict;
+use Moose;
 use Carp;
 use UNIVERSAL::require;
-use base qw/Youri::Check::Plugin/;
+
+extends 'Youri::Check::Plugin';
+
+has 'global'     => (is => 'rw', isa => 'Bool', reader => 'is_global');
+has 'individual' => (is => 'rw', isa => 'Bool', reader => 'is_individual');
+has 'config'     => (is => 'rw', isa => 'HashRef');
 
 =head1 CLASS METHODS
 
@@ -40,40 +44,6 @@ Individual reports generation (default: true).
 Warning: do not call directly, call subclass constructor instead.
 
 =cut
-
-sub new {
-    my $class = shift;
-    croak "Abstract class" if $class eq __PACKAGE__;
-
-    my %options = (
-        id         => '',
-        test       => 0,
-        verbose    => 0,
-        global     => 1,
-        individual => 1,
-        config     => undef,
-        @_
-    );
-
-    croak "Neither global nor individual reporting selected" unless $options{global} || $options{individual};
-
-    my $self = bless {
-        _id         => $options{id},
-        _test       => $options{test},
-        _verbose    => $options{verbose},
-        _global     => $options{global},
-        _individual => $options{individual},
-        _config     => $options{config}
-    }, $class;
-
-    $self->_init(%options);
-
-    return $self;
-}
-
-sub _init {
-    # do nothing
-}
 
 =head1 INSTANCE METHODS
 
