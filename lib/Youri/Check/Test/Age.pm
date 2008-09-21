@@ -85,11 +85,7 @@ sub get_descriptor {
     return $descriptor;
 }
 
-use constant MONIKER => 'Age';
-
-sub get_moniker {
-    return MONIKER;
-}
+our $MONIKER = 'Age';
 
 =head2 new(%args)
 
@@ -133,7 +129,7 @@ sub run {
             my $date = $buildtime->strftime("%a %d %b %G");
 
             $self->get_database()->add_package_file_result(
-                MONIKER,
+                $MONIKER,
                 $media,
                 $package,
                 {
