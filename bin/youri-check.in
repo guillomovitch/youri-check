@@ -358,6 +358,7 @@ if ($mode eq 'test') {
                     verbose    => $verbose > 0 ? $verbose - 1 : 0,
                     resolver   => $resolver,
                     preferences => $preferences,
+                    database    => $database
                 }
             );
         };
