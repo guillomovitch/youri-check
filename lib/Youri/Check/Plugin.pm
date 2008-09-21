@@ -11,9 +11,13 @@ This abstract class defines youri-check plugin interface.
 
 =cut
 
-use warnings;
-use strict;
+use Moose::Policy 'Moose::Policy::FollowPBP';
+use Moose;
 use Carp;
+
+has 'id'         => (is => 'ro', isa => 'Str');
+has 'test'       => (is => 'rw', isa => 'Bool', reader => 'is_test');
+has 'verbosity'  => (is => 'rw', isa => 'Int',  default => 0);
 
 =head1 INSTANCE METHODS
 
@@ -22,13 +26,6 @@ use Carp;
 Returns plugin identity.
 
 =cut
-
-sub get_id {
-    my ($self) = @_;
-    croak "Not a class method" unless ref $self;
-
-    return $self->{_id};
-}
 
 =head1 COPYRIGHT AND LICENSE
 
