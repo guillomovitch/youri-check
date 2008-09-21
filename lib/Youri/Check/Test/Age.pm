@@ -114,7 +114,9 @@ sub run {
     my $max_age_string =
         $media->get_option($self->get_id(), 'max') || $self->get_max();
 
-    my $max_age = $self->get_format()->parse_duration($max_age_string);
+    my $max_age  = $self->get_format()->parse_duration($max_age_string);
+    my $database = $self->get_database();
+    my $now      = $self->get_now();
 
     my $check = sub {
         my ($package) = @_;
@@ -123,12 +125,12 @@ sub run {
             epoch => $package->get_age()
         );
         
-        my $age = $self->get_now()->subtract_datetime($buildtime);
+        my $age = $now->subtract_datetime($buildtime);
 
         if (DateTime::Duration->compare($age, $max_age) > 0) {
             my $date = $buildtime->strftime("%a %d %b %G");
 
-            $self->get_database()->add_package_file_result(
+            $database->add_package_file_result(
                 $MONIKER,
                 $media,
                 $package,
