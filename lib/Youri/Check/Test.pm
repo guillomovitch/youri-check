@@ -32,6 +32,16 @@ has 'preferences' => (
     is => 'rw', isa => 'Youri::Check::Maintainer::Preferences'
 );
 
+sub BUILD {
+    my ($self, $params) = @_;
+
+    {
+        no strict 'refs';
+        my $moniker = ${$self->meta()->name() . '::MONIKER'};
+        $self->get_database()->register($moniker);
+    }
+}
+
 =head1 CLASS METHODS
 
 =head2 get_descriptor(%args)
