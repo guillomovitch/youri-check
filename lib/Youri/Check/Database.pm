@@ -40,7 +40,7 @@ sub new {
         @_
     );
 
-     croak "No driver defined" unless $options{driver};
+    croak "No driver defined" unless $options{driver};
     croak "No base defined" unless $options{base};
 
     my $datasource = "DBI:$options{driver}:dbname=$options{base}";
@@ -65,6 +65,8 @@ sub new {
         _resolver => $options{resolver},
         _schema   => $schema
     }, $class;
+
+    $schema->deploy({add_drop_table => 1});
 
     return $self;
 }
@@ -113,9 +115,174 @@ sub clone {
 
 Reset resultset object, by deleting all contained results.
 
-=head2 add_result($type, $media, $package, $values)
+=cut
+
+sub register {
+    my ($self, $moniker) = @_;
+    croak "Not a class method" unless ref $self;
+
+    # load the new class
+    Youri::Check::Schema->load_classes($moniker);
+
+    # replace current schema with a new clone
+    my $schema = Youri::Check::Schema->clone();
+    $schema->storage($self->{_schema}->storage());
+    $self->{_schema} = $schema;
+
+    # create additional tables
+    $self->{_schema}->deploy({
+        add_drop_table => 1,
+        parser_args => {
+            sources => [ $moniker ]
+        }
+    });
+
+    my $last_run = $self->{_schema}->resultset('TestRun')->single({
+        name => $moniker,
+    });
+
+    if ($last_run) {
+        # delete all previous results
+        $self->{_schema}->resultset($moniker)->search()->delete();
+        # update test run
+        $last_run->date(time());
+        $last_run->update();
+    } else {
+        # create test run
+        $self->{_schema}->resultset('TestRun')->create({
+            name => $moniker,
+            date => time()
+        })->update();
+    }
+}
+
+=head2 add_result($source, $media, $package, $values)
 
 Add given hash reference as a new result for given type and L<Youri::Package> object.
+
+=cut
+
+sub add_package_file_result {
+    my ($self, $moniker, $media, $package, $values) = @_;
+    croak "Not a class method" unless ref $self;
+    croak "No moniker defined" unless $moniker;
+    croak "No media defined" unless $media;
+    croak "No package defined" unless $package;
+    croak "No values defined" unless $values;
+
+    print "adding result for test $moniker and package $package\n"
+        if $self->{_verbose} > 1;
+
+    my $package_file_id =
+        $self->get_package_file_id($package) ||
+        $self->add_package_file($media, $package);
+
+    my $new_result = $self->{_schema}->resultset($moniker)->create({
+        package_file_id => $package_file_id,
+        %{$values}
+    });
+    $new_result->update();
+}
+
+sub add_section {
+    my ($self, $name) = @_;
+
+    return $self->{_schema}->resultset('Section')->create({
+        name => $name,
+    })->update();
+}
+
+sub get_section_id {
+    my ($self, $name) = @_;
+
+    my $record = $self->{_schema}->resultset('Section')->single({
+        name => $name,
+    });
+
+    return $record ? $record->id() : undef;
+}
+
+sub add_maintainer {
+    my ($self, $name) = @_;
+
+    return $self->{_schema}->resultset('Maintainer')->create({
+        name => $name,
+    })->update();
+}
+
+sub get_maintainer_id {
+    my ($self, $name) = @_;
+
+    my $record = $self->{_schema}->resultset('Maintainer')->single({
+        name => $name,
+    });
+
+    return $record ? $record->id() : undef;
+}
+
+sub add_package {
+    my ($self, $media, $package) = @_;
+
+    my $section = $media->get_name();
+
+    my $section_id =
+        $self->get_section_id($section) ||
+        $self->add_section($section);
+
+
+    my $maintainer_id;
+    if ($self->{_resolver}) {
+        my $maintainer = $self->{_resolver}->resolve($package);
+        $maintainer_id =
+            $self->get_maintainer_id($maintainer) ||
+            $self->add_maintainer($maintainer);
+    }
+
+    return $self->{_schema}->resultset('Package')->create({
+        name          => $package->get_canonical_name(),
+        version       => $package->get_version(),
+        release       => $package->get_release(),
+        section_id    => $section_id,
+        maintainer_id => $maintainer_id
+    })->update();
+}
+
+sub get_package_id {
+    my ($self, $package) = @_;
+
+    my $record = $self->{_schema}->resultset('Package')->single({
+        name    => $package->get_canonical_name(),
+        version => $package->get_version(),
+        release => $package->get_release(),
+    });
+
+    return $record ? $record->id() : undef;
+}
+
+sub add_package_file {
+    my ($self, $media, $package) = @_;
+
+    my $package_id =
+        $self->get_package_id($package) ||
+        $self->add_package($media, $package);
+
+    return $self->{_schema}->resultset('PackageFile')->create({
+        name       => $package->get_name(),
+        arch       => $package->get_arch(),
+        package_id => $package_id
+    })->update();
+}
+
+sub get_package_file_id {
+    my ($self, $package) = @_;
+
+    my $record = $self->{_schema}->resultset('PackageFile')->single({
+        name => $package->get_name(),
+        arch => $package->get_arch(),
+    });
+
+    return $record ? $record->id() : undef;
+}
 
 =head2 get_maintainers()
 
