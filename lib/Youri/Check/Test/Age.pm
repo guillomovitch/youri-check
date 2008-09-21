@@ -133,7 +133,6 @@ sub run {
                 $media,
                 $package,
                 {
-                    arch      => $package->get_arch(),
                     buildtime => $date
                 }
             );
