@@ -15,7 +15,7 @@ __PACKAGE__->add_columns(
         is_auto_increment => 0,
     },
     package_file_id => {
-        data_type         => 'id',
+        data_type         => 'integer',
         is_auto_increment => 0,
     },
 );
