@@ -51,14 +51,14 @@ Warning: do not call directly, call subclass constructor instead.
 Excepted explicit statement, package name is expressed with Mandriva naming
 conventions.
 
-=head2 get_version($package)
+=head2 get_package_version($package)
 
 Returns available version for given package, which can be either a full
 L<Youri::Package> object or just a package name.
 
 =cut
 
-sub get_version {
+sub get_package_version {
     my ($self, $package) = @_;
     croak "Not a class method" unless ref $self;
 
@@ -67,7 +67,7 @@ sub get_version {
         $package;
 
     # translate in grabber namespace
-    $name = $self->get_name($name);
+    $name = $self->get_converted_package_name($name);
 
     # return if aliased to null 
     return unless $name;
@@ -76,26 +76,27 @@ sub get_version {
     return $self->_version($name);
 }
 
-=head2 get_url($name)
+=head2 get_package_url($name)
 
 Returns the URL of information source for package with given name.
 
 =cut
 
-sub get_url {
+sub get_package_url {
     my ($self, $name) = @_;
 
     # retun subclass computation
     return $self->_url($self->get_name($name));
 }
 
-=head2 get_name($name)
+=head2 get_converted_package_name($name)
 
-Returns name converted to specific source naming conventions for package with given name.
+Returns name converted to specific source naming conventions for package with
+given name.
 
 =cut
 
-sub get_name {
+sub get_converted_package_name {
     my ($self, $name) = @_;
     croak "Not a class method" unless ref $self;
 

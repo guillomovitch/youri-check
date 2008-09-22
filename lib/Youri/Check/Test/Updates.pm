@@ -177,7 +177,7 @@ sub run {
         $max_version = $current_version;
 
         foreach my $source (@sources) {
-            my $available_version = $source->get_version($package);
+            my $available_version = $source->get_package_version($package);
             if (
                 $available_version &&
                 (! $current_stable || is_stable($available_version)) &&
@@ -185,7 +185,7 @@ sub run {
             ) {
                 $max_version = $available_version;
                 $max_source  = $source->get_id();
-                $max_url     = $source->get_url($name);
+                $max_url     = $source->get_package_url($name);
             }
         }
         $self->get_database()->add_package_result(

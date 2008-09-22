@@ -36,7 +36,7 @@ No specific parameters.
 
 =cut
 
-sub get_version {
+sub get_package_version {
     my ($self, $package) = @_;
     croak "Not a class method" unless ref $self;
 
