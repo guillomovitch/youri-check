@@ -119,10 +119,10 @@ coerce 'HashRef[Youri::Check::Test::Updates::Source]'
             my $in = $_;
             my $out;
             foreach my $key (keys %$in) {
-                $out->{$key} = create_instance(
+            $out->{$key} = create_instance_from_configuration(
                     'Youri::Check::Test::Updates::Source',
-                    $in->{$key}->{class},
-                    $in->{$key}->{options},
+                    $in->{$key},
+                    {id => $key}
                 )
             }
             return $out;
@@ -145,7 +145,7 @@ sub BUILD {
     if ($params->{aliases}) {
         foreach my $alias (keys %{$params->{aliases}}) {
             foreach my $source (values %{$self->get_sources()}) {
-                $source->add_alias($alias, $params->{aliases}->{$alias});
+                $source->set_alias($alias, $params->{aliases}->{$alias});
             }
         }
     }
