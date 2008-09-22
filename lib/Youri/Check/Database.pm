@@ -129,14 +129,6 @@ sub register {
     $schema->storage($self->{_schema}->storage());
     $self->{_schema} = $schema;
 
-    # create additional tables
-    $self->{_schema}->deploy({
-        add_drop_table => 1,
-        parser_args => {
-            sources => [ $moniker ]
-        }
-    });
-
     my $last_run = $self->{_schema}->resultset('TestRun')->single({
         name => $moniker,
     });
@@ -144,10 +136,19 @@ sub register {
     if ($last_run) {
         # delete all previous results
         $self->{_schema}->resultset($moniker)->search()->delete();
+
         # update test run
         $last_run->date(time());
         $last_run->update();
     } else {
+        # create additional tables
+        $self->{_schema}->deploy({
+            add_drop_table => 1,
+            parser_args => {
+                sources => [ $moniker ]
+            }
+        });
+
         # create test run
         $self->{_schema}->resultset('TestRun')->create({
             name => $moniker,
