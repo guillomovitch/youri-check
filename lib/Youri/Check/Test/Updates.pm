@@ -12,13 +12,17 @@ Additional source plugins handle specific sources.
 
 =cut
 
-use warnings;
-use strict;
+use Moose::Policy 'Moose::Policy::FollowPBP';
+use Moose;
+use Moose::Util::TypeConstraints;
+use Scalar::Util qw(blessed);
+use List::MoreUtils qw(all);
 use Carp;
 use Memoize;
 use Youri::Utils;
-use base 'Youri::Check::Test';
 use version; our $VERSION = qv('0.1.0');
+
+extends 'Youri::Check::Test';
 
 my $descriptor = Youri::Check::Descriptor::Row->new(
     cells => [
@@ -65,6 +69,8 @@ sub get_descriptor {
     return $descriptor;
 }
 
+our $MONIKER = 'Updates';
+
 memoize('is_newer');
 
 our $VERSION_REGEXP = 'v?([\d._-]*\d)[._ -]*(?:(alpha|beta|pre|rc|pl|rev|cvs|svn|[a-z])[_ -.]*([\d.]*))?([_ -.]*.*)';
@@ -88,61 +94,71 @@ Hash of source plugins definitions
 =back
 
 =cut
+use Data::Dumper;
 
-sub _init {
-    my $self    = shift;
-    my %options = (
-        aliases => undef,
-        sources => undef,
-        @_
-    );
+subtype 'HashRef[Youri::Check::Test::Updates::Source]'
+    => as 'HashRef'
+    => where {
+        all {
+            blessed $_ &&
+            $_->isa('Youri::Check::Test::Updates::Source')
+        } values %$_;
+    };
 
-    croak "No source defined" unless $options{sources};
-    croak "sources should be an hashref" unless ref $options{sources} eq 'HASH';
-    if ($options{aliases}) {
-        croak "aliases should be an hashref" unless ref $options{aliases} eq 'HASH';
-    }
-
-    foreach my $id (keys %{$options{sources}}) {
-        print "Creating source $id\n" if $options{verbose};
-        eval {
-            # add global aliases if defined
-            if ($options{aliases}) {
-                foreach my $alias (keys %{$options{aliases}}) {
-                    $options{sources}->{$id}->{aliases}->{$alias} =
-                    $options{aliases}->{$alias}
-                }
-            }
-
-            my $source_conf = $options{sources}->{$id};
-            push(
-                @{$self->{_sources}},
-                create_instance(
+subtype 'HashRef[HashRef]'
+    => as 'HashRef'
+    => where {
+        all {
+            ref($_) eq 'HASH'
+        } values %$_;
+    };
+  
+coerce 'HashRef[Youri::Check::Test::Updates::Source]'
+    => from 'HashRef[HashRef]'
+        => via {
+            my $in = $_;
+            my $out;
+            foreach my $key (keys %$in) {
+                $out->{$key} = create_instance(
                     'Youri::Check::Test::Updates::Source',
-                    $source_conf,
-                    {
-                        id          => $id,
-                        test        => $options{test},
-                        verbose     => $options{verbose},
-                        check_id    => $options{id},
-                        resolver    => $options{resolver},
-                        preferences => $options{preferences},
-                    }
+                    $in->{$key}->{class},
+                    $in->{$key}->{options},
                 )
-            );
+            }
+            return $out;
         };
-        print STDERR "Failed to create source $id: $@\n" if $@;
-    }
 
-    croak "no sources created" unless @{$self->{_sources}};
+has 'aliases' => (
+    is => 'rw',
+    isa => 'HashRef[Str]'
+);
+has 'sources' => (
+    is       => 'rw',
+    isa      => 'HashRef[Youri::Check::Test::Updates::Source]',
+    coerce   => 1,
+    required => 1
+);
+
+sub BUILD {
+    my ($self, $params) = @_;
+
+    if ($params->{aliases}) {
+        foreach my $alias (keys %{$params->{aliases}}) {
+            foreach my $source (values %{$self->get_sources()}) {
+                $source->add_alias($alias, $params->{aliases}->{$alias});
+            }
+        }
+    }
 }
 
 sub run {
-    my ($self, $media, $resultset) = @_;
+    my ($self, $media) = @_;
     croak "Not a class method" unless ref $self;
     
     # this is a source media check only
     return unless $media->get_type() eq 'source';
+
+    my @sources = values %{$self->get_sources()};
 
     my $callback = sub {
         my ($package) = @_;
@@ -160,7 +176,7 @@ sub run {
         my ($max_version, $max_source, $max_url);
         $max_version = $current_version;
 
-        foreach my $source (@{$self->{_sources}}) {
+        foreach my $source (@sources) {
             my $available_version = $source->get_version($package);
             if (
                 $available_version &&
@@ -172,11 +188,13 @@ sub run {
                 $max_url     = $source->get_url($name);
             }
         }
-        $resultset->add_result($self->{_id}, $media, $package, {
-            current   => $current_version,
-            available => $max_version,
-            source    => $max_source,
-            url       => $max_url
+        $self->get_database()->add_package_result(
+            $MONIKER, $media, $package,
+            {
+                current   => $current_version,
+                available => $max_version,
+                source    => $max_source,
+                url       => $max_url
         }) if $max_version ne $current_version;
     };
 
