@@ -16,6 +16,11 @@ use Moose::Policy 'Moose::Policy::FollowPBP';
 use Moose;
 use Carp;
 
+has 'id' => (
+    is => 'rw',
+    isa => 'Str'
+);
+
 has 'aliases' => (
     is => 'rw',
     isa => 'HashRef[Str]'
@@ -41,67 +46,10 @@ Warning: do not call directly, call subclass constructor instead.
 
 =cut
 
-sub new {
-    my $class = shift;
-    croak "Abstract class" if $class eq __PACKAGE__;
-
-    my %options = (
-        id          => '',    # object id
-        test        => 0,     # test mode
-        verbose     => 0,     # verbose mode
-        aliases     => undef, # aliases
-        resolver    => undef, # maintainer resolver
-        preferences => undef, # maintainer preferences
-        check_id    => '',    # parent check id
-        @_
-    );
-
-    if ($options{aliases}) {
-        croak "aliases should be an hashref" unless ref $options{aliases} eq 'HASH';
-    }
-    if ($options{resolver}) {
-        croak "resolver should be a Youri::Check::Maintainer::Resolver object" unless $options{resolver}->isa("Youri::Check::Maintainer::Resolver");
-    }
-    if ($options{preferences}) {
-        croak "preferences should be a Youri::Check::Maintainer::Preferences object" unless $options{preferences}->isa("Youri::Check::Maintainer::Preferences");
-    }
-
-    my $self = bless {
-        _id          => $options{id},
-        _test        => $options{test},
-        _verbose     => $options{verbose},
-        _aliases     => $options{aliases},
-        _resolver    => $options{resolver},
-        _preferences => $options{preferences},
-        _check_id    => $options{check_id},
-    }, $class;
-
-    $self->_init(%options);
-
-    return $self;
-}
-
-sub _init {
-    # do nothing
-}
-
 =head1 INSTANCE METHODS
 
 Excepted explicit statement, package name is expressed with Mandriva naming
 conventions.
-
-=head2 get_id()
-
-Returns source identity.
-
-=cut
-
-sub get_id {
-    my ($self) = @_;
-    croak "Not a class method" unless ref $self;
-
-    return $self->{_id};
-}
 
 =head2 get_version($package)
 
