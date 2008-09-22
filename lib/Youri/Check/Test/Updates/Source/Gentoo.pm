@@ -12,10 +12,19 @@ available from Gentoo.
 
 =cut
 
-use warnings;
-use strict;
+use Moose::Policy 'Moose::Policy::FollowPBP';
+use Moose;
+use Youri::Check::Types;
 use Carp;
-use base 'Youri::Check::Test::Updates::Source';
+
+extends 'Youri::Check::Test::Updates::Source';
+
+has 'url' => (
+    is => 'rw',
+    isa => 'Uri',
+    default => 'http://gentoo.mirror.sdv.fr/snapshots'
+);
+
 
 =head2 new(%args)
 
@@ -35,15 +44,12 @@ http://gentoo.mirror.sdv.fr/snapshots)
 =cut
 
 
-sub _init {
-    my $self    = shift;
-    my %options = (
-        url => 'http://gentoo.modulix.net/gentoo/snapshots', # default URL
-        @_
-    );
+sub BUILD {
+    my ($self, $params) = @_;
 
     my $versions;
-    my $command = "GET $options{url}/portage-latest.tar.bz2 | tar tjf -";
+    my $command =
+        'GET ' . $self->get_url() . '/portage-latest.tar.bz2 | tar tjf -';
     open(my $input, '-|', $command) or croak "Can't run $command: $!";
     while (my $line = <$input>) {
         next unless $line =~ /.*\/([\w-]+)-([\d\.]+)(:?-r\d)?\.ebuild$/;

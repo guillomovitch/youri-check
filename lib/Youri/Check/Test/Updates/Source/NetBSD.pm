@@ -3,7 +3,7 @@ package Youri::Check::Test::Updates::Source::NetBSD;
 
 =head1 NAME
 
-Youri::Check::Test::Updates::Source::NetBSD - NetBSD source for updates
+Youri::Check::Test::Updates::Source::NetBSD - NetBSD updates source
 
 =head1 DESCRIPTION
 
@@ -12,11 +12,18 @@ This source plugin for L<Youri::Check::Test::Updates> collects updates
 
 =cut
 
-use warnings;
-use strict;
-use Carp;
+use Moose::Policy 'Moose::Policy::FollowPBP';
+use Moose;
+use Youri::Check::Types;
 use LWP::UserAgent;
-use base 'Youri::Check::Test::Updates::Source';
+
+extends 'Youri::Check::Test::Updates::Source';
+
+has 'url' => (
+    is => 'rw',
+    isa => 'Uri',
+    default => 'http://ftp.free.fr/mirrors/ftp.netbsd.org/NetBSD-current/pkgsrc/README-all.html'
+);
 
 =head2 new(%args)
 
@@ -28,18 +35,14 @@ Specific parameters:
 
 =item url $url
 
-URL to NetBSD mirror content file, without ftp: (default: //ftp.free.fr/mirrors/ftp.netbsd.org/NetBSD-current/pkgsrc/README-all.html)
+URL to NetBSD mirror content file: (default: http://ftp.free.fr/mirrors/ftp.netbsd.org/NetBSD-current/pkgsrc/README-all.html)
 
 =back
 
 =cut
 
-sub _init {
-    my $self    = shift;
-    my %options = (
-        url => '//ftp.free.fr/mirrors/ftp.netbsd.org/NetBSD-current/pkgsrc/README-all.html',
-        @_
-    );
+sub BUILD {
+    my ($self, $params) = @_;
 
     my $agent = LWP::UserAgent->new();
     my $buffer = '';
@@ -64,7 +67,7 @@ sub _init {
         $buffer = substr($data, pos $data);
     };
 
-    $agent->get($options{url}, ':content_cb' => $callback);
+    $agent->get($self->get_url(), ':content_cb' => $callback);
 }
 
 sub _url {

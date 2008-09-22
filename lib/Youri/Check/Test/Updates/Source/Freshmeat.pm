@@ -3,7 +3,7 @@ package Youri::Check::Test::Updates::Source::Freshmeat;
 
 =head1 NAME
 
-Youri::Check::Test::Updates::Source::Freshmeat - Freshmeat source for updates
+Youri::Check::Test::Updates::Source::Freshmeat - Freshmeat updates source
 
 =head1 DESCRIPTION
 
@@ -12,12 +12,25 @@ available from Freshmeat.
 
 =cut
 
-use warnings;
-use strict;
+use Moose::Policy 'Moose::Policy::FollowPBP';
+use Moose;
+use Youri::Check::Types;
 use Carp;
 use XML::Twig;
 use LWP::UserAgent;
-use base 'Youri::Check::Test::Updates::Source';
+
+extends 'Youri::Check::Test::Updates::Source';
+
+has 'url' => (
+    is => 'rw',
+    isa => 'Uri',
+    default => 'http://download.freshmeat.net/backend/fm-projects.rdf.bz2'
+);
+has 'preload' => (
+    is => 'rw',
+    isa => 'Bool',
+    default => 0
+);
 
 =head2 new(%args)
 
@@ -36,14 +49,10 @@ Allows to load full Freshmeat catalogue at once instead of checking each softwar
 
 =cut
 
-sub _init {
-    my $self    = shift;
-    my %options = (
-        preload => 0,
-        @_
-    );
+sub BUILD {
+    my ($self, $params) = @_;
 
-    if ($options{preload}) {
+    if ($params{preload}) {
         my $versions;
         
         my $project = sub {
@@ -58,8 +67,7 @@ sub _init {
            TwigRoots => { project => $project }
         );
 
-        my $url = 'http://download.freshmeat.net/backend/fm-projects.rdf.bz2';
-        my $command = "GET $url | bzcat";
+        my $command = 'GET '. $self->get_url() . '| bzcat';
         open(my $input, '-|', $command) or croak "Can't run $command: $!\n";
         $twig->parse($input);
         close $input;

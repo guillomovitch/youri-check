@@ -12,11 +12,18 @@ available from Fedora.
 
 =cut
 
-use warnings;
-use strict;
-use Carp;
+use Moose::Policy 'Moose::Policy::FollowPBP';
+use Moose;
+use Youri::Check::Types;
 use LWP::UserAgent;
-use base 'Youri::Check::Test::Updates::Source';
+
+extends 'Youri::Check::Test::Updates::Source';
+
+has 'url' => (
+    is => 'rw',
+    isa => 'Uri',
+    default => 'http://fr.rpmfind.net/linux/fedora/core/development/source/SRPMS'
+);
 
 =head2 new(%args)
 
@@ -35,12 +42,8 @@ http://fr.rpmfind.net/linux/fedora/core/development/source/SRPMS)
 
 =cut
 
-sub _init {
-    my $self    = shift;
-    my %options = (
-        url => 'http://fr.rpmfind.net/linux/fedora/core/development/source/SRPMS',
-        @_
-    );
+sub BUILD {
+    my ($self, $params) = @_;
 
     my $agent = LWP::UserAgent->new();
     my $buffer = '';
@@ -62,7 +65,7 @@ sub _init {
         $buffer = substr($data, pos $data);
     };
 
-    $agent->get($options{url}, ':content_cb' => $callback);
+    $agent->get($self->get_url(), ':content_cb' => $callback);
 }
 
 =head1 COPYRIGHT AND LICENSE

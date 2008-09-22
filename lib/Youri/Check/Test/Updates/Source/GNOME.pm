@@ -12,13 +12,26 @@ available from GNOME.
 
 =cut
 
-use warnings;
-use strict;
+use Moose::Policy 'Moose::Policy::FollowPBP';
+use Moose;
+use Youri::Check::Types;
 use Carp;
 use LWP::UserAgent;
 use HTML::TokeParser;
 use List::MoreUtils 'any';
-use base 'Youri::Check::Test::Updates::Source';
+
+extends 'Youri::Check::Test::Updates::Source';
+
+has 'url' => (
+    is => 'rw',
+    isa => 'Uri',
+    default => 'http://fr2.rpmfind.net/linux/gnome.org/sources'
+);
+has 'agent' => (
+    is => 'ro',
+    isa => 'LWP::UserAgent'
+    default => sub { LWP::UserAgent->new() } 
+);
 
 =head2 new(%args)
 
@@ -37,16 +50,10 @@ http://fr2.rpmfind.net/linux/gnome.org/sources)
 
 =cut
 
-sub _init {
-    my $self    = shift;
-    my %options = (
-        url => 'http://fr2.rpmfind.net/linux/gnome.org/sources/', # default url
-	# We use HTTP as it offers a better sorting (1.2 < 1.10)
-        @_
-    );
+sub BUILD {
+    my ($self, $params) = @_;
 
-    $self->{_agent} = LWP::UserAgent->new();
-    my $response = $self->{_agent}->get($options{url});
+    my $response = $self->get_agent()->get($self->get_url());
     if($response->is_success()) {
         my $parser = HTML::TokeParser->new(\$response->content());
         my $pattern = qr/^([-\w]+)\/$/;
@@ -56,8 +63,6 @@ sub _init {
             $self->{_names}->{$1} = 1;
         }
     }
-
-    $self->{_url} = $options{url};
 }
 
 sub _version {
@@ -66,34 +71,38 @@ sub _version {
 
     return unless $self->{_names}->{$name};
     
-    my $response = $self->{_agent}->get("$self->{_url}/$name/");
-    if($response->is_success()) {
-        my $major;
-        my $parser = HTML::TokeParser->new(\$response->content());
-        my $pattern = qr/^([.\d]+)\/$/;
-        while (my $token = $parser->get_tag('a')) {
-            my $href = $token->[1]->{href};
-            next unless $href =~ $pattern;
-            $major = $1;
-        }
-        return unless $major;
+    my $response = $self->get_agent()->get(
+        $self->get_url() . "/$name/"
+    );
+    return unless $response->is_success();
 
-        $response = $self->{_agent}->get("$self->{_url}/$name/$major/");
-        if($response->is_success()) {
-            $parser = HTML::TokeParser->new(\$response->content());
-            $pattern = qr/^LATEST-IS-([.\d]+)$/;
-            while (my $token = $parser->get_tag('a')) {
-                my $href = $token->[1]->{href};
-                next unless $href =~ $pattern;
-                return $1;
-            }
-        }
+    my $major;
+    my $parser = HTML::TokeParser->new(\$response->content());
+    my $pattern = qr/^([.\d]+)\/$/;
+    while (my $token = $parser->get_tag('a')) {
+        my $href = $token->[1]->{href};
+        next unless $href =~ $pattern;
+        $major = $1;
+    }
+    return unless $major;
+
+    $response = $self->get_agent()->get(
+        $self->get_url() . "/$name/$major/"
+    );
+    return unless $response->is_success();
+
+    $parser = HTML::TokeParser->new(\$response->content());
+    $pattern = qr/^LATEST-IS-([.\d]+)$/;
+    while (my $token = $parser->get_tag('a')) {
+        my $href = $token->[1]->{href};
+        next unless $href =~ $pattern;
+        return $1;
     }
 }
 
 sub _url {
     my ($self, $name) = @_;
-    return $self->{_url}."$name/";
+    return $self->get_url() . "/$name/";
 }
 
 =head1 COPYRIGHT AND LICENSE

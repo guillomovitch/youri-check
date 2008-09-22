@@ -12,11 +12,18 @@ available from CPAN.
 
 =cut
 
-use warnings;
-use strict;
-use Carp;
+use Moose::Policy 'Moose::Policy::FollowPBP';
+use Moose;
+use Youri::Check::Types;
 use LWP::UserAgent;
-use base 'Youri::Check::Test::Updates::Source';
+
+extends 'Youri::Check::Test::Updates::Source';
+
+has 'url' => (
+    is => 'rw',
+    isa => 'Uri',
+    default => 'http://www.cpan.org/modules/01modules.index.html'
+);
 
 =head2 new(%args)
 
@@ -36,12 +43,8 @@ http://www.cpan.org/modules/01modules.index.html)
 =cut
 
 
-sub _init {
-    my $self    = shift;
-    my %options = (
-        url => 'http://www.cpan.org/modules/01modules.index.html',
-        @_
-    );
+sub BUILD {
+    my ($self, $params) = @_;
 
     my $agent = LWP::UserAgent->new();
     my $buffer = '';
@@ -63,7 +66,7 @@ sub _init {
         $buffer = substr($data, pos $data);
     };
 
-    $agent->get($options{url}, ':content_cb' => $callback);
+    $agent->get($self->get_url(), ':content_cb' => $callback);
 }
 
 sub _url {

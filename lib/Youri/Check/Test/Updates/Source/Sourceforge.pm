@@ -12,13 +12,20 @@ available from Sourceforge.
 
 =cut
 
-use warnings;
-use strict;
+use Moose::Policy 'Moose::Policy::FollowPBP';
+use Moose;
 use Carp;
 use LWP::UserAgent;
 use HTML::TokeParser;
 use Youri::Check::Test::Updates;
-use base 'Youri::Check::Test::Updates::Source';
+
+extends 'Youri::Check::Test::Updates::Source';
+
+has 'agent' => (
+    is => 'ro',
+    isa => 'LWP::UserAgent'
+    default => sub { LWP::UserAgent->new() } 
+);
 
 =head2 new(%args)
 
@@ -28,15 +35,6 @@ object.
 No specific parameters.
 
 =cut
-
-sub _init {
-    my $self    = shift;
-    my %options = (
-        @_
-    );
-
-    $self->{_agent} = LWP::UserAgent->new();
-}
 
 sub get_version {
     my ($self, $package) = @_;
@@ -64,7 +62,7 @@ sub get_version {
     # return if aliased to null 
     return unless $name;
 
-    my $response = $self->{_agent}->get($self->_url($name));
+    my $response = $self->get_agent()>get($self->_url($name));
     if($response->is_success()) {
         my $max = 0;
         my $parser = HTML::TokeParser->new(\$response->content());

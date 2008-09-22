@@ -12,12 +12,25 @@ available from RAA.
 
 =cut
 
-use warnings;
-use strict;
+use Moose::Policy 'Moose::Policy::FollowPBP';
+use Moose;
+use Youri::Check::Types;
 use Carp;
 use SOAP::Lite;
 use List::MoreUtils 'any';
-use base 'Youri::Check::Test::Updates::Source';
+
+extends 'Youri::Check::Test::Updates::Source';
+
+has 'url' => (
+    is => 'rw',
+    isa => 'Uri',
+    default => 'http://www2.ruby-lang.org/xmlns/soap/interface/RAA/0.0.4'
+);
+has 'raa' => (
+    is => 'ro',
+    isa => 'SOAP::Lite'
+    default => sub { SOAP::Lite->new() } 
+);
 
 =head2 new(%args)
 
@@ -36,17 +49,12 @@ http://www2.ruby-lang.org/xmlns/soap/interface/RAA/0.0.4)
 
 =cut
 
-sub _init {
-    my $self    = shift;
-    my %options = (
-        url => 'http://www2.ruby-lang.org/xmlns/soap/interface/RAA/0.0.4/',
-        @_
-    );
+sub BUILD {
+    my ($self, $params) = @_;
 
-    my $raa = SOAP::Lite->service($options{url})
-        or croak "Can't connect to $options{url}";
+    $self->get_raa()->service($self->get_url())
+        or croak "Can't connect to " . $self->get_url();
     
-    $self->{_raa}   = $raa;
     $self->{_names} = $raa->names();
 }
 

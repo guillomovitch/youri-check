@@ -12,9 +12,14 @@ L<Youri::Check::Test::Updates>.
 
 =cut
 
-use warnings;
-use strict;
+use Moose::Policy 'Moose::Policy::FollowPBP';
+use Moose;
 use Carp;
+
+has 'aliases' => (
+    is => 'rw',
+    isa => 'HashRef[Str]'
+);
 
 =head1 CLASS METHODS
 

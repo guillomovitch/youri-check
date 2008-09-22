@@ -3,7 +3,7 @@ package Youri::Check::Test::Updates::Source::Debian;
 
 =head1 NAME
 
-Youri::Check::Test::Updates::Source::Debian - Debian source for updates
+Youri::Check::Test::Updates::Source::Debian - Debian updates source
 
 =head1 DESCRIPTION
 
@@ -12,10 +12,17 @@ This source plugin for L<Youri::Check::Test::Updates> collects updates
 
 =cut
 
-use warnings;
-use strict;
-use Carp;
-use base 'Youri::Check::Test::Updates::Source';
+use Moose::Policy 'Moose::Policy::FollowPBP';
+use Moose;
+use Youri::Check::Types;
+
+extends 'Youri::Check::Test::Updates::Source';
+
+has 'url' => (
+    is => 'rw',
+    isa => 'Uri',
+    default => 'http://ftp.debian.org/ls-lR.gz'
+)
 
 =head2 new(%args)
 
@@ -33,17 +40,13 @@ URL to Debian mirror content file (default: http://ftp.debian.org/ls-lR.gz)
 
 =cut
 
-sub _init {
-    my $self    = shift;
-    my %options = (
-        url => 'http://ftp.debian.org/ls-lR.gz',
-        @_
-    );
+sub BUILD {
+    my ($self, $params) = @_;
 
     my $versions;
     my $pattern = qr/([\w\.-]+)_([\d\.]+)\.orig\.tar\.gz$/;
-    my $command = "GET $options{url} | zcat";
-    open(my $input, '-|', $command) or croak "Can't fetch $options{url}: $!";
+    my $command = 'GET ' . $self->get_url() . '| zcat';
+    open(my $input, '-|', $command) or croak "Can't run $command: $!\n";
     while (my $line = <$input>) {
         next unless $line =~ $pattern;
         my $name = $1;
