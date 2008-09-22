@@ -69,6 +69,11 @@ sub BUILD {
     $agent->get($self->get_url(), ':content_cb' => $callback);
 }
 
+sub _get_package_version {
+    my ($self, $name) = @_;
+    return $self->{_versions}->{$name};
+}
+
 sub _get_package_url {
     my ($self, $name) = @_;
     return "http://search.cpan.org/dist/$name";

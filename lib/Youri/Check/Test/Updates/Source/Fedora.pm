@@ -68,6 +68,11 @@ sub BUILD {
     $agent->get($self->get_url(), ':content_cb' => $callback);
 }
 
+sub _get_package_version {
+    my ($self, $name) = @_;
+    return $self->{_versions}->{$name};
+}
+
 =head1 COPYRIGHT AND LICENSE
 
 Copyright (C) 2002-2006, YOURI project

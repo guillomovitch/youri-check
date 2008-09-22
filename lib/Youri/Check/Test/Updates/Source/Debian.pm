@@ -14,6 +14,7 @@ This source plugin for L<Youri::Check::Test::Updates> collects updates
 
 use Moose::Policy 'Moose::Policy::FollowPBP';
 use Moose;
+use Carp;
 use Youri::Check::Types;
 
 extends 'Youri::Check::Test::Updates::Source';
@@ -22,7 +23,7 @@ has 'url' => (
     is => 'rw',
     isa => 'Uri',
     default => 'http://ftp.debian.org/ls-lR.gz'
-)
+);
 
 =head2 new(%args)
 
@@ -56,6 +57,11 @@ sub BUILD {
     close $input;
 
     $self->{_versions} = $versions;
+}
+
+sub _get_package_version {
+    my ($self, $name) = @_;
+    return $self->{_versions}->{$name};
 }
 
 sub _get_package_url {

@@ -67,7 +67,6 @@ sub BUILD {
 
 sub _get_package_version {
     my ($self, $name) = @_;
-    croak "Not a class method" unless ref $self;
 
     return unless $self->{_names}->{$name};
     

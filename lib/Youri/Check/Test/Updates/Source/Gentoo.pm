@@ -60,6 +60,11 @@ sub BUILD {
     $self->{_versions} = $versions;
 }
 
+sub _get_package_version {
+    my ($self, $name) = @_;
+    return $self->{_versions}->{$name};
+}
+
 sub _get_package_url {
     my ($self, $name) = @_;
     return "http://packages.gentoo.org/search/?sstring=$name";
