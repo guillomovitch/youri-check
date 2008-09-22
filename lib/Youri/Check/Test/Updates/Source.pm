@@ -14,6 +14,7 @@ L<Youri::Check::Test::Updates>.
 
 use Moose::Policy 'Moose::Policy::FollowPBP';
 use Moose;
+use MooseX::AttributeHelpers;
 use Carp;
 
 has 'id' => (
@@ -22,8 +23,14 @@ has 'id' => (
 );
 
 has 'aliases' => (
+    metaclass => 'Collection::Hash',
     is => 'rw',
-    isa => 'HashRef[Str]'
+    isa => 'HashRef[Str]',
+    provides  => {
+        exists => 'has_alias',
+        get    => 'get_alias',
+        set    => 'set_alias',
+    },
 );
 
 =head1 CLASS METHODS
@@ -111,10 +118,8 @@ sub get_converted_package_name {
         $package;
 
     # return alias if defined
-    my $aliases = $self->get_aliases();
-    if ($aliases) {
-        return $aliases->{$name} if exists $aliases->{$name};
-    }
+    return $self->get_alias($name)
+        if $self->has_alias($name);
 
     # otherwise return subclass computation
     return $self->_get_converted_package_name($name);
