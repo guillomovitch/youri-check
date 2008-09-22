@@ -104,26 +104,6 @@ sub get_name {
         return $self->{_aliases}->{$name} if exists $self->{_aliases}->{$name};
     }
 
-    # return maintainer aliases if it exists
-    if ($self->{_resolver} && $self->{_preferences}) {
-        my $maintainer = $self->{_resolver}->get_maintainer($name);
-        if ($maintainer) {
-            my $aliases = $self->{_preferences}->get_preference(
-                $maintainer,
-                $self->{_check_id},
-                'aliases'
-            );
-            if ($aliases) {
-                if ($aliases->{all}) {
-                    return $aliases->{all}->{$name} if exists $aliases->{all}->{$name};
-                }
-                if ($aliases->{$self->{_id}}) {
-                    return $aliases->{$self->{_id}}->{$name} if exists $aliases->{$self->{_id}}->{$name};
-                }
-            }
-        }
-    }
-
     # return return subclass computation
     return $self->_name($name);
 }
