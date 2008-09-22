@@ -184,6 +184,27 @@ sub add_package_file_result {
     $new_result->update();
 }
 
+sub add_package_result {
+    my ($self, $moniker, $media, $package, $values) = @_;
+    croak "Not a class method" unless ref $self;
+    croak "No moniker defined" unless $moniker;
+    croak "No media defined" unless $media;
+    croak "No package defined" unless $package;
+    croak "No values defined" unless $values;
+
+    print "adding result for test $moniker and package $package\n"
+        if $self->{_verbose} > 1;
+
+    my $package_id =
+        $self->get_package_id($package) ||
+        $self->add_package($media, $package);
+
+    $self->{_schema}->resultset($moniker)->create({
+        package_id => $package_id,
+        %{$values}
+    })->update();
+}
+
 sub add_section {
     my ($self, $name) = @_;
 
