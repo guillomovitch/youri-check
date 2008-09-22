@@ -69,12 +69,12 @@ sub BUILD {
     $agent->get($self->get_url(), ':content_cb' => $callback);
 }
 
-sub _url {
+sub _get_package_url {
     my ($self, $name) = @_;
     return "http://search.cpan.org/dist/$name";
 }
 
-sub _name {
+sub _get_converted_package_name {
     my ($self, $name) = @_;
     $name =~ s/^perl-//g;
     return $name;

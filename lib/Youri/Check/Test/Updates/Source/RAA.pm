@@ -78,7 +78,7 @@ sub get_package_version {
     }
 
     # translate in grabber namespace
-    $name = $self->get_name($name);
+    $name = $self->get_converted_package_name($name);
 
     # return if aliased to null 
     return unless $name;
@@ -92,12 +92,12 @@ sub get_package_version {
     return;
 }
 
-sub _url {
+sub _get_package_url {
     my ($self, $name) = @_;
     return "http://raa.ruby-lang.org/project/$name/";
 }
 
-sub _name {
+sub _get_package_name {
     my ($self, $name) = @_;
 
     if (ref $self) {

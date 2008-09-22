@@ -85,7 +85,7 @@ sub get_package_version {
     return;
 }
 
-sub _url {
+sub _get_package_url {
     my ($self, $name) = @_;
     return "http://prdownloads.sourceforge.net/$name/";
 }

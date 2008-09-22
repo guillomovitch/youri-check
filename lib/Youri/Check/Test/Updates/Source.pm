@@ -72,73 +72,84 @@ sub get_package_version {
     # return if aliased to null 
     return unless $name;
 
-    # return subclass computation
-    return $self->_version($name);
+    # otherwise return subclass computation
+    return $self->_get_package_version($name);
 }
 
-=head2 get_package_url($name)
+=head2 get_package_url($package)
 
-Returns the URL of information source for package with given name.
+Returns the URL of information source for package with given name, which
+can be either a full L<Youri::Package> object or just a package name.
 
 =cut
 
 sub get_package_url {
-    my ($self, $name) = @_;
+    my ($self, $package) = @_;
+    croak "Not a class method" unless ref $self;
+
+    my $name = ref $package && $package->isa('Youri::Package') ?
+        $package->get_canonical_name() :
+        $package;
 
     # retun subclass computation
-    return $self->_url($self->get_name($name));
+    return $self->_get_package_url($self->get_converted_package_name($name));
 }
 
 =head2 get_converted_package_name($name)
 
-Returns name converted to specific source naming conventions for package with
-given name.
+Returns name converted to specific source naming conventions for package, which
+can be either a full L<Youri::Package> object or just a package name.
 
 =cut
 
 sub get_converted_package_name {
-    my ($self, $name) = @_;
+    my ($self, $package) = @_;
     croak "Not a class method" unless ref $self;
 
-    # return config aliases if it exists
-    if ($self->{_aliases} ) {
-        return $self->{_aliases}->{$name} if exists $self->{_aliases}->{$name};
+    my $name = ref $package && $package->isa('Youri::Package') ?
+        $package->get_canonical_name() :
+        $package;
+
+    # return alias if defined
+    my $aliases = $self->get_aliases();
+    if ($aliases) {
+        return $aliases->{$name} if exists $aliases->{$name};
     }
 
-    # return return subclass computation
-    return $self->_name($name);
+    # otherwise return subclass computation
+    return $self->_get_converted_package_name($name);
 }
 
-=head2 _version($name)
+=head2 _get_package_version($name)
 
 Hook called by default B<version()> implementation after name translation.
 
 =cut
 
-sub _version {
+sub _get_package_version {
     my ($self, $name) = @_;
-    return $self->{_versions}->{$name};
+    return undef;
 }
 
-=head2 _url($name)
+=head2 _get_package_url($name)
 
 Hook called by default B<url()> implementation after name translation.
 
 =cut
 
-sub _url {
+sub _get_package_url {
     my ($self, $name) = @_;
-    return;
+    return undef;
 }
 
-=head2 _name($name)
+=head2 _get_package_name($name)
 
 Hook called by default B<name()> implementation if given name was not found in
 the aliases.
 
 =cut
 
-sub _name {
+sub _get_package_name {
     my ($self, $name) = @_;
     return $name;
 }

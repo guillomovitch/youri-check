@@ -65,7 +65,7 @@ sub BUILD {
     }
 }
 
-sub _version {
+sub _get_package_version {
     my ($self, $name) = @_;
     croak "Not a class method" unless ref $self;
 
@@ -100,7 +100,7 @@ sub _version {
     }
 }
 
-sub _url {
+sub _get_package_url {
     my ($self, $name) = @_;
     return $self->get_url() . "/$name/";
 }

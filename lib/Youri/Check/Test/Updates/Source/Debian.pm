@@ -58,12 +58,12 @@ sub BUILD {
     $self->{_versions} = $versions;
 }
 
-sub _url {
+sub _get_package_url {
     my ($self, $name) = @_;
     return "http://packages.debian.org/$name";
 }
 
-sub _name {
+sub _get_package_name {
     my ($self, $name) = @_;
     
     if ($name =~ /^(perl|ruby)-([-\w]+)$/) {

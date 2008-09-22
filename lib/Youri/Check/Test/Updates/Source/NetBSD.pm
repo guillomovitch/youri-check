@@ -70,7 +70,7 @@ sub BUILD {
     $agent->get($self->get_url(), ':content_cb' => $callback);
 }
 
-sub _url {
+sub _get_package_url {
     my ($self, $name) = @_;
     return $self->{_urls}->{$name};
 }
