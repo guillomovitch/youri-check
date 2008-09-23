@@ -12,11 +12,12 @@ source plugins handle specific sources.
 
 =cut
 
-use warnings;
-use strict;
+use Moose::Policy 'Moose::Policy::FollowPBP';
+use Moose;
 use Carp;
 use Youri::Utils;
-use base 'Youri::Check::Plugin::Test';
+
+extends 'Youri::Check::Plugin::Test';
 
 my $descriptor = Youri::Check::Descriptor::Row->new(
     cells => [

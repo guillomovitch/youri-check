@@ -11,12 +11,13 @@ This plugin checks packages files, and report conflict and duplications.
 
 =cut
 
-use warnings;
-use strict;
+use Moose::Policy 'Moose::Policy::FollowPBP';
+use Moose;
 use Carp;
 use constant;
 use Youri::Package;
-use base 'Youri::Check::Plugin::Test';
+
+extends 'Youri::Check::Plugin::Test';
 
 use constant PACKAGE   => 0;
 use constant DIRECTORY => 1;

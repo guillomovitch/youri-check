@@ -12,9 +12,14 @@ L<Youri::Check::Plugin::Test::Build>.
 
 =cut
 
-use warnings;
-use strict;
+use Moose::Policy 'Moose::Policy::FollowPBP';
+use Moose;
 use Carp;
+
+has 'id' => (
+    is => 'rw',
+    isa => 'Str'
+);
 
 =head1 CLASS METHODS
 
@@ -28,46 +33,7 @@ Warning: do not call directly, call subclass constructor instead.
 
 =cut
 
-sub new {
-    my $class = shift;
-    croak "Abstract class" if $class eq __PACKAGE__;
-
-    my %options = (
-        id        => '',    # object id
-        test      => 0,     # test mode
-        verbose   => 0,     # verbose mode
-        @_
-    );
-
-    my $self = bless {
-        _id        => $options{id},
-        _test      => $options{test},
-        _verbose   => $options{verbose},
-    }, $class;
-
-    $self->_init(%options);
-
-    return $self;
-}
-
-sub _init {
-    # do nothing
-}
-
 =head1 INSTANCE METHODS
-
-=head2 get_id()
-
-Returns source identity.
-
-=cut
-
-sub get_id {
-    my ($self) = @_;
-    croak "Not a class method" unless ref $self;
-
-    return $self->{_id};
-}
 
 =head2 fails($name, $version, $release, $arch, $media)
 

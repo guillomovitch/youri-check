@@ -16,12 +16,13 @@ especially when given explicit arch and medias limitations.
 
 =cut
 
-use warnings;
-use strict;
+use Moose::Policy 'Moose::Policy::FollowPBP';
+use Moose;
 use Carp;
 use LWP::UserAgent;
 use HTML::TokeParser;
-use base 'Youri::Check::Plugin::Test::Build::Source';
+
+extends 'Youri::Check::Plugin::Test::Build::Source';
 
 my %status = (
     install_deps => 0,

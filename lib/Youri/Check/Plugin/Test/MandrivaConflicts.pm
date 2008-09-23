@@ -12,11 +12,12 @@ packaging policy.
 
 =cut
 
-use warnings;
-use strict;
+use Moose::Policy 'Moose::Policy::FollowPBP';
+use Moose;
 use Carp;
 use Youri::Package;
-use base 'Youri::Check::Plugin::Test::Conflicts';
+
+extends 'Youri::Check::Plugin::Test::Conflicts';
 
 sub _directory_duplicate_exception {
     my ($self, $package1, $package2, $file) = @_;

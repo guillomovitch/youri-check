@@ -11,10 +11,11 @@ This plugin checks packages signature, and report unsigned ones.
 
 =cut
 
-use warnings;
-use strict;
+use Moose::Policy 'Moose::Policy::FollowPBP';
+use Moose;
 use Carp;
-use base 'Youri::Check::Plugin::Test';
+
+extends 'Youri::Check::Plugin::Test';
 
 my $descriptor = Youri::Check::Descriptor::Row->new(
     cells => [
