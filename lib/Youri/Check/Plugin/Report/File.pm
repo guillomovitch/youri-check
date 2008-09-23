@@ -18,7 +18,6 @@ use Carp;
 use File::Path;
 use Youri::Utils;
 use base 'Youri::Check::Plugin::Report';
-use version; our $VERSION = qv('0.1.0');
 
 sub _init {
     my $self = shift;

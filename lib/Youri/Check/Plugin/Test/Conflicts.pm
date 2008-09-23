@@ -17,7 +17,6 @@ use Carp;
 use constant;
 use Youri::Package;
 use base 'Youri::Check::Plugin::Test';
-use version; our $VERSION = qv('0.1.0');
 
 use constant PACKAGE   => 0;
 use constant DIRECTORY => 1;

@@ -16,7 +16,6 @@ use strict;
 use Carp;
 use Youri::Package;
 use base 'Youri::Check::Plugin::Test';
-use version; our $VERSION = qv('0.1.0');
 
 use constant MEDIA => 0;
 use constant RANGE => 1;

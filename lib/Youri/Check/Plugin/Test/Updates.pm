@@ -20,7 +20,6 @@ use List::MoreUtils qw(all);
 use Carp;
 use Memoize;
 use Youri::Utils;
-use version; our $VERSION = qv('0.1.0');
 
 extends 'Youri::Check::Plugin::Test';
 

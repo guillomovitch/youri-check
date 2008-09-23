@@ -17,7 +17,6 @@ use strict;
 use Carp;
 use Youri::Utils;
 use base 'Youri::Check::Plugin::Test';
-use version; our $VERSION = qv('0.1.0');
 
 my $descriptor = Youri::Check::Descriptor::Row->new(
     cells => [

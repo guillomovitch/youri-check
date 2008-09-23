@@ -19,7 +19,6 @@ use DateTime;
 use DateTime::Format::Duration;
 use Youri::Check::Descriptor::Row;
 use Youri::Check::Descriptor::Cell;
-use version; our $VERSION = qv('0.1.0');
 
 extends 'Youri::Check::Plugin::Test';
 
