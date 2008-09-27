@@ -12,61 +12,87 @@ formats.
 
 =cut
 
-use warnings;
-use strict;
+use Moose::Policy 'Moose::Policy::FollowPBP';
+use Moose;
+use Moose::Util::TypeConstraints;
 use Carp;
 use File::Path;
+use List::MoreUtils qw(all);
 use Youri::Utils;
-use base 'Youri::Check::Plugin::Report';
+use Youri::Check::Types;
 
-sub _init {
-    my $self = shift;
-    my %options = (
-        to      => '', # target directory
-        noclean => 0,  # don't clean up target directory
-        noempty => 0,  # don't generate empty reports
-        formats => undef,
-        @_
-    );
+extends 'Youri::Check::Plugin::Report';
 
-    croak "no format defined" unless $options{formats};
-    croak "formats should be an hashref" unless ref $options{formats} eq 'HASH';
+subtype 'HashRef[Youri::Check::Plugin::Report::File::Format]'
+    => as 'HashRef'
+    => where {
+        all {
+            blessed $_ &&
+            $_->isa('Youri::Check::Plugin::Report::File::Format')
+        } values %$_;
+    };
 
-    $self->{_to}      = $options{to};
-    $self->{_noclean} = $options{noclean};
-    $self->{_noempty} = $options{noempty};
-
-    foreach my $id (keys %{$options{formats}}) {
-        print "Creating format $id\n" if $options{verbose};
-        my $format_conf = $options{formats}->{$id};
-        eval {
-            push(
-                @{$self->{_formats}},
-                create_instance(
-                    'Youri::Check::Plugin::Report::Format',
-                    $format_conf,
-                    {
-                        id      => $id,
-                        test    => $options{test},
-                        verbose => $options{verbose},
-                    }
+subtype 'HashRef[HashRef]'
+    => as 'HashRef'
+    => where {
+        all {
+            ref($_) eq 'HASH'
+        } values %$_;
+    };
+  
+coerce 'HashRef[Youri::Check::Plugin::Report::File::Format]'
+    => from 'HashRef[HashRef]'
+        => via {
+            my $in = $_;
+            my $out;
+            foreach my $key (keys %$in) {
+            $out->{$key} = create_instance_from_configuration(
+                    'Youri::Check::Plugin::Report::File::Format',
+                    $in->{$key},
+                    {id => $key}
                 )
-            );
+            }
+            return $out;
         };
-        carp "Failed to create format $id: $@\n" if $@;
-    }
 
-    croak "no formats created" unless @{$self->{_formats}};
-}
+has 'database'    => (
+    is => 'rw', isa => 'Youri::Check::Database'
+);
+has 'format' => (
+    is       => 'rw',
+    isa      => 'HashRef[Youri::Check::Plugin::Report::File::Format]',
+    coerce   => 1,
+    required => 1
+);
+has 'to' => (
+    is       => 'rw',
+    isa      => 'Directory',
+    required => 1
+);
+has 'clean' => (
+    is       => 'rw',
+    isa      => 'Bool',
+    default  => 1
+);
+has 'empty' => (
+    is       => 'rw',
+    isa      => 'Bool',
+    default  => 1
+);
 
-sub _init_report {
+sub init {
     my ($self) = @_;
 
+    return if $self->is_test();
+    return if !$self->get_clean();
+
     # clean up output directory
-    unless ($self->{_test} || $self->{_noclean} || !$self->{_to}) {
-        my @files = glob($self->{_to} . '/*');
+    my @files = glob($self->get_to() . '/*');
         rmtree(\@files) if @files;
-    }
+}
+
+sub run {
+    my ($self) = @_;
 }
 
 sub _global_report {

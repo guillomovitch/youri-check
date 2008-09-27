@@ -13,6 +13,7 @@ This class defines somes global data types.
 
 use Moose;
 use Moose::Util::TypeConstraints;
+use List::MoreUtils qw(all);
 use Regexp::Common qw/URI/;
 use UNIVERSAL::require;
 
@@ -23,5 +24,13 @@ subtype 'Directory'
 subtype 'Uri'
     => as 'Str'
     => where { /^$RE{URI}$/ };
+
+subtype 'HashRef[HashRef]'
+    => as 'HashRef'
+    => where {
+        all {
+            ref($_) eq 'HASH'
+        } values %$_;
+    };
 
 1;
