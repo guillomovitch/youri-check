@@ -313,6 +313,21 @@ sub get_package_file_id {
 
 Returns the list of all maintainers with results.
 
+=cut
+
+sub get_maintainers {
+    my ($self) = @_;
+
+    return $self->{_schema}->resultset('Maintainer')->all();
+}
+
+sub get_test_runs {
+    my ($self) = @_;
+
+    return $self->{_schema}->resultset('TestRun')->all();
+}
+
+
 =head2 get_iterator($id, $sort, $filter)
 
 Returns a L<Youri::Check::Resultset::Iterator> object over results for given input it, with optional sort and filter directives.
