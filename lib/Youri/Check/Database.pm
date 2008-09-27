@@ -66,7 +66,10 @@ sub new {
         _schema   => $schema
     }, $class;
 
-    $schema->deploy({add_drop_table => 1});
+    # deploy schema if needed
+    my $dbh = $schema->storage()->dbh();
+    $schema->deploy({add_drop_table => 1})
+        if ! $dbh->tables(undef, undef, '%', 'TABLE');
 
     return $self;
 }
