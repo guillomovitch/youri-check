@@ -93,7 +93,6 @@ Hash of source plugins definitions
 =back
 
 =cut
-use Data::Dumper;
 
 subtype 'HashRef[Youri::Check::Plugin::Test::Updates::Source]'
     => as 'HashRef'
@@ -104,14 +103,6 @@ subtype 'HashRef[Youri::Check::Plugin::Test::Updates::Source]'
         } values %$_;
     };
 
-subtype 'HashRef[HashRef]'
-    => as 'HashRef'
-    => where {
-        all {
-            ref($_) eq 'HASH'
-        } values %$_;
-    };
-  
 coerce 'HashRef[Youri::Check::Plugin::Test::Updates::Source]'
     => from 'HashRef[HashRef]'
         => via {

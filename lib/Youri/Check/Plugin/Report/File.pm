@@ -32,14 +32,6 @@ subtype 'HashRef[Youri::Check::Plugin::Report::File::Format]'
         } values %$_;
     };
 
-subtype 'HashRef[HashRef]'
-    => as 'HashRef'
-    => where {
-        all {
-            ref($_) eq 'HASH'
-        } values %$_;
-    };
-  
 coerce 'HashRef[Youri::Check::Plugin::Report::File::Format]'
     => from 'HashRef[HashRef]'
         => via {
