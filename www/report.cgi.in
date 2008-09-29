@@ -2,15 +2,23 @@
 
 use strict;
 use warnings;
+use lib '@perllibdir@';
 use CGI;
 use CGI::Pretty;
 use DateTime;
 use Youri::Check::Database;
+use Youri::Config;
 
-my $database = Youri::Check::Database->new(
-    driver => 'SQLite',
-    base => '/home/guillaume/my.db'
+my $config = Youri::Config->new(
+    directories => [ '@sysconfdir@/youri' ],
+    file   => 'check.conf',
 );
+
+# database creation
+my $database_conf = $config->get_param('database');
+die "No database defined" unless $database_conf;
+
+my $database = Youri::Check::Database->new(%$database_conf);
 
 my @test_runs = $database->get_test_runs();
 my @maintainers = $database->get_maintainers();
