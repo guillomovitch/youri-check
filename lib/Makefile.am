@@ -1,4 +1,13 @@
 nobase_perllib_DATA = Youri/Check/Database.pm \
+		      Youri/Check/Schema.pm \
+		      Youri/Check/Schema/Age.pm \
+		      Youri/Check/Schema/Maintainer.pm \
+		      Youri/Check/Schema/Package.pm \
+		      Youri/Check/Schema/PackageFile.pm \
+		      Youri/Check/Schema/Section.pm \
+		      Youri/Check/Schema/TestRun.pm \
+		      Youri/Check/Schema/Updates.pm \
+		      Youri/Check/Types.pm \
 		      Youri/Check/Plugin.pm \
 		      Youri/Check/Plugin/Report.pm \
 		      Youri/Check/Plugin/Test.pm \
