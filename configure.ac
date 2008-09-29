@@ -15,5 +15,12 @@ fi
 perllibdir=$datadir/youri/lib
 AC_SUBST(perllibdir)
 
-AC_CONFIG_FILES([Makefile bin/Makefile lib/Makefile etc/Makefile t/Makefile])
+AC_CONFIG_FILES([
+    Makefile
+    bin/Makefile 
+    www/Makefile
+    lib/Makefile
+    etc/Makefile
+    t/Makefile
+    ])
 AC_OUTPUT
