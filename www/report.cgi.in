@@ -4,10 +4,9 @@ use strict;
 use warnings;
 use lib '@perllibdir@';
 use CGI;
-use CGI::Pretty;
-use DateTime;
 use Youri::Check::Database;
 use Youri::Config;
+use Template;
 
 my $config = Youri::Config->new(
     directories => [ '@sysconfdir@/youri' ],
@@ -26,6 +25,10 @@ my @maintainers = $database->get_maintainers();
 my $cgi = CGI->new();
 print $cgi->header(-charset=>'utf-8');
 
+my $template = Template->new(
+    INCLUDE_PATH => '@templatesdir@'
+);
+
 my $page = $cgi->param('page');
 if ($page) {
     if ($page eq 'test') {
@@ -38,7 +41,6 @@ if ($page) {
 } else {
     index_page();
 }
-print $cgi->end_html;
 
 sub test_page {
     my $test =  $cgi->param('test');
@@ -51,20 +53,11 @@ sub test_page {
 
 sub index_page {
 
-    my $title = "QA report";
-    display_title($title);
-
-    print $cgi->h2('Global reports');
-    print $cgi->ul(
-        $cgi->li([ map {
-                $_->name() .
-                ' (' . DateTime->from_epoch(epoch => $_->date())->ymd() . ')'
-            } @test_runs ])
-    );
-    print $cgi->h2('Individual reports');
-    print $cgi->ul(
-        $cgi->li(\@maintainers)
-    );
+    $template->process('index.tpl', {
+        tests      => \@test_runs,
+        maintainer => \@maintainers,
+        cgi        => $cgi
+    }) || die "Template process failed: ", $template->error(), "\n";
 }
 
 sub display_title {

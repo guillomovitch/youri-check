@@ -13,12 +13,15 @@ if test -z $POD2MAN; then
 fi
 
 perllibdir=$datadir/youri/lib
+templatesdir=$datadir/youri/templates
 AC_SUBST(perllibdir)
+AC_SUBST(templatesdir)
 
 AC_CONFIG_FILES([
     Makefile
     bin/Makefile 
     www/Makefile
+    templates/Makefile
     lib/Makefile
     etc/Makefile
     t/Makefile

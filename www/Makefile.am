@@ -9,5 +9,6 @@ report.cgi: report.cgi.in
 	perl -pi \
 		-e 's|\@sysconfdir\@|$(sysconfdir)|;' \
 		-e 's|\@perllibdir\@|$(perllibdir)|;' \
+		-e 's|\@templatesdir\@|$(templatesdir)|;' \
 		< $< > $@
 	chmod +x $@
