@@ -3,7 +3,10 @@
 [% IF tests %]
     <h2>Global reports</h2>
     [% FOREACH test = tests %]
-	<li><a href="report.cgi?test=[% test.name %]">[% test.name %]</a></li>
+	<li>
+	    <a href="report.cgi?test=[% test.name %]">[% test.name %]</a>
+	    ([% test.count %])
+	</li>
     [% END %]
 [% END %]
 
