@@ -14,6 +14,11 @@ __PACKAGE__->add_columns(
         data_type         => 'varchar',
         is_auto_increment => 0,
     },
+    count => {
+        data_type         => 'integer',
+        is_auto_increment => 0,
+        default_value     => 0
+    },
     date => {
         data_type         => 'timestamp',
         is_auto_increment => 0,
