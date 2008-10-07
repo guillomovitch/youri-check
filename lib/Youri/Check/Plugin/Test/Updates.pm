@@ -142,53 +142,64 @@ sub BUILD {
 }
 
 sub run {
-    my ($self, $media) = @_;
+    my ($self, @medias) = @_;
     croak "Not a class method" unless ref $self;
-    
-    # this is a source media check only
-    return unless $media->get_type() eq 'source';
 
-    my @sources = values %{$self->get_sources()};
+    $self->init();
 
-    my $callback = sub {
-        my ($package) = @_;
+    my $count = 0;
 
-        my $name    = $package->get_name();
-        my $version = $package->get_version();
-        my $release = $package->get_release();
+    foreach my $media (@medias) {
+        # this is a source media check only
+        next unless $media->get_type() eq 'source';
 
-        # compute version with rpm subtilities related to preversions
-        my $current_version = ($release =~ /^0\.(\w+)\.\w+$/) ?
-            $version . $1 :
-            $version;
-        my $current_stable = is_stable($current_version);
+        my @sources = values %{$self->get_sources()};
 
-        my ($max_version, $max_source, $max_url);
-        $max_version = $current_version;
+        my $callback = sub {
+            my ($package) = @_;
 
-        foreach my $source (@sources) {
-            my $available_version = $source->get_package_version($package);
-            if (
-                $available_version &&
-                (! $current_stable || is_stable($available_version)) &&
-                is_newer($available_version, $max_version)
-            ) {
-                $max_version = $available_version;
-                $max_source  = $source->get_id();
-                $max_url     = $source->get_package_url($name);
+            my $name    = $package->get_name();
+            my $version = $package->get_version();
+            my $release = $package->get_release();
+
+            # compute version with rpm subtilities related to preversions
+            my $current_version = ($release =~ /^0\.(\w+)\.\w+$/) ?
+                $version . $1 :
+                $version;
+            my $current_stable = is_stable($current_version);
+
+            my ($max_version, $max_source, $max_url);
+            $max_version = $current_version;
+
+            foreach my $source (@sources) {
+                my $available_version = $source->get_package_version($package);
+                if (
+                    $available_version &&
+                    (! $current_stable || is_stable($available_version)) &&
+                    is_newer($available_version, $max_version)
+                ) {
+                    $max_version = $available_version;
+                    $max_source  = $source->get_id();
+                    $max_url     = $source->get_package_url($name);
+                }
             }
-        }
-        $self->get_database()->add_package_result(
-            $MONIKER, $media, $package,
-            {
-                current   => $current_version,
-                available => $max_version,
-                source    => $max_source,
-                url       => $max_url
-        }) if $max_version ne $current_version;
-    };
+            if ($max_version ne $current_version) {
+                $self->get_database()->add_package_result(
+                    $MONIKER, $media, $package,
+                    {
+                        current   => $current_version,
+                        available => $max_version,
+                        source    => $max_source,
+                        url       => $max_url
+                });
+                $count++;
+            }
+        };
 
-    $media->traverse_headers($callback);
+        $media->traverse_headers($callback);
+    }
+
+    $self->finish($count);
 }
 
 =head2 is_stable($version)

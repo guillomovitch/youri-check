@@ -32,14 +32,23 @@ has 'preferences' => (
     is => 'rw', isa => 'Youri::Check::Maintainer::Preferences'
 );
 
-sub BUILD {
-    my ($self, $params) = @_;
+sub init {
+    my ($self) = @_;
 
-    {
-        no strict 'refs';
-        my $moniker = ${$self->meta()->name() . '::MONIKER'};
-        $self->get_database()->register($moniker);
-    }
+    $self->get_database()->register($self->get_moniker());
+}
+
+sub finish {
+    my ($self, $count) = @_;
+
+    $self->get_database()->unregister($self->get_moniker(), $count);
+}
+
+sub get_moniker {
+    my ($self) = @_;
+
+    no strict 'refs';
+    return ${$self->meta()->name() . '::MONIKER'};
 }
 
 =head1 CLASS METHODS
