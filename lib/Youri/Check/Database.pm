@@ -124,14 +124,10 @@ sub register {
     my ($self, $moniker) = @_;
     croak "Not a class method" unless ref $self;
 
-    # load the new class
-    Youri::Check::Schema->load_classes($moniker);
+    # extend schema
+    $self->load($moniker);
 
-    # replace current schema with a new clone
-    my $schema = Youri::Check::Schema->clone();
-    $schema->storage($self->{_schema}->storage());
-    $self->{_schema} = $schema;
-
+    # register test run
     my $last_run = $self->{_schema}->resultset('TestRun')->single({
         name => $moniker,
     });
@@ -158,6 +154,33 @@ sub register {
             date => time()
         })->update();
     }
+}
+
+sub unregister {
+    my ($self, $moniker, $count) = @_;
+    croak "Not a class method" unless ref $self;
+
+    # get last run
+    my $last_run = $self->{_schema}->resultset('TestRun')->single({
+        name => $moniker,
+    });
+
+    # update test count
+    $last_run->count($count);
+    $last_run->update();
+}
+
+sub load {
+    my ($self, $moniker) = @_;
+    croak "Not a class method" unless ref $self;
+
+    # load the new class
+    Youri::Check::Schema->load_classes($moniker);
+
+    # replace current schema with a new clone
+    my $schema = Youri::Check::Schema->clone();
+    $schema->storage($self->{_schema}->storage());
+    $self->{_schema} = $schema;
 }
 
 =head2 add_result($source, $media, $package, $values)
@@ -321,10 +344,22 @@ sub get_maintainers {
     return $self->{_schema}->resultset('Maintainer')->all();
 }
 
-sub get_test_runs {
+sub get_tests {
     my ($self) = @_;
 
     return $self->{_schema}->resultset('TestRun')->all();
+}
+
+sub get_test_count {
+    my ($self, $test) = @_;
+
+    return $self->{_schema}->resultset($test)->count();
+}
+
+sub get_test_results {
+    my ($self, $test) = @_;
+
+    return $self->{_schema}->resultset($test)->all();
 }
 
 
