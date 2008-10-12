@@ -19,10 +19,11 @@ This abstract class defines Youri::Check::Maintainer::Resolver interface.
 
 =cut
 
-use warnings;
-use strict;
+use Moose::Policy 'Moose::Policy::FollowPBP';
+use Moose;
 use Carp;
-use Youri::Utils;
+
+has 'verbosity'  => (is => 'rw', isa => 'Int',  default => 0);
 
 =head1 CLASS METHODS
 
@@ -35,30 +36,6 @@ No generic parameters (subclasses may define additional ones).
 Warning: do not call directly, call subclass constructor instead.
 
 =cut
-
-sub new {
-    my $class = shift;
-    croak "Abstract class" if $class eq __PACKAGE__;
-
-    my %options = (
-        test    => 0,  # test mode
-        verbose => 0,  # verbose mode
-        @_
-    );
-
-    my $self = bless {
-        _test    => $options{test},
-        _verbose => $options{verbose}
-    }, $class;
-
-    $self->_init(%options);
-
-    return $self;
-}
-
-sub _init {
-    # do nothing
-}
 
 =head2 get_maintainer($package)
 

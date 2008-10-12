@@ -13,11 +13,18 @@ It uses a remote CGI to resolve maintainers.
 
 =cut
 
-use warnings;
-use strict;
+use Moose::Policy 'Moose::Policy::FollowPBP';
+use Moose;
 use Carp;
 use LWP::UserAgent;
-use base 'Youri::Check::Maintainer::Resolver';
+use Youri::Check::Types;
+
+extends 'Youri::Check::Maintainer::Resolver';
+
+has 'url' => (
+    is => 'rw',
+    isa => 'Uri'
+);
 
 =head1 CLASS METHODS
 
@@ -37,14 +44,8 @@ CGI's URL.
 
 =cut
 
-sub _init {
-    my $self    = shift;
-    my %options = (
-        url => '', # url to fetch maintainers
-        @_
-    );
-
-    croak "No URL given" unless $options{url};
+sub BUILD {
+    my ($self, $params) = @_;
 
     my $agent = LWP::UserAgent->new();
     my $buffer = '';
@@ -66,7 +67,7 @@ sub _init {
         $buffer = substr($data, pos $data);
     };
 
-    $agent->get($options{url}, ':content_cb' => $callback);
+    $agent->get($params->{url}, ':content_cb' => $callback);
 }
 
 sub get_maintainer {
