@@ -333,7 +333,6 @@ if ($mode eq 'test') {
     }
 
     # prepare database
-    $database->reset();
     $database->set_resolver($resolver) if $resolver;
 
     my $skip_test = $config->get_arg('skip-test');
