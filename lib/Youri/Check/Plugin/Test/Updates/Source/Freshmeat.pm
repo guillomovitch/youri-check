@@ -15,7 +15,7 @@ available from Freshmeat.
 
 use Moose::Policy 'Moose::Policy::FollowPBP';
 use Moose;
-use Youri::Check::Types;
+use Youri::Types;
 use Carp;
 use XML::Twig;
 use LWP::UserAgent;

@@ -14,7 +14,7 @@ available from RAA.
 
 use Moose::Policy 'Moose::Policy::FollowPBP';
 use Moose;
-use Youri::Check::Types;
+use Youri::Types;
 use Carp;
 use SOAP::Lite;
 use List::MoreUtils 'any';

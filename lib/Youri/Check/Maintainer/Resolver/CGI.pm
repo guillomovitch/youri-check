@@ -17,7 +17,7 @@ use Moose::Policy 'Moose::Policy::FollowPBP';
 use Moose;
 use Carp;
 use Youri::Check::WebRetriever;
-use Youri::Check::Types;
+use Youri::Types;
 
 extends 'Youri::Check::Maintainer::Resolver';
 

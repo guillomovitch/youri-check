@@ -14,7 +14,7 @@ available from GNOME.
 
 use Moose::Policy 'Moose::Policy::FollowPBP';
 use Moose;
-use Youri::Check::Types;
+use Youri::Types;
 use Carp;
 use LWP::UserAgent;
 use HTML::TokeParser;

@@ -14,7 +14,7 @@ available from Gentoo.
 
 use Moose::Policy 'Moose::Policy::FollowPBP';
 use Moose;
-use Youri::Check::Types;
+use Youri::Types;
 use Carp;
 
 extends 'Youri::Check::Plugin::Test::Updates::Source';

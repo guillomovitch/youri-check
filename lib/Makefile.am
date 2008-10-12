@@ -7,7 +7,6 @@ nobase_perllib_DATA = Youri/Check/Database.pm \
 		      Youri/Check/Schema/Section.pm \
 		      Youri/Check/Schema/TestRun.pm \
 		      Youri/Check/Schema/Updates.pm \
-		      Youri/Check/Types.pm \
 		      Youri/Check/Plugin.pm \
 		      Youri/Check/Plugin/Report.pm \
 		      Youri/Check/Plugin/Test.pm \

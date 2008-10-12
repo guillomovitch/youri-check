@@ -19,7 +19,7 @@ use Carp;
 use File::Path;
 use List::MoreUtils qw(all);
 use Youri::Utils;
-use Youri::Check::Types;
+use Youri::Types;
 
 extends 'Youri::Check::Plugin::Report';
 

@@ -14,7 +14,7 @@ This source plugin for L<Youri::Check::Plugin::Test::Updates> collects updates
 
 use Moose::Policy 'Moose::Policy::FollowPBP';
 use Moose;
-use Youri::Check::Types;
+use Youri::Types;
 use LWP::UserAgent;
 
 extends 'Youri::Check::Plugin::Test::Plugin::Updates::Source';

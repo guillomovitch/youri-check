@@ -14,7 +14,7 @@ This class provides a simple web data retriever.
 use Moose::Policy 'Moose::Policy::FollowPBP';
 use Moose;
 use LWP::UserAgent;
-use Youri::Check::Types;
+use Youri::Types;
 
 has 'url'     => ( is => 'rw', isa => 'Uri' ); 
 has 'pattern' => ( is => 'rw', isa => 'RegexpRef' ); 
