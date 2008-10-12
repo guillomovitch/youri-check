@@ -16,7 +16,7 @@ It uses a remote CGI to resolve maintainers.
 use Moose::Policy 'Moose::Policy::FollowPBP';
 use Moose;
 use Carp;
-use LWP::UserAgent;
+use Youri::Check::WebRetriever;
 use Youri::Check::Types;
 
 extends 'Youri::Check::Maintainer::Resolver';
@@ -47,27 +47,12 @@ CGI's URL.
 sub BUILD {
     my ($self, $params) = @_;
 
-    my $agent = LWP::UserAgent->new();
-    my $buffer = '';
-    my $pattern = qr/^(\S+)\t(\S+)$/;
-    my $callback = sub {
-        my ($data, $response, $protocol) = @_;
+    my $retriever = Youri::Check::WebRetriever->new(
+        url     => $params->{url},
+        pattern => qr/^(\S+)\t(\S+)$/,
+    );
 
-        # prepend text remaining from previous run
-        $data = $buffer . $data;
-
-        # process current chunk
-        while ($data =~ m/(.*)\n/gc) {
-            my $line = $1;
-            next unless $line =~ $pattern;
-            $self->{_maintainers}->{$1} = $2;
-        }
-
-        # store remaining text
-        $buffer = substr($data, pos $data);
-    };
-
-    $agent->get($params->{url}, ':content_cb' => $callback);
+    $self->{_maintainers} = $retriever->get_results();
 }
 
 sub get_maintainer {
