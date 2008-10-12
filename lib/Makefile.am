@@ -47,7 +47,8 @@ nobase_perllib_DATA = Youri/Check/Database.pm \
 		      Youri/Check/Maintainer/Preferences.pm \
 		      Youri/Check/Maintainer/Resolver.pm \
 		      Youri/Check/Descriptor/Row.pm \
-		      Youri/Check/Descriptor/Cell.pm
+		      Youri/Check/Descriptor/Cell.pm \
+		      Youri/Check/WebRetriever.pm
 
 EXTRA_DIST = $(nobase_perllib_DATA)
 
