@@ -14,14 +14,14 @@ available from CPAN.
 
 use Moose::Policy 'Moose::Policy::FollowPBP';
 use Moose;
+use Youri::Check::WebRetriever;
 use Youri::Types;
-use LWP::UserAgent;
 
 extends 'Youri::Check::Plugin::Test::Updates::Source';
 
 has 'url' => (
-    is => 'rw',
-    isa => 'Uri',
+    is      => 'rw',
+    isa     => 'Uri',
     default => 'http://www.cpan.org/modules/01modules.index.html'
 );
 
@@ -47,27 +47,12 @@ http://www.cpan.org/modules/01modules.index.html)
 sub BUILD {
     my ($self, $params) = @_;
 
-    my $agent = LWP::UserAgent->new();
-    my $buffer = '';
-    my $pattern = qr/>([\w-]+)-([\d\.]+)\.tar\.gz<\/a>/;
-    my $callback = sub {
-        my ($data, $response, $protocol) = @_;
+    my $retriever = Youri::Check::WebRetriever->new(
+        url     => $params->{url},
+        pattern => qr/>([\w-]+)-([\d\.]+)\.tar\.gz<\/a>/
+    );
 
-        # prepend text remaining from previous run
-        $data = $buffer . $data;
-
-        # process current chunk
-        while ($data =~ m/(.*)\n/gc) {
-            my $line = $1;
-            next unless $line =~ $pattern;
-            $self->{_versions}->{$1} = $2;
-        }
-
-        # store remaining text
-        $buffer = substr($data, pos $data);
-    };
-
-    $agent->get($self->get_url(), ':content_cb' => $callback);
+    $self->{_versions} = $retriever->get_results();
 }
 
 sub _get_package_version {

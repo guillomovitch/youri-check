@@ -14,14 +14,14 @@ This source plugin for L<Youri::Check::Plugin::Test::Updates> collects updates
 
 use Moose::Policy 'Moose::Policy::FollowPBP';
 use Moose;
+use Youri::Check::WebRetriever;
 use Youri::Types;
-use LWP::UserAgent;
 
 extends 'Youri::Check::Plugin::Test::Plugin::Updates::Source';
 
 has 'url' => (
-    is => 'rw',
-    isa => 'Uri',
+    is      => 'rw',
+    isa     => 'Uri',
     default => 'http://ftp.free.fr/mirrors/ftp.netbsd.org/NetBSD-current/pkgsrc/README-all.html'
 );
 
@@ -45,30 +45,12 @@ URL to NetBSD mirror content file: (default: http://ftp.free.fr/mirrors/ftp.netb
 sub BUILD {
     my ($self, $params) = @_;
 
-    my $agent = LWP::UserAgent->new();
-    my $buffer = '';
-    my $pattern = qr/<!-- (.+)-([^-]*?)(?:nb\d*)? \(for sorting\).*?href="([^"]+)"/;
-    my $callback = sub {
-        my ($data, $response, $protocol) = @_;
+    my $retriever = Youri::Check::WebRetriever->new(
+        url     => $params->{url},
+        pattern => qr/<!-- (.+)-([^-]*?)(?:nb\d*)? \(for sorting\).*?href="([^"]+)"/
+    );
 
-        # prepend text remaining from previous run
-        $data = $buffer . $data;
-
-        # process current chunk
-        while ($data =~ m/(.*)\n/gc) {
-            my $line = $1;
-            next unless $line =~ $pattern;
-            my $name = $1;
-            my $version = $2;
-            $self->{_versions}->{$1} = $2;
-            $self->{_urls}->{$1} = $3;
-        }
-
-        # store remaining text
-        $buffer = substr($data, pos $data);
-    };
-
-    $agent->get($self->get_url(), ':content_cb' => $callback);
+    $self->{_versions} = $retriever->get_results();
 }
 
 sub _get_package_version {

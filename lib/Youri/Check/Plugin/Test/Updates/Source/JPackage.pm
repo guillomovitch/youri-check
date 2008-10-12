@@ -14,14 +14,14 @@ available from JPackage.
 
 use Moose::Policy 'Moose::Policy::FollowPBP';
 use Moose;
-use Carp;
-use LWP::UserAgent;
+use Youri::Check::WebRetriever;
+use Youri::Types;
 
 extends 'Youri::Check::Plugin::Test::Updates::Source';
 
 has 'url' => (
-    is => 'rw',
-    isa => 'Uri',
+    is      => 'rw',
+    isa     => 'Uri',
     default => 'http://mirrors.dotsrc.org/jpackage/1.7/generic'
 );
 
@@ -45,34 +45,16 @@ http://mirrors.dotsrc.org/jpackage/1.7/generic)
 sub BUILD {
     my ($self, $params) = @_;
 
-    my $agent = LWP::UserAgent->new();
-    my $buffer = '';
-    my $pattern = qr/>([\w-]+)-([\w\.]+)-[\w\.]+jpp\.src\.rpm<\/a>/;
-    my $callback = sub {
-        my ($data, $response, $protocol) = @_;
+    my $retriever = Youri::Check::WebRetriever->new(
+        url     => [
+            $params->{url}/SRPMS.free,
+            $params->{url}/SRPMS.non-free,
+            $params->{url}/SRPMS.devel
+        ]
+        pattern => qr/>([\w-]+)-([\w\.]+)-[\w\.]+jpp\.src\.rpm<\/a>/
+    );
 
-        # prepend text remaining from previous run
-        $data = $buffer . $data;
-
-        # process current chunk
-        while ($data =~ m/(.*)\n/gc) {
-            my $line = $1;
-            next unless $line =~ $pattern;
-            $self->{_versions}->{$1} = $2;
-        }
-
-        # store remaining text
-        my $pos = pos $data;
-        if ($pos) {
-            $buffer = substr($data, pos $data);
-        } else {
-            $buffer = $data;
-        }
-    };
-
-    $agent->get("$params->{url}/SRPMS.free", ':content_cb' => $callback);
-    $agent->get("$params->{url}/SRPMS.non-free", ':content_cb' => $callback);
-    $agent->get("$params->{url}/SRPMS.devel", ':content_cb' => $callback);
+    $self->{_versions} = $retriever->get_results();
 }
 
 =head1 COPYRIGHT AND LICENSE
