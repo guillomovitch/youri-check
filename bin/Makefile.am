@@ -9,6 +9,7 @@ youri-check: youri-check.in
 		-e 's|\@sysconfdir\@|$(sysconfdir)|;' \
 		-e 's|\@perllibdir\@|$(perllibdir)|;' \
 		< $< > $@
+	chmod +x $@
 
 youri-check.1: youri-check
 	pod2man $< $@
