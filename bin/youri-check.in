@@ -204,7 +204,8 @@ use warnings;
 use lib '@perllibdir@';
 
 use Youri::Config;
-use Youri::Utils 0.002;
+use Youri::Factory;
+use Youri::Check::Database;
 use Pod::Usage;
 use Net::Config qw/%NetConfig/;
 
@@ -282,13 +283,11 @@ if ($mode eq 'test') {
         log_message("Creating maintainer resolver", $timestamp, $parallel)
             if $verbose;
         eval {
-            $resolver = create_instance(
+            $resolver = Youri::Factory->create_from_configuration(
                 'Youri::Check::Maintainer::Resolver',
                 $resolver_conf,
-                {
-                    test    => $test,
-                    verbose => $verbose > 1 ? $verbose - 2 : 0,
-                }
+                test    => $test,
+                verbose => $verbose > 1 ? $verbose - 2 : 0,
             );
         };
         print STDERR "Failed to create maintainer resolver: $@\n" if $@;
@@ -300,13 +299,11 @@ if ($mode eq 'test') {
         log_message("Creating maintainer preferences", $timestamp, $parallel)
             if $verbose;
         eval {
-            $preferences = create_instance(
+            $preferences = Youri::Factory->create_from_configuration(
                 'Youri::Check::Maintainer::Preferences',
                 $preferences_conf,
-                {
-                    test      => $test,
-                    verbose   => $verbose > 1 ? $verbose - 2 : 0,
-                }
+                test      => $test,
+                verbose   => $verbose > 1 ? $verbose - 2 : 0,
             );
         };
         print STDERR "Failed to create maintainer preferences: $@\n" if $@;
@@ -322,15 +319,13 @@ if ($mode eq 'test') {
         eval {
             push(
                 @medias,
-                 create_instance(
+                Youri::Factory->create_from_configuration(
                     'Youri::Media',
                     $media_conf,
-                    {
-                        id      => $id,
-                        test    => $test,
-                        verbose => $verbose > 0 ? $verbose - 1 : 0,
-                        cache   => $parallel ? 0 : 1
-                    }
+                    id      => $id,
+                    test    => $test,
+                    verbose => $verbose > 0 ? $verbose - 1 : 0,
+                    cache   => $parallel ? 0 : 1
                 )
             );
         };
@@ -349,17 +344,15 @@ if ($mode eq 'test') {
         my $test;
         my $test_conf = $config->get_param('tests')->{$id};
         eval {
-            $test = create_instance(
+            $test = Youri::Factory->create_from_configuration(
                 'Youri::Check::Test',
                 $test_conf,
-                {
-                    id         => $id,
-                    test       => $test,
-                    verbose    => $verbose > 0 ? $verbose - 1 : 0,
-                    resolver   => $resolver,
-                    preferences => $preferences,
-                    database    => $database
-                }
+                id         => $id,
+                test       => $test,
+                verbose    => $verbose > 0 ? $verbose - 1 : 0,
+                resolver   => $resolver,
+                preferences => $preferences,
+                database    => $database
             );
         };
         if ($@) {
@@ -426,15 +419,13 @@ if ($mode eq 'test') {
         my $report;
         my $report_conf = $config->get_param('reports')->{$id};
         eval {
-            $report = create_instance(
+            $report = Youri::Factory->create_from_configuration(
                 'Youri::Check::Report',
                 $report_conf,
-                {
-                    id      => $id,
-                    test    => $test,
-                    verbose => $verbose > 0 ? $verbose - 1 : 0,
-                    config  => $config,
-                }
+                id      => $id,
+                test    => $test,
+                verbose => $verbose > 0 ? $verbose - 1 : 0,
+                config  => $config,
             );
         };
         if ($@) {
@@ -489,3 +480,9 @@ while ($children) {
 }
 
 log_message("Finishing", $timestamp, $parallel) if $verbose;
+
+sub log_message {
+    my ($message, $time, $process) = @_;
+
+    print "$message\n";
+}
