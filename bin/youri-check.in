@@ -286,8 +286,10 @@ if ($mode eq 'test') {
             $resolver = Youri::Factory->create_from_configuration(
                 'Youri::Check::Maintainer::Resolver',
                 $resolver_conf,
-                test    => $test,
-                verbose => $verbose > 1 ? $verbose - 2 : 0,
+                {
+                    test    => $test,
+                    verbose => $verbose > 1 ? $verbose - 2 : 0,
+                }
             );
         };
         print STDERR "Failed to create maintainer resolver: $@\n" if $@;
@@ -302,8 +304,10 @@ if ($mode eq 'test') {
             $preferences = Youri::Factory->create_from_configuration(
                 'Youri::Check::Maintainer::Preferences',
                 $preferences_conf,
-                test      => $test,
-                verbose   => $verbose > 1 ? $verbose - 2 : 0,
+                {
+                    test      => $test,
+                    verbose   => $verbose > 1 ? $verbose - 2 : 0,
+                }
             );
         };
         print STDERR "Failed to create maintainer preferences: $@\n" if $@;
@@ -322,10 +326,12 @@ if ($mode eq 'test') {
                 Youri::Factory->create_from_configuration(
                     'Youri::Media',
                     $media_conf,
-                    id      => $id,
-                    test    => $test,
-                    verbose => $verbose > 0 ? $verbose - 1 : 0,
-                    cache   => $parallel ? 0 : 1
+                    {
+                        id      => $id,
+                        test    => $test,
+                        verbose => $verbose > 0 ? $verbose - 1 : 0,
+                        cache   => $parallel ? 0 : 1
+                    }
                 )
             );
         };
@@ -346,12 +352,14 @@ if ($mode eq 'test') {
             $test = Youri::Factory->create_from_configuration(
                 'Youri::Check::Test',
                 $test_conf,
-                id         => $id,
-                test       => $test,
-                verbose    => $verbose > 0 ? $verbose - 1 : 0,
-                resolver   => $resolver,
-                preferences => $preferences,
-                database    => $database
+                {
+                    id         => $id,
+                    test       => $test,
+                    verbose    => $verbose > 0 ? $verbose - 1 : 0,
+                    resolver   => $resolver,
+                    preferences => $preferences,
+                    database    => $database
+                }
             );
         };
         if ($@) {
@@ -421,10 +429,12 @@ if ($mode eq 'test') {
             $report = Youri::Factory->create_from_configuration(
                 'Youri::Check::Report',
                 $report_conf,
-                id      => $id,
-                test    => $test,
-                verbose => $verbose > 0 ? $verbose - 1 : 0,
-                config  => $config,
+                {
+                    id      => $id,
+                    test    => $test,
+                    verbose => $verbose > 0 ? $verbose - 1 : 0,
+                    config  => $config,
+                }
             );
         };
         if ($@) {
