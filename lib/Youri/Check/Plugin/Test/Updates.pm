@@ -19,7 +19,7 @@ use Scalar::Util qw(blessed);
 use List::MoreUtils qw(all);
 use Carp;
 use Memoize;
-use Youri::Utils;
+use Youri::Factory;
 
 extends 'Youri::Check::Plugin::Test';
 
@@ -109,7 +109,7 @@ coerce 'HashRef[Youri::Check::Plugin::Test::Updates::Source]'
             my $in = $_;
             my $out;
             foreach my $key (keys %$in) {
-            $out->{$key} = create_instance_from_configuration(
+                $out->{$key} = Youri::Factory->create_from_configuration(
                     'Youri::Check::Plugin::Test::Updates::Source',
                     $in->{$key},
                     {id => $key}

@@ -15,7 +15,7 @@ source plugins handle specific sources.
 use Moose::Policy 'Moose::Policy::FollowPBP';
 use Moose;
 use Carp;
-use Youri::Utils;
+use Youri::Factory;
 
 extends 'Youri::Check::Plugin::Test';
 
@@ -95,8 +95,8 @@ sub _init {
         my $source_conf = $options{sources}->{$id};
         eval {
             push(
-            @{$self->{_sources}},
-            create_instance(
+                @{$self->{_sources}},
+                Youri::Factory->create_from_configuration(
                     'Youri::Check::Plugin::Test::Build::Source',
                     $source_conf,
                     {

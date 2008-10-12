@@ -13,7 +13,6 @@ This abstract class defines test plugin interface.
 
 use Moose::Policy 'Moose::Policy::FollowPBP';
 use Moose;
-use Youri::Utils;
 use Youri::Check::Descriptor::Row;
 use Youri::Check::Descriptor::Cell;
 
