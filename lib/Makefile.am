@@ -20,16 +20,19 @@ nobase_perllib_DATA = Youri/Check/Database.pm \
 		      Youri/Check/Plugin/Test/MandrivaConflicts.pm \
 		      Youri/Check/Plugin/Test/Missing.pm \
 		      Youri/Check/Plugin/Test/Unmaintained.pm \
-		      Youri/Check/Plugin/Test/Updates/Source/GNOME.pm \
-		      Youri/Check/Plugin/Test/Updates/Source/Gentoo.pm \
-		      Youri/Check/Plugin/Test/Updates/Source/Freshmeat.pm \
-		      Youri/Check/Plugin/Test/Updates/Source/NetBSD.pm \
-		      Youri/Check/Plugin/Test/Updates/Source/Fedora.pm \
+		      Youri/Check/Plugin/Test/Updates/Source.pm \
+		      Youri/Check/Plugin/Test/Updates/Source/Apache.pm \
 		      Youri/Check/Plugin/Test/Updates/Source/CPAN.pm \
 		      Youri/Check/Plugin/Test/Updates/Source/Debian.pm \
+		      Youri/Check/Plugin/Test/Updates/Source/Fedora.pm \
+		      Youri/Check/Plugin/Test/Updates/Source/Freshmeat.pm \
+		      Youri/Check/Plugin/Test/Updates/Source/GNOME.pm \
+		      Youri/Check/Plugin/Test/Updates/Source/Gentoo.pm \
+		      Youri/Check/Plugin/Test/Updates/Source/Jpackage.pm \
+		      Youri/Check/Plugin/Test/Updates/Source/NetBSD.pm \
+		      Youri/Check/Plugin/Test/Updates/Source/PEAR.pm \
 		      Youri/Check/Plugin/Test/Updates/Source/RAA.pm \
 		      Youri/Check/Plugin/Test/Updates/Source/Sourceforge.pm \
-		      Youri/Check/Plugin/Test/Updates/Source.pm \
 		      Youri/Check/Plugin/Test/Age.pm \
 		      Youri/Check/Plugin/Test/Rpmcheck.pm \
 		      Youri/Check/Plugin/Test/Build.pm \
