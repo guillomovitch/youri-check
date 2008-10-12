@@ -1,27 +1,35 @@
 # $Id$
-package Youri::Check::Test::Updates::Source::Apache;
+package Youri::Check::Plugin::Test::Updates::Source::Apache;
 
 =head1 NAME
 
-Youri::Check::Test::Updates::Source::Apache - Apache modules updates source
+Youri::Check::Plugin::Test::Updates::Source::Apache - Apache modules updates source
 
 =head1 DESCRIPTION
 
-This source plugin for L<Youri::Check::Test::Updates> collects updates
+This source plugin for L<Youri::Check::Plugin::Test::Updates> collects updates
 available for apache modules.
 
 =cut
 
-use warnings;
-use strict;
+use Moose::Policy 'Moose::Policy::FollowPBP';
+use Moose;
 use Carp;
 use LWP::UserAgent;
 use HTML::TableExtract;
-use base 'Youri::Check::Test::Updates::Source';
+
+extends 'Youri::Check::Plugin::Test::Updates::Source';
+
+has 'url' => (
+    is => 'rw',
+    isa => 'Uri',
+    default => 'http://modules.apache.org/search.php?query=true&apacheversion2=yes)'
+);
 
 =head2 new(%args)
 
-Creates and returns a new Youri::Check::Test::Updates::Source::Apache object.  
+Creates and returns a new Youri::Check::Plugin::Test::Updates::Source::Apache
+object.  
 
 Specific parameters:
 
@@ -36,16 +44,11 @@ http://modules.apache.org/search.php?query=true&apacheversion2=yes)
 
 =cut
 
-
-sub _init {
-    my $self    = shift;
-    my %options = (
-        url => 'http://modules.apache.org/search.php?query=true&apacheversion2=yes',
-        @_
-    );
+sub BUILD {
+    my ($self, $params) = @_;
 
     my $agent = LWP::UserAgent->new();
-    my $response = $agent->get($options{url});
+    my $response = $agent->get($params->{url});
     if ($response->is_success()) {
         my $parser = HTML::TableExtract->new(
             attribs   => {width => '100%'},

@@ -1,26 +1,33 @@
 # $Id$
-package Youri::Check::Test::Updates::Source::JPackage;
+package Youri::Check::Plugin::Test::Updates::Source::JPackage;
 
 =head1 NAME
 
-Youri::Check::Test::Updates::Source::JPackage - JPackage updates source
+Youri::Check::Plugin::Test::Updates::Source::JPackage - JPackage updates source
 
 =head1 DESCRIPTION
 
-This source plugin for L<Youri::Check::Test::Updates> collects updates
+This source plugin for L<Youri::Check::Plugin::Test::Updates> collects updates
 available from JPackage.
 
 =cut
 
-use warnings;
-use strict;
+use Moose::Policy 'Moose::Policy::FollowPBP';
+use Moose;
 use Carp;
 use LWP::UserAgent;
-use base 'Youri::Check::Test::Updates::Source';
+
+extends 'Youri::Check::Plugin::Test::Updates::Source';
+
+has 'url' => (
+    is => 'rw',
+    isa => 'Uri',
+    default => 'http://mirrors.dotsrc.org/jpackage/1.7/generic'
+);
 
 =head2 new(%args)
 
-Creates and returns a new Youri::Check::Test::Updates::Source::JPackage object.
+Creates and returns a new Youri::Check::Plugin::Test::Updates::Source::JPackage object.
 
 Specific parameters:
 
@@ -35,12 +42,8 @@ http://mirrors.dotsrc.org/jpackage/1.7/generic)
 
 =cut
 
-sub _init {
-    my $self    = shift;
-    my %options = (
-        url => 'http://mirrors.dotsrc.org/jpackage/1.7/generic',
-        @_
-    );
+sub BUILD {
+    my ($self, $params) = @_;
 
     my $agent = LWP::UserAgent->new();
     my $buffer = '';
@@ -67,9 +70,9 @@ sub _init {
         }
     };
 
-    $agent->get("$options{url}/SRPMS.free", ':content_cb' => $callback);
-    $agent->get("$options{url}/SRPMS.non-free", ':content_cb' => $callback);
-    $agent->get("$options{url}/SRPMS.devel", ':content_cb' => $callback);
+    $agent->get("$params->{url}/SRPMS.free", ':content_cb' => $callback);
+    $agent->get("$params->{url}/SRPMS.non-free", ':content_cb' => $callback);
+    $agent->get("$params->{url}/SRPMS.devel", ':content_cb' => $callback);
 }
 
 =head1 COPYRIGHT AND LICENSE

@@ -1,33 +1,41 @@
 # $Id$
-package Youri::Check::Test::Updates::Source::PEAR;
+package Youri::Check::Plugin::Test::Updates::Source::PEAR;
 
 =head1 NAME
 
-Youri::Check::Test::Updates::Source::PEAR - PEAR updates source
+Youri::Check::Plugin::Test::Updates::Source::PEAR - PEAR updates source
 
 =head1 DESCRIPTION
 
-This source plugin for L<Youri::Check::Test::Updates> collects updates
+This source plugin for L<Youri::Check::Plugin::Test::Updates> collects updates
 available from PEAR.
 
 =cut
 
-use warnings;
-use strict;
+use Moose::Policy 'Moose::Policy::FollowPBP';
+use Moose;
 use Carp;
 use LWP::UserAgent;
 use XML::Twig;
-use base 'Youri::Check::Test::Updates::Source';
+
+extends 'Youri::Check::Plugin::Test::Updates::Source';
+
+has 'url' => (
+    is => 'rw',
+    isa => 'Uri',
+    default => 'http://pear.php.net',
+);
 
 =head2 new(%args)
 
-Creates and returns a new Youri::Check::Test::Updates::Source::PEAR object.  
+Creates and returns a new Youri::Check::Plugin::Test::Updates::Source::PEAR
+object.  
 
 Specific parameters:
 
 =over
 
-=item mirror $mirror
+=item url $url
 
 URL to PEAR mirror (default: http://pear.php.net)
 
@@ -35,12 +43,8 @@ URL to PEAR mirror (default: http://pear.php.net)
 
 =cut
 
-sub _init {
-    my $self    = shift;
-    my %options = (
-        mirror => 'http://pear.php.net',
-        @_
-    );
+sub BUILD {
+    my ($self, $params) = @_;
 
     my $agent = LWP::UserAgent->new();
 
@@ -66,7 +70,7 @@ sub _init {
          # get each category information file
          my $info = $c->{att}->{'xlink:href'};
          $info =~ s/info/packagesinfo/;
-         my $url = $options{mirror} . $info;
+         my $url = $params->{url} . $info;
          my $response2 = $agent->get($url);
          my $content2 = $response2->content();
          # correct it, at is is broken
@@ -79,7 +83,7 @@ sub _init {
          $twig->purge();
     };
 
-    my $response = $agent->get($options{mirror} . '/rest/c/categories.xml');
+    my $response = $agent->get($params->{url} . '/rest/c/categories.xml');
     my $twig = XML::Twig->new(
        TwigRoots => { c => $callback }
     );
