@@ -28,7 +28,7 @@ nobase_perllib_DATA = Youri/Check/Database.pm \
 		      Youri/Check/Plugin/Test/Updates/Source/Freshmeat.pm \
 		      Youri/Check/Plugin/Test/Updates/Source/GNOME.pm \
 		      Youri/Check/Plugin/Test/Updates/Source/Gentoo.pm \
-		      Youri/Check/Plugin/Test/Updates/Source/Jpackage.pm \
+		      Youri/Check/Plugin/Test/Updates/Source/JPackage.pm \
 		      Youri/Check/Plugin/Test/Updates/Source/NetBSD.pm \
 		      Youri/Check/Plugin/Test/Updates/Source/PEAR.pm \
 		      Youri/Check/Plugin/Test/Updates/Source/RAA.pm \
