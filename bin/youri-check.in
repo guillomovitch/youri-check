@@ -261,7 +261,7 @@ if ($netconfig_conf) {
 
 # database creation
 my $database_conf = $config->get_param('database');
-die "No database defined" unless $database_conf;
+die "No database defined in configuration, aborting\n" unless $database_conf;
 
 log_message("Creating database", $timestamp, $parallel) if $verbose;
 my $database = Youri::Check::Database->new(
@@ -274,9 +274,10 @@ my $database = Youri::Check::Database->new(
 my $children;
 
 if ($mode eq 'test') {
+    my $tests_conf = $config->get_param('tests');
+    die "No tests defined in configuration, aborting\n" unless $tests_conf;
 
-    # additional objects
-
+    # resolver
     my $resolver;
     my $resolver_conf = $config->get_param('resolver');
     if ($resolver_conf) {
@@ -294,7 +295,9 @@ if ($mode eq 'test') {
         };
         print STDERR "Failed to create maintainer resolver: $@\n" if $@;
     }
+    $database->set_resolver($resolver) if $resolver;
 
+    # preferences
     my $preferences;
     my $preferences_conf = $config->get_param('preferences');
     if ($preferences_conf) {
@@ -313,6 +316,7 @@ if ($mode eq 'test') {
         print STDERR "Failed to create maintainer preferences: $@\n" if $@;
     }
 
+    # medias
     my @medias;
     my $skip_media = $config->get_arg('skip-media');
     my %skip_media = $skip_media ?  map { $_ => 1 } @{$skip_media} : ();
@@ -338,12 +342,10 @@ if ($mode eq 'test') {
         print STDERR "Failed to create media $id: $@\n" if $@;
     }
 
-    # prepare database
-    $database->set_resolver($resolver) if $resolver;
-
+    # tests
     my $skip_test = $config->get_arg('skip-test');
     my %skip_test = $skip_test ?  map { $_ => 1 } @{$skip_test} : ();
-    foreach my $id (keys %{$config->get_param('tests')}) {
+    foreach my $id (keys %{$tests_conf}) {
         next if $skip_test{$id};
         log_message("Creating test $id", $timestamp, $parallel) if $verbose;
         my $test;
@@ -431,10 +433,12 @@ if ($mode eq 'test') {
     }
 
 } elsif ($mode eq 'report') {
+    my $reports_conf = $config->get_param('reports');
+    die "No reports defined in configuration, aborting\n" unless $reports_conf;
 
     my $skip_report = $config->get_arg('skip-report');
     my %skip_report = $skip_report ?  map { $_ => 1 } @{$skip_report} : ();
-    foreach my $id (keys %{$config->get_param('reports')}) {
+    foreach my $id (keys %{$reports_conf}) {
         next if $skip_report{$id};
         log_message("Creating report $id", $timestamp, $parallel) if $verbose;
         my $report;
