@@ -14,6 +14,7 @@ This plugin checks packages age, and report the ones exceeding maximum limit.
 use Moose::Policy 'Moose::Policy::FollowPBP';
 use Moose;
 use Moose::Util::TypeConstraints;
+use MooseX::Method;
 use Carp;
 use DateTime;
 use DateTime::Format::Duration;
@@ -106,7 +107,9 @@ Format used to describe age (default: %Y year)
 
 =cut
 
-sub run {
+method run => positional (
+    { isa => 'Youri::Media', required => 1 },
+) => sub {
     my ($self, $media) = @_;
     croak "Not a class method" unless ref $self;
 
@@ -115,6 +118,7 @@ sub run {
 
     my $max_age  = $self->get_format()->parse_duration($max_age_string);
     my $database = $self->get_database();
+    my $count    = $self->get_count();
     my $now      = $self->get_now();
 
     my $check = sub {
@@ -127,19 +131,19 @@ sub run {
         my $age = $now->subtract_datetime($buildtime);
 
         if (DateTime::Duration->compare($age, $max_age) > 0) {
-            my $date = $buildtime->strftime("%a %d %b %G");
-
             $database->add_package_file_result(
-                $MONIKER,
-                $media,
-                $package,
+                $MONIKER, $media, $package,
                 {
-                    buildtime => $date
+                    buildtime => $buildtime->strftime("%a %d %b %G")
                 }
             );
+            $count++;
         }
     };
+
     $media->traverse_headers($check);
+
+    $self->set_count($count);
 }
 
 =head1 COPYRIGHT AND LICENSE

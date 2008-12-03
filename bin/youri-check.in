@@ -363,56 +363,70 @@ if ($mode eq 'test') {
             );
         };
         if ($@) {
-            print STDERR "Failed to create test $id: $@\n";
-        } else {
-            if ($parallel) {
-                # fork
-                my $pid = fork;
-                die "Can't fork: $!" unless defined $pid;
-                if ($pid) {
-                    # parent process
-                    $children++;
-                    next;
-                } else {
-                    log_message(
-                        "Forking child process $id", $timestamp, $parallel
-                    ) if $verbose;
-                }
+            print STDERR "Failed to create test $id, skipping: $@\n";
+            next;
+        }
+
+        if ($parallel) {
+            # fork
+            my $pid = fork;
+            die "Can't fork: $!" unless defined $pid;
+            if ($pid) {
+                # parent process
+                $children++;
+                next;
+            } else {
+                log_message(
+                    "Forking child process $id", $timestamp, $parallel
+                ) if $verbose;
             }
+        }
+
+        # initialisation
+        eval {
+            $test->init(@medias);
+        };
+        if ($@) {
+            print STDERR "Failed to init test $id, skipping: $@\n";
+            next;
+        }
+
+        # clone database in child process
+        $database = $parallel ?
+            $database->clone() :
+            $database;
+
+        # run for each media
+        foreach my $media (@medias) {
+            next if $media->skip_test($id);
+            my $media_id = $media->get_id();
+            log_message(
+                "Running test $id on media $media_id",
+                $timestamp,
+                $parallel
+            ) if $verbose;
             eval {
-                $test->prepare(@medias);
+                $test->run($media);
             };
             if ($@) {
-                print STDERR "Failed to prepare test $id: $@\n";
-            } else {
-                # clone database in child process
-                $database = $parallel ?
-                    $database->clone() :
-                    $database;
+                print STDERR "Failed to run test $id on media $media_id: $@\n";
+            }
+        }
 
-                foreach my $media (@medias) {
-                    next if $media->skip_test($id);
-                    my $media_id = $media->get_id();
-                    log_message(
-                        "Running test $id on media $media_id",
-                        $timestamp,
-                        $parallel
-                    ) if $verbose;
-                    eval {
-                        $test->run($media, $database);
-                    };
-                    if ($@) {
-                        print STDERR "Failed to run test $id on media $media_id: $@\n";
-                    }
-                }
-            }
-            if ($parallel) {
-                # child process
-                log_message(
-                    "Finishing child process $id", $timestamp, $parallel
-                ) if $verbose;
-                exit;
-            }
+        # finalization
+        eval {
+            $test->finish();
+        };
+        if ($@) {
+            print STDERR "Failed to finish test $id: $@\n";
+        }
+
+        if ($parallel) {
+            # child process
+            log_message(
+                "Finishing child process $id", $timestamp, $parallel
+            ) if $verbose;
+            exit;
         }
     }
 

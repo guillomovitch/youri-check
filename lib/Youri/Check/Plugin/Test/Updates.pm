@@ -15,11 +15,14 @@ Additional source plugins handle specific sources.
 use Moose::Policy 'Moose::Policy::FollowPBP';
 use Moose;
 use Moose::Util::TypeConstraints;
+use MooseX::Method;
 use Scalar::Util qw(blessed);
 use List::MoreUtils qw(all);
 use Carp;
 use Memoize;
 use Youri::Factory;
+use Youri::Check::Descriptor::Row;
+use Youri::Check::Descriptor::Cell;
 
 extends 'Youri::Check::Plugin::Test';
 
@@ -141,65 +144,64 @@ sub BUILD {
     }
 }
 
-sub run {
-    my ($self, @medias) = @_;
+method run => positional (
+    { isa => 'Youri::Media', required => 1 },
+) => sub {
+    my ($self, $media) = @_;
     croak "Not a class method" unless ref $self;
 
-    $self->init();
+    # this is a source media check only
+    next unless $media->get_type() eq 'source';
 
-    my $count = 0;
+    my @sources = values %{$self->get_sources()};
+    my $database = $self->get_database();
+    my $count    = $self->get_count();
 
-    foreach my $media (@medias) {
-        # this is a source media check only
-        next unless $media->get_type() eq 'source';
+    my $check = sub {
+        my ($package) = @_;
 
-        my @sources = values %{$self->get_sources()};
+        my $name    = $package->get_name();
+        my $version = $package->get_version();
+        my $release = $package->get_release();
 
-        my $callback = sub {
-            my ($package) = @_;
+        # compute version with rpm subtilities related to preversions
+        my $current_version = ($release =~ /^0\.(\w+)\.\w+$/) ?
+            $version . $1 :
+            $version;
+        my $current_stable = is_stable($current_version);
 
-            my $name    = $package->get_name();
-            my $version = $package->get_version();
-            my $release = $package->get_release();
+        my ($max_version, $max_source, $max_url);
+        $max_version = $current_version;
 
-            # compute version with rpm subtilities related to preversions
-            my $current_version = ($release =~ /^0\.(\w+)\.\w+$/) ?
-                $version . $1 :
-                $version;
-            my $current_stable = is_stable($current_version);
-
-            my ($max_version, $max_source, $max_url);
-            $max_version = $current_version;
-
-            foreach my $source (@sources) {
-                my $available_version = $source->get_package_version($package);
-                if (
-                    $available_version &&
-                    (! $current_stable || is_stable($available_version)) &&
-                    is_newer($available_version, $max_version)
-                ) {
-                    $max_version = $available_version;
-                    $max_source  = $source->get_id();
-                    $max_url     = $source->get_package_url($name);
+        foreach my $source (@sources) {
+            my $available_version = $source->get_package_version($package);
+            if (
+                $available_version &&
+                (! $current_stable || is_stable($available_version)) &&
+                is_newer($available_version, $max_version)
+            ) {
+                $max_version = $available_version;
+                $max_source  = $source->get_id();
+                $max_url     = $source->get_package_url($name);
+            }
+        }
+        if ($max_version ne $current_version) {
+            $database->add_package_result(
+                $MONIKER, $media, $package,
+                {
+                    current   => $current_version,
+                    available => $max_version,
+                    source    => $max_source,
+                    url       => $max_url
                 }
-            }
-            if ($max_version ne $current_version) {
-                $self->get_database()->add_package_result(
-                    $MONIKER, $media, $package,
-                    {
-                        current   => $current_version,
-                        available => $max_version,
-                        source    => $max_source,
-                        url       => $max_url
-                });
-                $count++;
-            }
-        };
+            );
+            $count++;
+        }
+    };
 
-        $media->traverse_headers($callback);
-    }
+    $media->traverse_headers($check);
 
-    $self->finish($count);
+    $self->set_count($count);
 }
 
 =head2 is_stable($version)
