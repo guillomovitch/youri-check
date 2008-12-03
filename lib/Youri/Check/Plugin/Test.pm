@@ -30,17 +30,24 @@ has 'resolver'    => (
 has 'preferences' => (
     is => 'rw', isa => 'Youri::Check::Maintainer::Preferences'
 );
+has 'count' => (
+    is => 'rw', isa => 'Int', default => 0
+);
 
 sub init {
     my ($self) = @_;
 
-    $self->get_database()->register($self->get_moniker());
+    $self->get_database()->register(
+        $self->get_moniker()
+    );
 }
 
 sub finish {
-    my ($self, $count) = @_;
+    my ($self) = @_;
 
-    $self->get_database()->unregister($self->get_moniker(), $count);
+    $self->get_database()->unregister(
+        $self->get_moniker(), $self->get_count()
+    );
 }
 
 sub get_moniker {
