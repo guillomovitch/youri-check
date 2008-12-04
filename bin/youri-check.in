@@ -203,6 +203,10 @@ use strict;
 use warnings;
 use lib '@perllibdir@';
 
+# workaround for method redefinition warnings 
+use Class::C3;
+use MRO::Compat;
+
 use Youri::Config;
 use Youri::Factory;
 use Youri::Check::Database;
