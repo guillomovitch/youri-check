@@ -356,7 +356,7 @@ if ($mode eq 'test') {
         my $test_conf = $config->get_param('tests')->{$id};
         eval {
             $test = Youri::Factory->create_from_configuration(
-                'Youri::Check::Test',
+                'Youri::Check::Plugin::Test',
                 $test_conf,
                 {
                     id         => $id,
@@ -449,7 +449,7 @@ if ($mode eq 'test') {
         my $report_conf = $config->get_param('reports')->{$id};
         eval {
             $report = Youri::Factory->create_from_configuration(
-                'Youri::Check::Report',
+                'Youri::Check::Plugin::Report',
                 $report_conf,
                 {
                     id      => $id,
