@@ -48,8 +48,10 @@ sub _init {
         
         my $project = sub {
             my ($twig, $project) = @_;
+            my $latest_release = $project->first_child('latest_release');
+            return unless $latest_release;
             my $name    = $project->first_child('projectname_short')->text();
-            my $version = $project->first_child('latest_release')->first_child('latest_release_version')->text();
+            my $version = $latest_release->first_child('latest_release_version')->text();
             $versions->{$name} = $version;
             $twig->purge();
         };
