@@ -27,7 +27,8 @@ Specific parameters:
 
 =item url $url
 
-URL to Debian mirror content file (default: http://ftp.debian.org/ls-lR.gz)
+URL to Debian mirror content file (default:
+http://ftp.debian.org/debian/ls-lR.gz)
 
 =back
 
@@ -36,7 +37,7 @@ URL to Debian mirror content file (default: http://ftp.debian.org/ls-lR.gz)
 sub _init {
     my $self    = shift;
     my %options = (
-        url => 'http://ftp.debian.org/ls-lR.gz',
+        url => 'http://ftp.debian.org/debian/ls-lR.gz',
         @_
     );
 
