@@ -14,6 +14,7 @@ available from CPAN.
 
 use warnings;
 use strict;
+use version;
 use Carp;
 use LWP::UserAgent;
 use base 'Youri::Check::Test::Updates::Source';
@@ -56,7 +57,10 @@ sub _init {
         while ($data =~ m/(.*)\n/gc) {
             my $line = $1;
             next unless $line =~ $pattern;
-            $self->{_versions}->{$1} = $2;
+            my $name = $1;
+            my $version = version->new($2)->normal();
+            $version =~ s/^v//;
+            $self->{_versions}->{$name} = $version;
         }
 
         # store remaining text
