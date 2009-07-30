@@ -123,8 +123,7 @@ sub run {
         my $id;
         my $canonical_name = $package->get_canonical_name();
 
-        my $bin_revision =
-            $package->get_version() . '-' . $package->get_release();
+        my $bin_revision = $package->get_canonical_revision();
 
         my $src_revision;
         foreach my $id (@{$allowed_ids}) {
