@@ -7,7 +7,7 @@ nobase_perllib_DATA = Youri/Check/Test/Build/Source/LBD.pm \
 		      Youri/Check/Test/Dependencies.pm \
 		      Youri/Check/Test/MandrivaConflicts.pm \
 		      Youri/Check/Test/Missing.pm \
-		      Youri/Check/Test/Orphans.pm \
+		      Youri/Check/Test/Unmaintained.pm \
 		      Youri/Check/Test/Updates/Source/GNOME.pm \
 		      Youri/Check/Test/Updates/Source/Gentoo.pm \
 		      Youri/Check/Test/Updates/Source/Freshmeat.pm \
