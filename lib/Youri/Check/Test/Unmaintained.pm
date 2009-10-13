@@ -1,8 +1,8 @@
-package Youri::Check::Test::Orphans;
+package Youri::Check::Test::Unmaintained;
 
 =head1 NAME
 
-Youri::Check::Test::Orphans - Check maintainance
+Youri::Check::Test::Unmaintained - Check maintainance
 
 =head1 DESCRIPTION
 
@@ -41,7 +41,7 @@ sub get_descriptor {
 
 =head2 new(%args)
 
-Creates and returns a new Youri::Check::Test::Orphans object.
+Creates and returns a new Youri::Check::Test::Unmaintained object.
 
 No specific parameters.
 
