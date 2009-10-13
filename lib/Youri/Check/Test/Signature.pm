@@ -26,6 +26,13 @@ my $descriptor = Youri::Check::Descriptor::Row->new(
             type        => 'string',
         ),
         Youri::Check::Descriptor::Cell->new(
+            name        => 'section',
+            description => 'section',
+            mergeable   => 1,
+            value       => 'media',
+            type        => 'string',
+        ),
+        Youri::Check::Descriptor::Cell->new(
             name        => 'maintainer',
             description => 'maintainer',
             mergeable   => 1,

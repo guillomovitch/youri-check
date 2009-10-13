@@ -14,7 +14,7 @@ This plugins checks package dependencies with rpmcheck, and reports output.
 use warnings;
 use strict;
 use Carp;
- use File::Temp qw/tempdir/;
+use File::Temp qw/tempdir/;
 use base 'Youri::Check::Test';
 
 my $descriptor = Youri::Check::Descriptor::Row->new(
@@ -24,6 +24,13 @@ my $descriptor = Youri::Check::Descriptor::Row->new(
             description => 'source package',
             mergeable   => 1,
             value       => 'source_package',
+            type        => 'string',
+        ),
+        Youri::Check::Descriptor::Cell->new(
+            name        => 'section',
+            description => 'section',
+            mergeable   => 1,
+            value       => 'media',
             type        => 'string',
         ),
         Youri::Check::Descriptor::Cell->new(
