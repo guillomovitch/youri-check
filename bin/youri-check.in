@@ -138,10 +138,6 @@ libnet configuration options (see Net::Config).
 
 The definition of the resolver plugin to be used.
 
-=item B<preferences>
-
-The definition of the preferences plugin to be used.
-
 =back
 
 Here is a sample configuration:
@@ -301,25 +297,6 @@ if ($mode eq 'test') {
     }
     $database->set_resolver($resolver) if $resolver;
 
-    # preferences
-    my $preferences;
-    my $preferences_conf = $config->get_param('preferences');
-    if ($preferences_conf) {
-        log_message("Creating maintainer preferences", $timestamp, $parallel)
-            if $verbose;
-        eval {
-            $preferences = Youri::Factory->create_from_configuration(
-                'Youri::Check::Maintainer::Preferences',
-                $preferences_conf,
-                {
-                    test      => $test,
-                    verbose   => $verbose > 1 ? $verbose - 2 : 0,
-                }
-            );
-        };
-        print STDERR "Failed to create maintainer preferences: $@\n" if $@;
-    }
-
     # medias
     my @medias;
     my $skip_media = $config->get_arg('skip-media');
@@ -359,12 +336,11 @@ if ($mode eq 'test') {
                 'Youri::Check::Plugin::Test',
                 $test_conf,
                 {
-                    id         => $id,
-                    test       => $test,
-                    verbose    => $verbose > 0 ? $verbose - 1 : 0,
-                    resolver   => $resolver,
-                    preferences => $preferences,
-                    database    => $database
+                    id          => $id,
+                    test        => $test,
+                    verbose     => $verbose > 0 ? $verbose - 1 : 0,
+                    resolver    => $resolver,
+                    database    => $database,
                 }
             );
         };
