@@ -216,13 +216,6 @@ if ($config->get_arg('list')) {
     exit 0;
 }
 
-pod2usage(
-    -verbose => 0,
-    -message => "No mode specified, aborting\n"
-) unless @ARGV;
-
-my $mode = $ARGV[0];
-
 # convenient global flags
 my $test      = $config->get_arg('test');
 my $verbose   = $config->get_arg('verbose');
