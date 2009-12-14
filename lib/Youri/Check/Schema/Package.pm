@@ -34,7 +34,7 @@ __PACKAGE__->add_columns(
 );
 __PACKAGE__->set_primary_key('id');
 __PACKAGE__->has_many(
-    'files' => 'Youri::Check::Schema::PackageFile', 'package_id'
+    'files' => 'Youri::Check::Schema::RPM', 'package_id'
 );
 __PACKAGE__->belongs_to(
     'section_id' => 'Youri::Check::Schema::Section'
