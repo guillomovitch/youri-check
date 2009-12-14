@@ -8,7 +8,7 @@ __PACKAGE__->load_classes(qw/
     Section
     Maintainer
     Package
-    PackageFile
+    RPM
 /);
 
 1;
