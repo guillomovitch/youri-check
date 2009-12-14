@@ -11,14 +11,13 @@ Version 1.0
 
 =head1 SYNOPSIS
 
-youri-check [options] <test|report>
+youri-check [options]
 
 Options:
 
     --config <file>        use file <file> as config file
     --skip-media <media>   skip media <media>
     --skip-test <test>     skip test <test>
-    --skip-report <report> skip report <report>
     --parallel             parallel run
     --verbose              verbose run
     --timestamp            add timestamps in output
@@ -30,12 +29,10 @@ Options:
 
 B<youri-check> allows to check packages in a repository.
 
-In test mode, all medias defined in configuration are passed to a list of
-test plugins, each of them storing their result in a persistent database. In
-report mode, this database is passed to a list of report plugins, each of them
-producing arbitrary effects.
+All medias defined in configuration are passed to a list of
+test plugins, each of them storing their result in a persistent database.
 
-In normal run, all tests or reports are processed sequentially, whereas they
+In normal run, all tests are processed sequentially, whereas they
 are processed simultaneously in parallel run (using B<--parallel> option). The
 second one is faster, but generally more expensive in term of memory usage,
 even if parsed headers caching is automatically desactivated. Also, some
@@ -57,10 +54,6 @@ Skip media with given identity.
 =item B<--skip-test> <test>
 
 Skip test with given identity.
-
-=item B<--skip-report> <report>
-
-Skip report with given identity.
 
 =item B<--parallel>
 
@@ -120,10 +113,6 @@ The list of available media plugins, indexed by their identity.
 
 The list of available test plugins, indexed by their identity.
 
-=item B<reports>
-
-The list of available report plugins, indexed by their identity.
-
 =back
 
 Additional optional top-level directives:
@@ -156,18 +145,6 @@ Here is a sample configuration:
             options:
                 max: 12 months
                 pattern: %m months
-
-    # Reports results as HTML files
-    reports:
-        file:
-            class: Youri::Check::Report::File
-            options:
-                to: ${home}/youri
-                global: 1
-                individual: 1
-                formats:
-                    html:
-                        class: Youri::Check::Report::File::Format::HTML
 
     # Test PLF free media for cooker/i586
     medias:
@@ -212,7 +189,6 @@ use Net::Config qw/%NetConfig/;
 my $config = Youri::Config->new(
     args => {
         'skip-test'   => '=s@',
-        'skip-report' => '=s@',
         'skip-media'  => '=s@',
         'timestamp'   => '!',
         'parallel'    => '|p!',
@@ -273,211 +249,142 @@ my $database = Youri::Check::Database->new(
 
 my $children;
 
-if ($mode eq 'test') {
-    my $tests_conf = $config->get_param('tests');
-    die "No tests defined in configuration, aborting\n" unless $tests_conf;
+my $tests_conf = $config->get_param('tests');
+die "No tests defined in configuration, aborting\n" unless $tests_conf;
 
-    # resolver
-    my $resolver;
-    my $resolver_conf = $config->get_param('resolver');
-    if ($resolver_conf) {
-        log_message("Creating maintainer resolver", $timestamp, $parallel)
-            if $verbose;
-        eval {
-            $resolver = Youri::Factory->create_from_configuration(
-                'Youri::Check::Maintainer::Resolver',
-                $resolver_conf,
-                {
-                    test    => $test,
-                    verbose => $verbose > 1 ? $verbose - 2 : 0,
-                }
-            );
-        };
-        print STDERR "Failed to create maintainer resolver: $@\n" if $@;
-    }
-    $database->set_resolver($resolver) if $resolver;
-
-    # medias
-    my @medias;
-    my $skip_media = $config->get_arg('skip-media');
-    my %skip_media = $skip_media ?  map { $_ => 1 } @{$skip_media} : ();
-    foreach my $id (keys %{$config->get_param('medias')}) {
-        next if $skip_media{$id};
-        log_message("Creating media $id", $timestamp, $parallel) if $verbose;
-        my $media_conf = $config->get_param('medias')->{$id};
-        eval {
-            push(
-                @medias,
-                Youri::Factory->create_from_configuration(
-                    'Youri::Media',
-                    $media_conf,
-                    {
-                        id      => $id,
-                        test    => $test,
-                        verbose => $verbose > 0 ? $verbose - 1 : 0,
-                        cache   => $parallel ? 0 : 1
-                    }
-                )
-            );
-        };
-        print STDERR "Failed to create media $id: $@\n" if $@;
-    }
-
-    # tests
-    my $skip_test = $config->get_arg('skip-test');
-    my %skip_test = $skip_test ?  map { $_ => 1 } @{$skip_test} : ();
-    foreach my $id (keys %{$tests_conf}) {
-        next if $skip_test{$id};
-        log_message("Creating test $id", $timestamp, $parallel) if $verbose;
-        my $test;
-        my $test_conf = $config->get_param('tests')->{$id};
-        eval {
-            $test = Youri::Factory->create_from_configuration(
-                'Youri::Check::Plugin::Test',
-                $test_conf,
-                {
-                    id          => $id,
-                    test        => $test,
-                    verbose     => $verbose > 0 ? $verbose - 1 : 0,
-                    resolver    => $resolver,
-                    database    => $database,
-                }
-            );
-        };
-        if ($@) {
-            print STDERR "Failed to create test $id, skipping: $@\n";
-            next;
-        }
-
-        if ($parallel) {
-            # fork
-            my $pid = fork;
-            die "Can't fork: $!" unless defined $pid;
-            if ($pid) {
-                # parent process
-                $children++;
-                next;
-            } else {
-                log_message(
-                    "Forking child process $id", $timestamp, $parallel
-                ) if $verbose;
+# resolver
+my $resolver;
+my $resolver_conf = $config->get_param('resolver');
+if ($resolver_conf) {
+    log_message("Creating maintainer resolver", $timestamp, $parallel)
+        if $verbose;
+    eval {
+        $resolver = Youri::Factory->create_from_configuration(
+            'Youri::Check::Maintainer::Resolver',
+            $resolver_conf,
+            {
+                test    => $test,
+                verbose => $verbose > 1 ? $verbose - 2 : 0,
             }
-        }
+        );
+    };
+    print STDERR "Failed to create maintainer resolver: $@\n" if $@;
+}
+$database->set_resolver($resolver) if $resolver;
 
-        # initialisation
-        eval {
-            $test->init(@medias);
-        };
-        if ($@) {
-            print STDERR "Failed to init test $id, skipping: $@\n";
-            next;
-        }
-
-        # clone database in child process
-        $database = $parallel ?
-            $database->clone() :
-            $database;
-
-        # run for each media
-        foreach my $media (@medias) {
-            next if $media->skip_test($id);
-            my $media_id = $media->get_id();
-            log_message(
-                "Running test $id on media $media_id",
-                $timestamp,
-                $parallel
-            ) if $verbose;
-            eval {
-                $test->run($media);
-            };
-            if ($@) {
-                print STDERR "Failed to run test $id on media $media_id: $@\n";
-            }
-        }
-
-        # finalization
-        eval {
-            $test->finish();
-        };
-        if ($@) {
-            print STDERR "Failed to finish test $id: $@\n";
-        }
-
-        if ($parallel) {
-            # child process
-            log_message(
-                "Finishing child process $id", $timestamp, $parallel
-            ) if $verbose;
-            exit;
-        }
-    }
-
-} elsif ($mode eq 'report') {
-    my $reports_conf = $config->get_param('reports');
-    die "No reports defined in configuration, aborting\n" unless $reports_conf;
-
-    my $skip_report = $config->get_arg('skip-report');
-    my %skip_report = $skip_report ?  map { $_ => 1 } @{$skip_report} : ();
-    foreach my $id (keys %{$reports_conf}) {
-        next if $skip_report{$id};
-        log_message("Creating report $id", $timestamp, $parallel) if $verbose;
-        my $report;
-        my $report_conf = $config->get_param('reports')->{$id};
-        eval {
-            $report = Youri::Factory->create_from_configuration(
-                'Youri::Check::Plugin::Report',
-                $report_conf,
+# medias
+my @medias;
+my $skip_media = $config->get_arg('skip-media');
+my %skip_media = $skip_media ?  map { $_ => 1 } @{$skip_media} : ();
+foreach my $id (keys %{$config->get_param('medias')}) {
+    next if $skip_media{$id};
+    log_message("Creating media $id", $timestamp, $parallel) if $verbose;
+    my $media_conf = $config->get_param('medias')->{$id};
+    eval {
+        push(
+            @medias,
+            Youri::Factory->create_from_configuration(
+                'Youri::Media',
+                $media_conf,
                 {
                     id      => $id,
                     test    => $test,
                     verbose => $verbose > 0 ? $verbose - 1 : 0,
-                    config  => $config,
+                    cache   => $parallel ? 0 : 1
                 }
-            );
-        };
-        if ($@) {
-            print STDERR "Failed to create report $id: $@\n";
+            )
+        );
+    };
+    print STDERR "Failed to create media $id: $@\n" if $@;
+}
+
+# tests
+my $skip_test = $config->get_arg('skip-test');
+my %skip_test = $skip_test ?  map { $_ => 1 } @{$skip_test} : ();
+foreach my $id (keys %{$tests_conf}) {
+    next if $skip_test{$id};
+    log_message("Creating test $id", $timestamp, $parallel) if $verbose;
+    my $test;
+    my $test_conf = $config->get_param('tests')->{$id};
+    eval {
+        $test = Youri::Factory->create_from_configuration(
+            'Youri::Check::Plugin::Test',
+            $test_conf,
+            {
+                id          => $id,
+                test        => $test,
+                verbose     => $verbose > 0 ? $verbose - 1 : 0,
+                resolver    => $resolver,
+                database    => $database,
+            }
+        );
+    };
+    if ($@) {
+        print STDERR "Failed to create test $id, skipping: $@\n";
+        next;
+    }
+
+    if ($parallel) {
+        # fork
+        my $pid = fork;
+        die "Can't fork: $!" unless defined $pid;
+        if ($pid) {
+            # parent process
+            $children++;
+            next;
         } else {
-            if ($parallel) {
-                # fork
-                my $pid = fork;
-                die "Can't fork: $!" unless defined $pid;
-                if ($pid) {
-                    # parent process
-                    $children++;
-                    next;
-                } else {
-                    log_message(
-                        "Forking child process $id", $timestamp, $parallel
-                    ) if $verbose;
-                }
-            }
-
-            # clone database in child process
-            $database = $parallel ?
-                $database->clone() :
-                $database;
-
-            log_message("Running report $id", $timestamp, $parallel)
-                if $verbose;
-            eval {
-                $report->run($database);
-            };
-            if ($@) {
-                print STDERR "Failed to run report $id: $@\n";
-            }
-
-            if ($parallel) {
-                # child process
-                log_message(
-                    "Finishing child process $id", $timestamp, $parallel
-                ) if $verbose;
-                exit;
-            }
+            log_message(
+                "Forking child process $id", $timestamp, $parallel
+            ) if $verbose;
         }
     }
-} else {
-    die "Invalid mode $mode";
+
+    # initialisation
+    eval {
+        $test->init(@medias);
+    };
+    if ($@) {
+        print STDERR "Failed to init test $id, skipping: $@\n";
+        next;
+    }
+
+    # clone database in child process
+    $database = $parallel ?
+        $database->clone() :
+        $database;
+
+    # run for each media
+    foreach my $media (@medias) {
+        next if $media->skip_test($id);
+        my $media_id = $media->get_id();
+        log_message(
+            "Running test $id on media $media_id",
+            $timestamp,
+            $parallel
+        ) if $verbose;
+        eval {
+            $test->run($media);
+        };
+        if ($@) {
+            print STDERR "Failed to run test $id on media $media_id: $@\n";
+        }
+    }
+
+    # finalization
+    eval {
+        $test->finish();
+    };
+    if ($@) {
+        print STDERR "Failed to finish test $id: $@\n";
+    }
+
+    if ($parallel) {
+        # child process
+        log_message(
+            "Finishing child process $id", $timestamp, $parallel
+        ) if $verbose;
+        exit;
+    }
 }
 
 # wait for all forked processus termination
