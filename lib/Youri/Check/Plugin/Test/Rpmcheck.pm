@@ -15,52 +15,11 @@ use Moose::Policy 'Moose::Policy::FollowPBP';
 use Moose;
 use Carp;
 use File::Temp qw/tempdir/;
+use Youri::Types;
 
 extends 'Youri::Check::Plugin::Test';
 
-my $descriptor = Youri::Check::Descriptor::Row->new(
-    cells => [
-        Youri::Check::Descriptor::Cell->new(
-            name        => 'source package',
-            description => 'source package',
-            mergeable   => 1,
-            value       => 'source_package',
-            type        => 'string',
-        ),
-        Youri::Check::Descriptor::Cell->new(
-            name        => 'maintainer',
-            description => 'maintainer',
-            mergeable   => 1,
-            value       => 'maintainer',
-            type        => 'email',
-        ),
-        Youri::Check::Descriptor::Cell->new(
-            name        => 'architecture',
-            description => 'architecture',
-            mergeable   => 0,
-            value       => 'arch',
-            type        => 'string',
-        ),
-        Youri::Check::Descriptor::Cell->new(
-            name        => 'package',
-            description => 'package',
-            mergeable   => 0,
-            value       => 'package',
-            type        => 'string',
-        ),
-        Youri::Check::Descriptor::Cell->new(
-            name        => 'reason',
-            description => 'reason',
-            mergeable   => 0,
-            value       => 'reason',
-            type        => 'string',
-        )
-    ]
-);
-
-sub get_descriptor {
-    return $descriptor;
-}
+our $MONIKER = 'Rpmcheck';
 
 =head2 new(%args)
 
@@ -78,16 +37,11 @@ Path to the rpmcheck executable (default: /usr/bin/rpmcheck)
 
 =cut
 
-
-sub _init {
-    my $self    = shift;
-    my %options = (
-        path   => '/usr/bin/rpmcheck',
-        @_
-    );
-
-    $self->{_path}   = $options{path};
-}
+has 'path' => (
+    is      => 'rw',
+    isa     => 'ExecutableFile',
+    default => '/usr/bin/rpmcheck'
+);
 
 sub prepare {
     my ($self, @medias) = @_;
@@ -105,7 +59,7 @@ sub prepare {
 
 
 sub run {
-    my ($self, $media, $resultset) = @_;
+    my ($self, $media) = @_;
     croak "Not a class method" unless ref $self;
 
     # index packages first
@@ -120,6 +74,7 @@ sub run {
     # then run rpmcheck
     my $command = "$self->{_path} -explain -failures";
     my $allowed_ids = $media->get_option($self->{_id}, 'allowed');
+    my $database = $self->get_database();
     my $id = $media->get_id();
     foreach my $allowed_id (@{$allowed_ids}) {
         if ($allowed_id eq $id) {
@@ -196,12 +151,14 @@ sub run {
                     "explicit conflict with $dependency";
             }
 
-            $resultset->add_result(
-                $self->{_id}, $media, $package, { 
-                arch    => $arch,
-                package => $name,
-                reason  => $reason
-            });
+            $database->add_package_result(
+                $MONIKER, $media, $package,
+                { 
+                    arch   => $arch,
+                    rpm   => $name,
+                    error => $reason
+                }
+            );
         }
 
         # restart loop

@@ -17,28 +17,7 @@ use Carp;
 
 extends 'Youri::Check::Plugin::Test';
 
-my $descriptor = Youri::Check::Descriptor::Row->new(
-    cells => [
-        Youri::Check::Descriptor::Cell->new(
-            name        => 'source package',
-            description => 'source package',
-            mergeable   => 1,
-            value       => 'source_package',
-            type        => 'string',
-        ),
-        Youri::Check::Descriptor::Cell->new(
-            name        => 'error',
-            description => 'error',
-            mergeable   => 0,
-            value       => 'error',
-            type        => 'string',
-        )
-    ]
-);
-
-sub get_descriptor {
-    return $descriptor;
-}
+our $MONIKER = 'Unmaintained';
 
 =head2 new(%args)
 
@@ -48,30 +27,30 @@ No specific parameters.
 
 =cut
 
-sub _init {
-    my $self    = shift;
-    my %options = (
-        resolver => undef,
-        @_
-    );
-
-    croak "No resolver defined" unless $options{resolver};
-
-    $self->{_resolver} = $options{resolver};
-}
+has 'resolver'  => (
+    is       => 'rw',
+    isa      => 'Youri::Check::Maintainer::Resolver',
+    required => 1
+);
 
 sub run {
-    my ($self, $media, $resultset) = @_;
+    my ($self, $media) = @_;
     croak "Not a class method" unless ref $self;
     
     # this is a source media check only
     return unless $media->get_type() eq 'source';
 
+    my $database = $self->get_database();
+    my $resolver = $self->get_resolver();
+
     my $check = sub {
         my ($package) = @_;
-        $resultset->add_result($self->{_id}, $media, $package, {
-            error => "unmaintained package"
-        }) unless $self->{_resolver}->get_maintainer($package);
+        $database->add_package_result(
+            $MONIKER, $media, $package,
+            {
+                error => "unmaintained package"
+            }
+        ) unless $resolver->get_maintainer($package);
     };
 
     $media->traverse_headers($check);

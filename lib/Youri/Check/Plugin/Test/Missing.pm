@@ -18,56 +18,7 @@ use List::MoreUtils qw/all any/;
 
 extends 'Youri::Check::Plugin::Test';
 
-my $descriptor = Youri::Check::Descriptor::Row->new(
-    cells => [
-        Youri::Check::Descriptor::Cell->new(
-            name        => 'source package',
-            description => 'source package',
-            mergeable   => 1,
-            value       => 'source_package',
-            type        => 'string',
-        ),
-        Youri::Check::Descriptor::Cell->new(
-            name        => 'maintainer',
-            description => 'maintainer',
-            mergeable   => 1,
-            value       => 'maintainer',
-            type        => 'email',
-        ),
-        Youri::Check::Descriptor::Cell->new(
-            name        => 'package',
-            description => 'distribution unit',
-            mergeable   => 0,
-            value       => 'package',
-            type        => 'string',
-        ),
-        Youri::Check::Descriptor::Cell->new(
-            name        => 'architecture',
-            description => 'architecture',
-            mergeable   => 0,
-            value       => 'arch',
-            type        => 'string',
-        ),
-        Youri::Check::Descriptor::Cell->new(
-            name        => 'revision',
-            description => 'revision',
-            mergeable   => 0,
-            value       => 'revision',
-            type        => 'string',
-        ),
-        Youri::Check::Descriptor::Cell->new(
-            name        => 'error',
-            description => 'error',
-            mergeable   => 0,
-            value       => 'error',
-            type        => 'string',
-        ),
-    ]
-);
-
-sub get_descriptor {
-    return $descriptor;
-}
+our $MONIKER = 'Missing';
 
 =head2 new(%args)
 
@@ -101,7 +52,7 @@ sub prepare {
 }
 
 sub run {
-    my ($self, $media, $resultset) = @_;
+    my ($self, $media)  = @_;
     croak "Not a class method" unless ref $self;
 
     # this is a binary media check only
@@ -111,13 +62,14 @@ sub run {
 
     # abort unless all allowed medias are present
     foreach my $id (@{$allowed_ids}) {
-    unless ($self->{_medias}->{$id}) {
-            carp "Missing media $id, aborting";
-            return;
-        }
+        unless ($self->{_medias}->{$id}) {
+                carp "Missing media $id, aborting";
+                return;
+            }
     }
 
     my $class = $media->get_package_class();
+    my $database = $self->get_database();
 
     my $check_package = sub {
         my ($package) = @_;
@@ -137,29 +89,38 @@ sub run {
             unless ($src_revision eq $bin_revision) {
                 if ($class->compare_revisions($src_revision, $bin_revision) > 0) {
                     # binary package is obsolete
-                    $resultset->add_result($self->{_id}, $media, $package, {
-                        package   => $package->get_name(),
-                        arch      => $package->get_arch(),
-                        revision  => $bin_revision,
-                        error     => "Obsolete binaries (source $src_revision found)",
-                    });
+                    $database->add_package_result(
+                        $MONIKER, $media, $package,
+                        {
+                            rpm   => $package->get_name(),
+                            arch  => $package->get_arch(),
+                            build => $bin_revision,
+                            error => "Obsolete binaries (source $src_revision found)",
+                        }
+                    );
                 } else {
                     # source package is obsolete
-                    $resultset->add_result($self->{_id}, $media, $package, {
-                        package   => $package->get_canonical_name(),
-                        arch      => 'src',
-                        revision  => $src_revision,
-                        error     => "Obsolete source (binaries $bin_revision found)",
-                    });
+                    $database->add_package_result(
+                        $MONIKER, $media, $package,
+                        {
+                            rpm   => $package->get_canonical_name(),
+                            arch  => 'src',
+                            build => $src_revision,
+                            error => "Obsolete source (binaries $bin_revision found)",
+                        }
+                    );
                 }
             }
         } else {
-            $resultset->add_result($self->{_id}, $media, $package, {
-                package   => $package->get_name(),
-                arch      => $package->get_arch(),
-                revision  => $bin_revision,
-                error     => "Missing source package",
-            });
+            $database->add_package_result(
+                $MONIKER, $media, $package,
+                {
+                    rpm   => $package->get_name(),
+                    arch  => $package->get_arch(),
+                    build => $bin_revision,
+                    error => "Missing source package",
+                }
+            );
         }
     };
 

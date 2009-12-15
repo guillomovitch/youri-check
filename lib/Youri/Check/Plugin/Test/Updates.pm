@@ -15,61 +15,14 @@ Additional source plugins handle specific sources.
 use Moose::Policy 'Moose::Policy::FollowPBP';
 use Moose;
 use Moose::Util::TypeConstraints;
-use MooseX::Method;
 use Scalar::Util qw(blessed);
 use List::MoreUtils qw(all);
 use Carp;
 use Memoize;
 use Youri::Factory;
-use Youri::Check::Descriptor::Row;
-use Youri::Check::Descriptor::Cell;
+use Youri::Check::Plugin::Test::Updates::Source;
 
 extends 'Youri::Check::Plugin::Test';
-
-my $descriptor = Youri::Check::Descriptor::Row->new(
-    cells => [
-        Youri::Check::Descriptor::Cell->new(
-            name        => 'source package',
-            description => 'source package',
-            mergeable   => 1,
-            value       => 'source_package',
-            type        => 'string',
-        ),
-        Youri::Check::Descriptor::Cell->new(
-            name        => 'maintainer',
-            description => 'maintainer',
-            mergeable   => 1,
-            value       => 'maintainer',
-            type        => 'email',
-        ),
-        Youri::Check::Descriptor::Cell->new(
-            name        => 'current',
-            description => 'current version',
-            mergeable   => 0,
-            value       => 'current',
-            type        => 'string',
-        ),
-        Youri::Check::Descriptor::Cell->new(
-            name        => 'available',
-            description => 'available version',
-            mergeable   => 0,
-            value       => 'available',
-            type        => 'string',
-        ),
-        Youri::Check::Descriptor::Cell->new(
-            name        => 'source',
-            description => 'information source',
-            mergeable   => 0,
-            value       => 'source',
-            type        => 'string',
-            link        => 'url',
-        )
-    ]
-);
-
-sub get_descriptor {
-    return $descriptor;
-}
 
 our $MONIKER = 'Updates';
 
@@ -97,16 +50,10 @@ Hash of source plugins definitions
 
 =cut
 
-subtype 'HashRef[Youri::Check::Plugin::Test::Updates::Source]'
-    => as 'HashRef'
-    => where {
-        all {
-            blessed $_ &&
-            $_->isa('Youri::Check::Plugin::Test::Updates::Source')
-        } values %$_;
-    };
+subtype 'HashRefOfSources',
+    => as 'HashRef[Youri::Check::Plugin::Test::Updates::Source]';
 
-coerce 'HashRef[Youri::Check::Plugin::Test::Updates::Source]'
+coerce 'HashRefOfSources',
     => from 'HashRef[HashRef]'
         => via {
             my $in = $_;
@@ -122,12 +69,12 @@ coerce 'HashRef[Youri::Check::Plugin::Test::Updates::Source]'
         };
 
 has 'aliases' => (
-    is => 'rw',
+    is  => 'rw',
     isa => 'HashRef[Str]'
 );
 has 'sources' => (
     is       => 'rw',
-    isa      => 'HashRef[Youri::Check::Plugin::Test::Updates::Source]',
+    isa      => 'HashRefOfSources',
     coerce   => 1,
     required => 1
 );
@@ -144,10 +91,8 @@ sub BUILD {
     }
 }
 
-method run => positional (
-    { isa => 'Youri::Media', required => 1 },
-) => sub {
-    my ($self, $media) = @_;
+sub run {
+    my ($self, $media)  = @_;
     croak "Not a class method" unless ref $self;
 
     # this is a source media check only

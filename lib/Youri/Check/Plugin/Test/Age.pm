@@ -14,12 +14,9 @@ This plugin checks packages age, and report the ones exceeding maximum limit.
 use Moose::Policy 'Moose::Policy::FollowPBP';
 use Moose;
 use Moose::Util::TypeConstraints;
-use MooseX::Method;
 use Carp;
 use DateTime;
 use DateTime::Format::Duration;
-use Youri::Check::Descriptor::Row;
-use Youri::Check::Descriptor::Cell;
 
 extends 'Youri::Check::Plugin::Test';
 
@@ -48,43 +45,6 @@ has 'format'  => (
     default => sub { DateTime::Format::Duration->new(pattern => '%Y year') }
 );
 
-my $descriptor = Youri::Check::Descriptor::Row->new(
-    cells => [
-        Youri::Check::Descriptor::Cell->new(
-            name        => 'source package',
-            description => 'source package',
-            mergeable   => 1,
-            value       => 'source_package',
-            type        => 'string',
-        ),
-        Youri::Check::Descriptor::Cell->new(
-            name        => 'maintainer',
-            description => 'maintainer',
-            mergeable   => 1,
-            value       => 'maintainer',
-            type        => 'email',
-        ),
-        Youri::Check::Descriptor::Cell->new(
-            name        => 'architecture',
-            description => 'architecture',
-            mergeable   => 0,
-            value       => 'arch',
-            type        => 'string',
-        ),
-        Youri::Check::Descriptor::Cell->new(
-            name        => 'build time',
-            description => 'build time',
-            mergeable   => 0,
-            value       => 'buildtime',
-            type        => 'string',
-        )
-    ]
-);
-
-sub get_descriptor {
-    return $descriptor;
-}
-
 our $MONIKER = 'Age';
 
 =head2 new(%args)
@@ -107,10 +67,8 @@ Format used to describe age (default: %Y year)
 
 =cut
 
-method run => positional (
-    { isa => 'Youri::Media', required => 1 },
-) => sub {
-    my ($self, $media) = @_;
+sub run {
+    my ($self, $media)  = @_;
     croak "Not a class method" unless ref $self;
 
     my $max_age_string =
