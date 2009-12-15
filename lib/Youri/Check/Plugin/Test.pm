@@ -13,8 +13,6 @@ This abstract class defines test plugin interface.
 
 use Moose::Policy 'Moose::Policy::FollowPBP';
 use Moose;
-use Youri::Check::Descriptor::Row;
-use Youri::Check::Descriptor::Cell;
 
 use constant WARNING => 'warning';
 use constant ERROR => 'error';
@@ -35,11 +33,13 @@ has 'count' => (
 );
 
 sub init {
-    my ($self) = @_;
+    my ($self, @medias) = @_;
 
     $self->get_database()->register(
         $self->get_moniker()
     );
+
+    $self->prepare(@medias);
 }
 
 sub finish {
