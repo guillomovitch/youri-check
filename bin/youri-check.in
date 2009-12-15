@@ -301,7 +301,7 @@ foreach my $id (keys %{$tests_conf}) {
     my $test_conf = $config->get_param('tests')->{$id};
     eval {
         $test = Youri::Factory->create_from_configuration(
-            'Youri::Check::Plugin::Test',
+            'Youri::Check::Test',
             $test_conf,
             {
                 id          => $id,
