@@ -17,14 +17,11 @@ use Moose::Policy 'Moose::Policy::FollowPBP';
 use Moose;
 use Carp;
 use Youri::Check::WebRetriever;
-use Youri::Types;
+use Youri::Types qw/URI/;
 
 extends 'Youri::Check::Maintainer::Resolver';
 
-has 'url' => (
-    is => 'rw',
-    isa => 'Uri'
-);
+has 'url' => ( is => 'ro', isa => URI );
 
 =head1 CLASS METHODS
 
