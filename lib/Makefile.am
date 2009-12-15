@@ -37,17 +37,11 @@ nobase_perllib_DATA = Youri/Check/Database.pm \
 		      Youri/Check/Plugin/Test/Rpmcheck.pm \
 		      Youri/Check/Plugin/Test/Build.pm \
 		      Youri/Check/Plugin/Test/Signature.pm \
-		      Youri/Check/Plugin/Report/Mail.pm \
-		      Youri/Check/Plugin/Report/Mail/Format.pm \
-		      Youri/Check/Plugin/Report/Mail/Format/HTML.pm \
-		      Youri/Check/Plugin/Report/Mail/Format/Text.pm \
 		      Youri/Check/Maintainer/Preferences/File.pm \
 		      Youri/Check/Maintainer/Resolver/Bugzilla.pm \
 		      Youri/Check/Maintainer/Resolver/CGI.pm \
 		      Youri/Check/Maintainer/Preferences.pm \
 		      Youri/Check/Maintainer/Resolver.pm \
-		      Youri/Check/Descriptor/Row.pm \
-		      Youri/Check/Descriptor/Cell.pm \
 		      Youri/Check/WebRetriever.pm
 
 EXTRA_DIST = $(nobase_perllib_DATA)
