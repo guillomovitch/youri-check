@@ -14,11 +14,12 @@ This class provides a simple web data retriever.
 use Moose::Policy 'Moose::Policy::FollowPBP';
 use Moose;
 use LWP::UserAgent;
-use Youri::Types;
+use Youri::Types qw/URI/;
+use MooseX::Types::Moose qw/HashRef RegexpRef/;
 
-has 'url'     => ( is => 'rw', isa => 'Uri' ); 
-has 'pattern' => ( is => 'rw', isa => 'RegexpRef' ); 
-has 'results' => ( is => 'rw', isa => 'HashRef' );
+has 'url'     => ( is => 'ro', isa => URI ); 
+has 'pattern' => ( is => 'ro', isa => RegexpRef ); 
+has 'results' => ( is => 'rw', isa => HashRef );
 
 sub BUILD {
     my ($self, $params) = @_;
