@@ -21,6 +21,9 @@ use constant ERROR => 'error';
 has 'id' => (
     is => 'ro', isa => Str
 );
+has 'verbosity' => (
+    is => 'rw', isa => Int, default => 0
+);
 has 'database'    => (
     is => 'rw', isa => 'Youri::Check::Database'
 );
