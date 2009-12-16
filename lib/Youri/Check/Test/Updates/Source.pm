@@ -15,17 +15,18 @@ L<Youri::Check::Test::Updates> test plugin.
 use Moose::Policy 'Moose::Policy::FollowPBP';
 use Moose;
 use MooseX::AttributeHelpers;
+use MooseX::Types::Moose qw/Str HashRef/;
 use Carp;
 
 has 'id' => (
     is => 'rw',
-    isa => 'Str'
+    isa => Str
 );
 
 has 'aliases' => (
     metaclass => 'Collection::Hash',
     is => 'rw',
-    isa => 'HashRef[Str]',
+    isa => HashRef[Str],
     provides  => {
         exists => 'has_alias',
         get    => 'get_alias',
