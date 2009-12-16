@@ -129,7 +129,7 @@ sub register {
 
     # register test run
     my $last_run = $self->{_schema}->resultset('TestRun')->single({
-        name => $moniker,
+        name => $moniker
     });
 
     if ($last_run) {
@@ -183,29 +183,29 @@ sub load {
     $self->{_schema} = $schema;
 }
 
-=head2 add_result($source, $media, $package, $values)
+=head2 add_rpm_result($source, $moniker, $media, $rpm, $values)
 
 Add given hash reference as a new result for given type and L<Youri::Package> object.
 
 =cut
 
-sub add_package_file_result {
-    my ($self, $moniker, $media, $package, $values) = @_;
+sub add_rpm_result {
+    my ($self, $moniker, $media, $rpm, $values) = @_;
     croak "Not a class method" unless ref $self;
     croak "No moniker defined" unless $moniker;
     croak "No media defined" unless $media;
-    croak "No package defined" unless $package;
+    croak "No rpm defined" unless $rpm;
     croak "No values defined" unless $values;
 
-    print "adding result for test $moniker and package $package\n"
+    print "adding result for test $moniker and rpm $rpm\n"
         if $self->{_verbose} > 1;
 
-    my $package_file_id =
-        $self->get_package_file_id($package) ||
-        $self->add_package_file($media, $package);
+    my $rpm_id =
+        $self->get_rpm_id($rpm) ||
+        $self->add_rpm($media, $rpm);
 
     my $new_result = $self->{_schema}->resultset($moniker)->create({
-        package_file_id => $package_file_id,
+        rpm_id => $rpm_id,
         %{$values}
     });
     $new_result->update();
@@ -277,13 +277,14 @@ sub add_package {
         $self->get_section_id($section) ||
         $self->add_section($section);
 
-
     my $maintainer_id;
     if ($self->{_resolver}) {
         my $maintainer = $self->{_resolver}->get_maintainer($package);
-        $maintainer_id =
-            $self->get_maintainer_id($maintainer) ||
-            $self->add_maintainer($maintainer);
+        if ($maintainer) {
+            $maintainer_id =
+                $self->get_maintainer_id($maintainer) ||
+                $self->add_maintainer($maintainer);
+        }
     }
 
     return $self->{_schema}->resultset('Package')->create({
@@ -307,24 +308,24 @@ sub get_package_id {
     return $record ? $record->id() : undef;
 }
 
-sub add_package_file {
+sub add_rpm {
     my ($self, $media, $package) = @_;
 
     my $package_id =
         $self->get_package_id($package) ||
         $self->add_package($media, $package);
 
-    return $self->{_schema}->resultset('PackageFile')->create({
+    return $self->{_schema}->resultset('RPM')->create({
         name       => $package->get_name(),
         arch       => $package->get_arch(),
         package_id => $package_id
     })->update();
 }
 
-sub get_package_file_id {
+sub get_rpm_id {
     my ($self, $package) = @_;
 
-    my $record = $self->{_schema}->resultset('PackageFile')->single({
+    my $record = $self->{_schema}->resultset('RPM')->single({
         name => $package->get_name(),
         arch => $package->get_arch(),
     });

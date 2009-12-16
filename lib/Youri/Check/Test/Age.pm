@@ -82,7 +82,7 @@ sub run {
         my $age = $now->subtract_datetime($buildtime);
 
         if (DateTime::Duration->compare($age, $max_age) > 0) {
-            $database->add_package_file_result(
+            $database->add_rpm_result(
                 $MONIKER, $media, $package,
                 {
                     buildtime => $buildtime->strftime("%a %d %b %G")
