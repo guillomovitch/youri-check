@@ -17,10 +17,11 @@ use MooseX::Types
         Date DurationFormat
         BuildSource HashRefOfBuildSources
         UpdatesSource HashRefOfUpdatesSources
+        HashRefOfStr
     )];
 
 # import builtin types
-use MooseX::Types::Moose qw/Str HashRef/;
+use MooseX::Types::Moose qw/Str HashRef ArrayRef/;
 
 # class types
 class_type Date,           { class => 'DateTime' };
@@ -34,6 +35,9 @@ subtype HashRefOfUpdatesSources,
 
 subtype HashRefOfBuildSources,
     as HashRef[BuildSource];
+
+subtype HashRefOfStr,
+    as HashRef[Str];
 
 # coercion rules
 coerce HashRefOfUpdatesSources,
@@ -69,5 +73,13 @@ coerce HashRefOfBuildSources,
 coerce DurationFormat,
     from Str,
     via { DateTime::Format::Duration->new(pattern => $_) };
+
+coerce HashRefOfStr,
+    from ArrayRef,
+    via {
+        my $in = $_;
+        my $out = { map { $_ => 1 } @$in };
+        return $out;
+    };
 
 1;
