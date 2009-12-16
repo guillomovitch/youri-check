@@ -27,9 +27,6 @@ has 'database'    => (
 has 'resolver'    => (
     is => 'rw', isa => 'Youri::Check::Maintainer::Resolver'
 );
-has 'preferences' => (
-    is => 'rw', isa => 'Youri::Check::Maintainer::Preferences'
-);
 has 'count' => (
     is => 'rw', isa => Int, default => 0
 );
