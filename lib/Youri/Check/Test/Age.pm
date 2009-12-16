@@ -69,7 +69,6 @@ sub run {
 
     my $max_age  = $self->get_format()->parse_duration($max_age_string);
     my $database = $self->get_database();
-    my $count    = $self->get_count();
     my $now      = $self->get_now();
 
     my $check = sub {
