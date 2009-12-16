@@ -42,7 +42,7 @@ sub finish {
     my ($self) = @_;
 
     $self->get_database()->unregister(
-        $self->get_moniker(), $self->get_count()
+        $self->get_moniker()
     );
 }
 
