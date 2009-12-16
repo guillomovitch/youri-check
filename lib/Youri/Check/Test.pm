@@ -13,10 +13,14 @@ This abstract class defines test interface.
 
 use Moose::Policy 'Moose::Policy::FollowPBP';
 use Moose;
+use MooseX::Types::Moose qw/Str Int/;
 
 use constant WARNING => 'warning';
 use constant ERROR => 'error';
 
+has 'id' => (
+    is => 'ro', isa => Str
+);
 has 'database'    => (
     is => 'rw', isa => 'Youri::Check::Database'
 );
@@ -27,7 +31,7 @@ has 'preferences' => (
     is => 'rw', isa => 'Youri::Check::Maintainer::Preferences'
 );
 has 'count' => (
-    is => 'rw', isa => 'Int', default => 0
+    is => 'rw', isa => Int, default => 0
 );
 
 sub init {
