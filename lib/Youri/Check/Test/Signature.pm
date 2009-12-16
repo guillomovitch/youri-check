@@ -13,9 +13,12 @@ This plugin checks packages signature, and report unsigned ones.
 
 use Moose::Policy 'Moose::Policy::FollowPBP';
 use Moose;
+use MooseX::Types::Moose qw/Str/;
 use Carp;
 
 extends 'Youri::Check::Test';
+
+our $MONIKER = 'Signature';
 
 =head2 new(%args)
 
@@ -33,19 +36,16 @@ Expected GPG key identity
 
 =cut
 
-sub _init {
-    my $self    = shift;
-    my %options = (
-        key => '',
-        @_
-    );
-
-    $self->{_key} = $options{key};
-}
+has 'key' => (
+    is => 'rw',
+    isa => Str
+);
 
 sub run {
-    my ($self, $media, $resultset) = @_;
+    my ($self, $media) = @_;
     croak "Not a class method" unless ref $self;
+
+    my $database = $self->get_database();
 
     my $check = sub {
         my ($package) = @_;
@@ -56,17 +56,23 @@ sub run {
         my $key = $package->get_gpg_key();
 
         if (!$key) {
-            $resultset->add_result($self->{_id}, $media, $package, { 
-                arch  => $arch,
-                file  => $name,
-                error => "unsigned package $name"
-            });
+            $database->add_package_result(
+                $MONIKER, $media, $package,
+                {
+                    arch  => $arch,
+                    file  => $name,
+                    error => "unsigned package $name"
+                }
+            );
         } elsif ($key ne $self->{_key}) {
-            $resultset->add_result($self->{_id}, $media, $package, { 
-                arch    => $arch,
-                package => $name,
-                error   => "invalid key id $key for package $name (allowed $self->{_key})"
-            });
+            $database->add_package_result(
+                $MONIKER, $media, $package,
+                {
+                    arch    => $arch,
+                    package => $name,
+                    error   => "invalid key id $key for package $name (allowed $self->{_key})"
+                }
+            );
         }
         
     };
