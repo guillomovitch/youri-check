@@ -21,7 +21,7 @@ use Youri::Types qw/URI/;
 extends 'Youri::Check::Test::Updates::Source';
 
 has 'url' => (
-    is      => 'rw',
+    is      => 'ro',
     isa     => URI,
     default => 'http://pear.php.net',
 );

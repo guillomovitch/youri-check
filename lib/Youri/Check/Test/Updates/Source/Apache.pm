@@ -22,7 +22,7 @@ use Youri::Types qw/URI/;
 extends 'Youri::Check::Test::Updates::Source';
 
 has 'url' => (
-    is      => 'rw',
+    is      => 'ro',
     isa     => URI,
     default => 'http://modules.apache.org/search.php?query=true&apacheversion2=yes)'
 );

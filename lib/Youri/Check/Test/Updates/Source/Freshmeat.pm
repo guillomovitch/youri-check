@@ -24,12 +24,12 @@ use Youri::Types qw/URI/;
 extends 'Youri::Check::Test::Updates::Source';
 
 has 'url' => (
-    is => 'rw',
+    is => 'ro',
     isa => URI,
     default => 'http://download.freshmeat.net/backend/fm-projects.rdf.bz2'
 );
 has 'preload' => (
-    is => 'rw',
+    is => 'ro',
     isa => Bool,
     default => 0
 );
