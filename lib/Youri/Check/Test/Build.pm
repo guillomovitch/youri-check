@@ -15,9 +15,11 @@ source plugins handle specific sources.
 use Carp;
 use Moose::Policy 'Moose::Policy::FollowPBP';
 use Moose;
-use Youri::Factory;
+use Youri::Check::Types qw/HashRefOfBuildSources/;
 
 extends 'Youri::Check::Test';
+
+our $MONIKER = 'Build';
 
 =head2 new(%args)
 
@@ -35,41 +37,12 @@ Hash of source plugins definitions
 
 =cut
 
-sub _init {
-    my $self    = shift;
-    my %options = (
-        sources => undef,
-        @_
-    );
-
-    croak "No source defined" unless $options{sources};
-    croak "sources should be an hashref" unless ref $options{sources} eq 'HASH';
-
-    foreach my $id (keys %{$options{sources}}) {
-        print "Creating source $id\n" if $options{verbose};
-        my $source_conf = $options{sources}->{$id};
-        eval {
-            push(
-                @{$self->{_sources}},
-                Youri::Factory->create_from_configuration(
-                    'Youri::Check::Test::Build::Source',
-                    $source_conf,
-                    {
-                        id      => $id,
-                        test    => $options{test},
-                        verbose => $options{verbose},
-                    }
-                )
-            );
-            # register monitored arches
-            $self->{_arches}->{$_}->{$id} = 1
-                foreach @{$options{sources}->{$id}->{arches}};
-        };
-        print STDERR "Failed to create source $id: $@\n" if $@;
-    }
-
-    croak "no sources created" unless @{$self->{_sources}};
-}
+has 'sources' => (
+    is       => 'rw',
+    isa      => HashRefOfBuildSources,
+    coerce   => 1,
+    required => 1
+);
 
 sub run {
     my ($self, $media, $resultset) = @_;
