@@ -17,10 +17,10 @@ use List::MoreUtils qw(all);
 use Memoize;
 use Moose::Policy 'Moose::Policy::FollowPBP';
 use Moose;
-use Moose::Util::TypeConstraints;
+use MooseX::Types::Moose qw/HashRef/;
 use Scalar::Util qw(blessed);
 use Youri::Check::Test::Updates::Source;
-use Youri::Factory;
+use Youri::Check::Types qw/HashRefOfUpdatesSources/;
 
 extends 'Youri::Check::Test';
 
@@ -50,31 +50,13 @@ Hash of source plugins definitions
 
 =cut
 
-subtype 'HashRefOfSources',
-    => as 'HashRef[Youri::Check::Test::Updates::Source]';
-
-coerce 'HashRefOfSources',
-    => from 'HashRef[HashRef]'
-        => via {
-            my $in = $_;
-            my $out;
-            foreach my $key (keys %$in) {
-                $out->{$key} = Youri::Factory->create_from_configuration(
-                    'Youri::Check::Test::Updates::Source',
-                    $in->{$key},
-                    {id => $key}
-                )
-            }
-            return $out;
-        };
-
 has 'aliases' => (
     is  => 'rw',
-    isa => 'HashRef[Str]'
+    isa => HashRef[Str]
 );
 has 'sources' => (
     is       => 'rw',
-    isa      => 'HashRefOfSources',
+    isa      => HashRefOfUpdatesSources,
     coerce   => 1,
     required => 1
 );

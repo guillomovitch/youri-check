@@ -16,32 +16,25 @@ use DateTime;
 use DateTime::Format::Duration;
 use Moose::Policy 'Moose::Policy::FollowPBP';
 use Moose;
-use Moose::Util::TypeConstraints;
+use MooseX::Types::Moose qw/Str/;
+use Youri::Check::Types qw/Date DurationFormat/;
 
 extends 'Youri::Check::Test';
 
-subtype 'DateTime::Format::Duration'
-    => as 'Object'
-    => where { $_->isa('DateTime::Format::Duration') };
-
-coerce 'DateTime::Format::Duration'
-    => from 'Str'
-    => via { DateTime::Format::Duration->new(pattern => $_) };
-
-has 'max'     => (
-    is => 'rw',
-    isa => 'Str',
+has 'max' => (
+    is      => 'rw',
+    isa     => Str,
     default => '1 year'
 );
-has 'now'     => (
-    is => 'ro',
-    isa => 'DateTime',
+has 'now' => (
+    is      => 'ro',
+    isa     => Date,
     default => sub { DateTime->from_epoch(epoch => time()) }
 );
-has 'format'  => (
-    is => 'rw',
-    isa => 'DateTime::Format::Duration',
-    coerce => 1,
+has 'format' => (
+    is      => 'rw',
+    isa     => DurationFormat,
+    coerce  => 1,
     default => sub { DateTime::Format::Duration->new(pattern => '%Y year') }
 );
 
