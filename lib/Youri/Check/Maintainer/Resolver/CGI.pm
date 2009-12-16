@@ -17,11 +17,20 @@ use Moose::Policy 'Moose::Policy::FollowPBP';
 use Moose;
 use Carp;
 use Youri::Check::WebRetriever;
+use Youri::Check::Types qw/HashRefOfStr/;
 use Youri::Types qw/URI/;
 
 extends 'Youri::Check::Maintainer::Resolver';
 
-has 'url' => ( is => 'ro', isa => URI );
+has 'url' => (
+    is  => 'ro',
+    isa => URI
+);
+has 'exceptions' => (
+    is      => 'ro',
+    isa    => HashRefOfStr,
+    coerce => 1
+);
 
 =head1 CLASS METHODS
 
@@ -63,7 +72,15 @@ sub get_maintainer {
         $package->get_canonical_name() :
         $package;
 
-    return $self->{_maintainers}->{$name};
+    my $maintainer = $self->{_maintainers}->{$name};
+
+    return
+        # undef if maintainer is unknown
+        ! defined $maintainer                  ? undef      :
+        # undef if maintainer is an exception
+        $self->get_exceptions()->{$maintainer} ? undef      :
+        # maintainer otherwise
+                                                 $maintainer;
 }
 
 =head1 COPYRIGHT AND LICENSE
