@@ -87,13 +87,10 @@ sub run {
                     buildtime => $buildtime->strftime("%a %d %b %G")
                 }
             );
-            $count++;
         }
     };
 
     $media->traverse_headers($check);
-
-    $self->set_count($count);
 }
 
 =head1 COPYRIGHT AND LICENSE
