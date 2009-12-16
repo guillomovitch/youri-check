@@ -12,9 +12,9 @@ source plugins handle specific sources.
 
 =cut
 
+use Carp;
 use Moose::Policy 'Moose::Policy::FollowPBP';
 use Moose;
-use Carp;
 use Youri::Factory;
 
 extends 'Youri::Check::Test';

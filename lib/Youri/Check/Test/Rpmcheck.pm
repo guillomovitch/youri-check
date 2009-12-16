@@ -11,10 +11,10 @@ This plugins checks package dependencies with rpmcheck, and reports output.
 
 =cut
 
-use Moose::Policy 'Moose::Policy::FollowPBP';
-use Moose;
 use Carp;
 use File::Temp qw/tempdir/;
+use Moose::Policy 'Moose::Policy::FollowPBP';
+use Moose;
 use Youri::Types qw/ExecutableFile/;
 
 extends 'Youri::Check::Test';

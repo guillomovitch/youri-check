@@ -12,15 +12,15 @@ Additional source plugins handle specific sources.
 
 =cut
 
+use Carp;
+use List::MoreUtils qw(all);
+use Memoize;
 use Moose::Policy 'Moose::Policy::FollowPBP';
 use Moose;
 use Moose::Util::TypeConstraints;
 use Scalar::Util qw(blessed);
-use List::MoreUtils qw(all);
-use Carp;
-use Memoize;
-use Youri::Factory;
 use Youri::Check::Test::Updates::Source;
+use Youri::Factory;
 
 extends 'Youri::Check::Test';
 

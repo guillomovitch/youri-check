@@ -11,12 +11,12 @@ This plugin checks packages age, and report the ones exceeding maximum limit.
 
 =cut
 
-use Moose::Policy 'Moose::Policy::FollowPBP';
-use Moose;
-use Moose::Util::TypeConstraints;
 use Carp;
 use DateTime;
 use DateTime::Format::Duration;
+use Moose::Policy 'Moose::Policy::FollowPBP';
+use Moose;
+use Moose::Util::TypeConstraints;
 
 extends 'Youri::Check::Test';
 

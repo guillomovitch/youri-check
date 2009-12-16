@@ -11,10 +11,10 @@ ones.
 
 =cut
 
-use Moose::Policy 'Moose::Policy::FollowPBP';
-use Moose;
 use Carp;
 use List::MoreUtils qw/all any/;
+use Moose::Policy 'Moose::Policy::FollowPBP';
+use Moose;
 
 extends 'Youri::Check::Test';
 

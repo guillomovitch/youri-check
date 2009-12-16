@@ -11,9 +11,9 @@ This plugins checks packages with rpmlint, and reports output.
 
 =cut
 
+use Carp;
 use Moose::Policy 'Moose::Policy::FollowPBP';
 use Moose;
-use Carp;
 use Youri::Types qw/ExecutableFile ReadableFile/;
 
 extends 'Youri::Check::Test';
