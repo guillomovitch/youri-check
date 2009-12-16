@@ -27,9 +27,6 @@ has 'database'    => (
 has 'resolver'    => (
     is => 'rw', isa => 'Youri::Check::Maintainer::Resolver'
 );
-has 'count' => (
-    is => 'rw', isa => Int, default => 0
-);
 
 sub init {
     my ($self, @medias) = @_;
