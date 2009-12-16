@@ -280,7 +280,7 @@ sub add_package {
 
     my $maintainer_id;
     if ($self->{_resolver}) {
-        my $maintainer = $self->{_resolver}->resolve($package);
+        my $maintainer = $self->{_resolver}->get_maintainer($package);
         $maintainer_id =
             $self->get_maintainer_id($maintainer) ||
             $self->add_maintainer($maintainer);
