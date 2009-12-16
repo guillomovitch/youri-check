@@ -57,7 +57,7 @@ sub get_maintainer {
     croak "Not a class method" unless ref $self;
 
     print "Retrieving package $package maintainer\n"
-        if $self->{_verbose} > 0;
+        if $self->get_verbosity() > 0;
 
     my $name = ref $package && $package->isa('Youri::Package') ?
         $package->get_canonical_name() :
