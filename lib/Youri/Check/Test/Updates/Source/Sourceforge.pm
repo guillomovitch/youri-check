@@ -22,8 +22,8 @@ use Youri::Check::Test::Updates;
 extends 'Youri::Check::Test::Updates::Source';
 
 has 'agent' => (
-    is => 'ro',
-    isa => 'LWP::UserAgent'
+    is      => 'ro',
+    isa     => LWP::UserAgent
     default => sub { LWP::UserAgent->new() } 
 );
 

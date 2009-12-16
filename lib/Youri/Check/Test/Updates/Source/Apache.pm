@@ -17,12 +17,13 @@ use Moose;
 use Carp;
 use LWP::UserAgent;
 use HTML::TableExtract;
+use Youri::Types qw/URI/;
 
 extends 'Youri::Check::Test::Updates::Source';
 
 has 'url' => (
-    is => 'rw',
-    isa => 'Uri',
+    is      => 'rw',
+    isa     => URI,
     default => 'http://modules.apache.org/search.php?query=true&apacheversion2=yes)'
 );
 

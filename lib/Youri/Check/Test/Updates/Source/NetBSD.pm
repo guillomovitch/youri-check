@@ -15,13 +15,13 @@ This source plugin for L<Youri::Check::Test::Updates> collects updates
 use Moose::Policy 'Moose::Policy::FollowPBP';
 use Moose;
 use Youri::Check::WebRetriever;
-use Youri::Types;
+use Youri::Types qw/URI/;
 
 extends 'Youri::Check::Test::Updates::Source';
 
 has 'url' => (
     is      => 'rw',
-    isa     => 'Uri',
+    isa     => URI,
     default => 'http://ftp.free.fr/mirrors/ftp.netbsd.org/NetBSD-current/pkgsrc/README-all.html'
 );
 

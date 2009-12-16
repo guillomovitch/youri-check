@@ -15,13 +15,13 @@ available from Fedora.
 use Moose::Policy 'Moose::Policy::FollowPBP';
 use Moose;
 use Youri::Check::WebRetriever;
-use Youri::Types;
+use Youri::Types qw/URI/;
 
 extends 'Youri::Check::Test::Updates::Source';
 
 has 'url' => (
     is      => 'rw',
-    isa     => 'Uri',
+    isa     => URI,
     default => 'http://fr.rpmfind.net/linux/fedora/core/development/source/SRPMS'
 );
 

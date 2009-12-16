@@ -15,13 +15,13 @@ available from JPackage.
 use Moose::Policy 'Moose::Policy::FollowPBP';
 use Moose;
 use Youri::Check::WebRetriever;
-use Youri::Types;
+use Youri::Types qw/URI/;
 
 extends 'Youri::Check::Test::Updates::Source';
 
 has 'url' => (
     is      => 'rw',
-    isa     => 'Uri',
+    isa     => URI,
     default => 'http://mirrors.dotsrc.org/jpackage/1.7/generic'
 );
 

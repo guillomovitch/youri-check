@@ -14,15 +14,15 @@ available from RAA.
 
 use Moose::Policy 'Moose::Policy::FollowPBP';
 use Moose;
-use Youri::Types;
 use LWP::UserAgent;
 use HTML::TableExtract;
+use Youri::Types qw/URI/;
 
 extends 'Youri::Check::Test::Updates::Source';
 
 has 'url' => (
     is      => 'rw',
-    isa     => 'Uri',
+    isa     => URI,
     default => 'http://raa.ruby-lang.org/all.html'
 );
 

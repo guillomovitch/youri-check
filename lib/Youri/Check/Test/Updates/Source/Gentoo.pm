@@ -14,14 +14,13 @@ available from Gentoo.
 
 use Moose::Policy 'Moose::Policy::FollowPBP';
 use Moose;
-use Youri::Types;
-use Carp;
+use Youri::Types qw/URI/;
 
 extends 'Youri::Check::Test::Updates::Source';
 
 has 'url' => (
-    is => 'rw',
-    isa => 'Uri',
+    is      => 'rw',
+    isa     => URI,
     default => 'http://gentoo.mirror.sdv.fr/snapshots'
 );
 

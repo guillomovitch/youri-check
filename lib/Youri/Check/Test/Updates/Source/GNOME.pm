@@ -14,22 +14,22 @@ available from GNOME.
 
 use Moose::Policy 'Moose::Policy::FollowPBP';
 use Moose;
-use Youri::Types;
 use Carp;
 use LWP::UserAgent;
 use HTML::TokeParser;
 use List::MoreUtils 'any';
+use Youri::Types qw/URI/;
 
 extends 'Youri::Check::Test::Updates::Source';
 
 has 'url' => (
-    is => 'rw',
-    isa => 'Uri',
+    is      => 'rw',
+    isa     => URI,
     default => 'http://fr2.rpmfind.net/linux/gnome.org/sources'
 );
 has 'agent' => (
-    is => 'ro',
-    isa => 'LWP::UserAgent'
+    is      => 'ro',
+    isa     => LWP::UserAgent
     default => sub { LWP::UserAgent->new() } 
 );
 

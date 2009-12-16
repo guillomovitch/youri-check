@@ -15,21 +15,22 @@ available from Freshmeat.
 
 use Moose::Policy 'Moose::Policy::FollowPBP';
 use Moose;
-use Youri::Types;
+use MooseX::Types::Moose qw/Bool/;
 use Carp;
 use XML::Twig;
 use LWP::UserAgent;
+use Youri::Types qw/URI/;
 
 extends 'Youri::Check::Test::Updates::Source';
 
 has 'url' => (
     is => 'rw',
-    isa => 'Uri',
+    isa => URI,
     default => 'http://download.freshmeat.net/backend/fm-projects.rdf.bz2'
 );
 has 'preload' => (
     is => 'rw',
-    isa => 'Bool',
+    isa => Bool,
     default => 0
 );
 
@@ -53,7 +54,7 @@ Allows to load full Freshmeat catalogue at once instead of checking each softwar
 sub BUILD {
     my ($self, $params) = @_;
 
-    if ($params{preload}) {
+    if ($params->{preload}) {
         my $versions;
         
         my $project = sub {

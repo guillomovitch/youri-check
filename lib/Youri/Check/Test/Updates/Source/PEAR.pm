@@ -14,15 +14,15 @@ available from PEAR.
 
 use Moose::Policy 'Moose::Policy::FollowPBP';
 use Moose;
-use Carp;
 use LWP::UserAgent;
 use XML::Twig;
+use Youri::Types qw/URI/;
 
 extends 'Youri::Check::Test::Updates::Source';
 
 has 'url' => (
-    is => 'rw',
-    isa => 'Uri',
+    is      => 'rw',
+    isa     => URI,
     default => 'http://pear.php.net',
 );
 
