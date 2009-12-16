@@ -82,7 +82,6 @@ sub run {
 
     my @sources = values %{$self->get_sources()};
     my $database = $self->get_database();
-    my $count    = $self->get_count();
 
     my $check = sub {
         my ($package) = @_;
@@ -122,13 +121,10 @@ sub run {
                     url       => $max_url
                 }
             );
-            $count++;
         }
     };
 
     $media->traverse_headers($check);
-
-    $self->set_count($count);
 }
 
 =head2 is_stable($version)
