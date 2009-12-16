@@ -22,8 +22,9 @@ This abstract class defines Youri::Check::Maintainer::Resolver interface.
 use Moose::Policy 'Moose::Policy::FollowPBP';
 use Moose;
 use Carp;
+use MooseX::Types::Moose qw/Int/;
 
-has 'verbosity'  => (is => 'rw', isa => 'Int',  default => 0);
+has 'verbosity'  => (is => 'rw', isa => Int,  default => 0);
 
 =head1 CLASS METHODS
 
