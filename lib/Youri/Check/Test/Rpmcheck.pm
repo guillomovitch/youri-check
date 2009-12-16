@@ -15,7 +15,7 @@ use Moose::Policy 'Moose::Policy::FollowPBP';
 use Moose;
 use Carp;
 use File::Temp qw/tempdir/;
-use Youri::Types;
+use Youri::Types qw/ExecutableFile/;
 
 extends 'Youri::Check::Test';
 
@@ -39,7 +39,7 @@ Path to the rpmcheck executable (default: /usr/bin/rpmcheck)
 
 has 'path' => (
     is      => 'rw',
-    isa     => 'ExecutableFile',
+    isa     => ExecutableFile,
     default => '/usr/bin/rpmcheck'
 );
 
@@ -72,9 +72,10 @@ sub run {
     $media->traverse_headers($index);
 
     # then run rpmcheck
+    my $database = $self->get_database();
+
     my $command = "$self->{_path} -explain -failures";
     my $allowed_ids = $media->get_option($self->{_id}, 'allowed');
-    my $database = $self->get_database();
     my $id = $media->get_id();
     foreach my $allowed_id (@{$allowed_ids}) {
         if ($allowed_id eq $id) {
@@ -84,6 +85,7 @@ sub run {
         $command .= " -base $self->{_hdlists}/$allowed_id";
     }
     $command .= " <$self->{_hdlists}/$id 2>/dev/null";
+
     open(my $input, '-|', $command) or croak "Can't run $command: $!";
     my $package_pattern = qr/^
         (\S+) \s
