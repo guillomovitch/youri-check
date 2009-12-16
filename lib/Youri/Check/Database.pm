@@ -157,7 +157,7 @@ sub register {
 }
 
 sub unregister {
-    my ($self, $moniker, $count) = @_;
+    my ($self, $moniker) = @_;
     croak "Not a class method" unless ref $self;
 
     # get last run
@@ -166,7 +166,6 @@ sub unregister {
     });
 
     # update test count
-    $last_run->count($count);
     $last_run->update();
 }
 
