@@ -11,11 +11,8 @@ nobase_perllib_DATA = Youri/Check/Database.pm \
 		      Youri/Check/Test/Build/Source/LBD.pm \
 		      Youri/Check/Test/Build/Source/Iurt.pm \
 		      Youri/Check/Test/Build/Source.pm \
-		      Youri/Check/Test/Conflicts.pm \
 		      Youri/Check/Test/Rpmlint.pm \
 		      Youri/Check/Test/Updates.pm \
-		      Youri/Check/Test/Dependencies.pm \
-		      Youri/Check/Test/MandrivaConflicts.pm \
 		      Youri/Check/Test/Missing.pm \
 		      Youri/Check/Test/Unmaintained.pm \
 		      Youri/Check/Test/Updates/Source.pm \
@@ -35,6 +32,7 @@ nobase_perllib_DATA = Youri/Check/Database.pm \
 		      Youri/Check/Test/Rpmcheck.pm \
 		      Youri/Check/Test/Build.pm \
 		      Youri/Check/Test/Signature.pm \
+		      Youri/Check/Types.pm \
 		      Youri/Check/Maintainer/Preferences/File.pm \
 		      Youri/Check/Maintainer/Resolver/Bugzilla.pm \
 		      Youri/Check/Maintainer/Resolver/CGI.pm \
