@@ -19,51 +19,6 @@ use Youri::Factory;
 
 extends 'Youri::Check::Test';
 
-my $descriptor = Youri::Check::Descriptor::Row->new(
-    cells => [
-        Youri::Check::Descriptor::Cell->new(
-            name        => 'source package',
-            description => 'source package',
-            mergeable   => 1,
-            value       => 'source_package',
-            type        => 'string',
-        ),
-        Youri::Check::Descriptor::Cell->new(
-            name        => 'maintainer',
-            description => 'maintainer',
-            mergeable   => 1,
-            value       => 'maintainer',
-            type        => 'email',
-        ),
-        Youri::Check::Descriptor::Cell->new(
-            name        => 'architecture',
-            description => 'architecture',
-            mergeable   => 0,
-            value       => 'arch',
-            type        => 'string',
-        ),
-        Youri::Check::Descriptor::Cell->new(
-            name        => 'bot',
-            description => 'build bot',
-            mergeable   => 0,
-            value       => 'bot',
-            type        => 'string',
-        ),
-        Youri::Check::Descriptor::Cell->new(
-            name        => 'status',
-            description => 'build status',
-            mergeable   => 0,
-            value       => 'status',
-            type        => 'string',
-            link        => 'url',
-        )
-    ]
-);
-
-sub get_descriptor {
-    return $descriptor;
-}
-
 =head2 new(%args)
 
 Creates and returns a new Youri::Check::Test::Build object.

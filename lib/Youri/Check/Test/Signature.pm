@@ -17,50 +17,6 @@ use Carp;
 
 extends 'Youri::Check::Test';
 
-my $descriptor = Youri::Check::Descriptor::Row->new(
-    cells => [
-        Youri::Check::Descriptor::Cell->new(
-            name        => 'source package',
-            description => 'source package',
-            mergeable   => 1,
-            value       => 'source_package',
-            type        => 'string',
-        ),
-        Youri::Check::Descriptor::Cell->new(
-            name        => 'maintainer',
-            description => 'maintainer',
-            mergeable   => 1,
-            value       => 'maintainer',
-            type        => 'email',
-        ),
-        Youri::Check::Descriptor::Cell->new(
-            name        => 'architecture',
-            description => 'architecture',
-            mergeable   => 0,
-            value       => 'arch',
-            type        => 'string',
-        ),
-        Youri::Check::Descriptor::Cell->new(
-            name        => 'package',
-            description => 'package',
-            mergeable   => 0,
-            value       => 'package',
-            type        => 'string',
-        ),
-        Youri::Check::Descriptor::Cell->new(
-            name        => 'error',
-            description => 'error',
-            mergeable   => 0,
-            value       => 'error',
-            type        => 'string',
-        )
-    ]
-);
-
-sub get_descriptor {
-    return $descriptor;
-}
-
 =head2 new(%args)
 
 Creates and returns a new Youri::Check::Test::Signature object.
