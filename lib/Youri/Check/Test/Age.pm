@@ -70,6 +70,7 @@ sub run {
     my $max_age  = $self->get_format()->parse_duration($max_age_string);
     my $database = $self->get_database();
     my $now      = $self->get_now();
+    my $verbosity = $self->get_verbosity();
 
     my $check = sub {
         my ($package) = @_;
@@ -80,6 +81,7 @@ sub run {
         
         my $age = $now->subtract_datetime($buildtime);
 
+        my $error;
         if (DateTime::Duration->compare($age, $max_age) > 0) {
             $database->add_rpm_result(
                 $MONIKER, $media, $package,
@@ -87,6 +89,14 @@ sub run {
                     buildtime => $buildtime->strftime("%a %d %b %G")
                 }
             );
+            $error = 1;
+        }
+
+        if ($verbosity > 1) {
+            printf
+                "checking package $package: %s -> %s\n",
+                $age,
+                $error ? 'NOK' : 'OK';
         }
     };
 

@@ -42,15 +42,29 @@ sub run {
 
     my $database = $self->get_database();
     my $resolver = $self->get_resolver();
+    my $verbosity = $self->get_verbosity();
 
     my $check = sub {
         my ($package) = @_;
-        $database->add_package_result(
-            $MONIKER, $media, $package,
-            {
-                error => "unmaintained package"
-            }
-        ) unless $resolver->get_maintainer($package);
+
+        my $error;
+        my $maintainer = $resolver->get_maintainer($package);
+        if (!$maintainer) {
+            $database->add_package_result(
+                $MONIKER, $media, $package,
+                {
+                    error => "unmaintained package"
+                }
+            );
+            $error = 1;
+        }
+
+        if ($verbosity > 1) {
+            printf
+                "checking package $package: %s -> %s\n",
+                $maintainer || 'none',
+                $error ? 'NOK' : 'OK';
+        }
     };
 
     $media->traverse_headers($check);
