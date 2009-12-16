@@ -15,21 +15,15 @@ available from RAA.
 use Moose::Policy 'Moose::Policy::FollowPBP';
 use Moose;
 use Youri::Types;
-use Carp;
-use SOAP::Lite;
-use List::MoreUtils 'any';
+use LWP::UserAgent;
+use HTML::TableExtract;
 
 extends 'Youri::Check::Test::Updates::Source';
 
 has 'url' => (
-    is => 'rw',
-    isa => 'Uri',
-    default => 'http://www2.ruby-lang.org/xmlns/soap/interface/RAA/0.0.4'
-);
-has 'raa' => (
-    is => 'ro',
-    isa => 'SOAP::Lite'
-    default => sub { SOAP::Lite->new() } 
+    is      => 'rw',
+    isa     => 'Uri',
+    default => 'http://raa.ruby-lang.org/all.html'
 );
 
 =head2 new(%args)
@@ -42,8 +36,7 @@ Specific parameters:
 
 =item url $url
 
-URL to RAA SOAP interface (default:
-http://www2.ruby-lang.org/xmlns/soap/interface/RAA/0.0.4)
+URL to RAA SOAP interface (default: http://raa.ruby-lang.org/all.html)
 
 =back
 
@@ -52,44 +45,22 @@ http://www2.ruby-lang.org/xmlns/soap/interface/RAA/0.0.4)
 sub BUILD {
     my ($self, $params) = @_;
 
-    $self->get_raa()->service($self->get_url())
-        or croak "Can't connect to " . $self->get_url();
-    
-    $self->{_names} = $raa->names();
-}
-
-sub get_package_version {
-    my ($self, $package) = @_;
-    croak "Not a class method" unless ref $self;
-
-    my $name;
-    if (ref $package && $package->isa('Youri::Package')) {
-        # don't bother checking for non-ruby packages
-        if (
-            any { $_->get_name() =~ /ruby/ }
-            $package->get_requires()
-        ) {
-            $name = $package->get_canonical_name();
-        } else {
-            return;
+    my $agent = LWP::UserAgent->new();
+    my $response = $agent->get($params->{url});
+    if ($response->is_success()) {
+        my $parser = HTML::TableExtract->new(debug => 1);
+        $parser->parse($response->content());
+        my $table = $parser->first_table_found();
+        foreach my $row ($table->rows()) {
+            my $name = $row->[0];
+            my $version = $row->[4];
+            $name =~ s/\s*$//;
+            $version =~ s/\s*$//;
+            $self->{_versions}->{$name} = $version;
         }
-    } else {
-        $name = $package;
+        delete $self->{_versions}->{Name};
     }
 
-    # translate in grabber namespace
-    $name = $self->get_converted_package_name($name);
-
-    # return if aliased to null 
-    return unless $name;
-
-    # susceptible to throw exception for timeout
-    eval {
-        my $gem = $self->{_raa}->gem($name);
-        return $gem->{project}->{version} if $gem;
-    };
-
-    return;
 }
 
 sub _get_package_url {
@@ -99,22 +70,7 @@ sub _get_package_url {
 
 sub _get_package_name {
     my ($self, $name) = @_;
-
-    if (ref $self) {
-        my $match = $name;
-        $match =~ s/^ruby[-_]//;
-        $match =~ s/[-_]ruby$//;
-        my @results =
-            grep { /^(ruby[-_])?\Q$match\E([-_]ruby)$/ }
-            @{$self->{_names}};
-        if (@results) {
-            return $results[0];
-        } else {
-            return $name;
-        }
-    } else {
-        return $name;
-    }
+    return $name;
 }
 
 =head1 COPYRIGHT AND LICENSE
