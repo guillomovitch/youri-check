@@ -14,8 +14,11 @@ This plugins checks packages with rpmlint, and reports output.
 use Moose::Policy 'Moose::Policy::FollowPBP';
 use Moose;
 use Carp;
+use Youri::Types qw/ExecutableFile ReadableFile/;
 
 extends 'Youri::Check::Test';
+
+our $MONIKER = 'Rpmlint';
 
 =head2 new(%args)
 
@@ -37,21 +40,19 @@ Specific rpmlint configuration.
 
 =cut
 
+has 'path' => (
+    is      => 'rw',
+    isa     => ExecutableFile,
+    default => '/usr/bin/rpmlint'
+);
 
-sub _init {
-    my $self    = shift;
-    my %options = (
-        path   => '/usr/bin/rpmlint', # path to rpmlint
-        config => '',                 # default rpmlint configuration
-        @_
-    );
-
-    $self->{_path}   = $options{path};
-    $self->{_config} = $options{config};
-}
+has 'config' => (
+    is      => 'rw',
+    isa     => ReadableFile
+);
 
 sub run {
-    my ($self, $media, $resultset) = @_;
+    my ($self, $media) = @_;
     croak "Not a class method" unless ref $self;
 
     # index packages first
@@ -65,6 +66,8 @@ sub run {
     $media->traverse_headers($index);
 
     # then run rpmlint
+    my $database = $self->get_database();
+
     my $config =
         $media->get_option($self->{_id}, 'config') || $self->{_config};
 
@@ -95,14 +98,17 @@ sub run {
             $last_name = $name;
             $last_package = $package;
         }
-        $resultset->add_result($self->{_id}, $media, $package, { 
-            arch    => $package->get_arch(),
-            package => $name,
-            error   => $error,
-            level   => $level eq 'E' ? 
-                Youri::Check::Test::ERROR :
-                Youri::Check::Test::WARNING
-        });
+        $database->add_package_result(
+            $MONIKER, $media, $package, 
+            {
+                arch    => $package->get_arch(),
+                package => $name,
+                error   => $error,
+                level   => $level eq 'E' ? 
+                    Youri::Check::Test::ERROR :
+                    Youri::Check::Test::WARNING
+            }
+        );
     }
 
     close $input;
