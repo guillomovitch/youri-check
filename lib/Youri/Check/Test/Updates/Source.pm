@@ -14,7 +14,6 @@ L<Youri::Check::Test::Updates> test plugin.
 
 use Moose::Policy 'Moose::Policy::FollowPBP';
 use Moose;
-use MooseX::AttributeHelpers;
 use MooseX::Types::Moose qw/Str HashRef/;
 use Carp;
 
@@ -24,14 +23,9 @@ has 'id' => (
 );
 
 has 'aliases' => (
-    metaclass => 'Collection::Hash',
-    is => 'rw',
-    isa => HashRef[Str],
-    provides  => {
-        exists => 'has_alias',
-        get    => 'get_alias',
-        set    => 'set_alias',
-    },
+    is        => 'rw',
+    isa       => HashRef[Str],
+    predicate => 'has_aliases',
 );
 
 =head1 CLASS METHODS
@@ -119,8 +113,10 @@ sub get_converted_package_name {
         $package;
 
     # return alias if defined
-    return $self->get_alias($name)
-        if $self->has_alias($name);
+    if ($self->has_aliases()) {
+        my $alias = $self->get_aliases()->{$name};
+        return $alias if $alias;
+    }
 
     # otherwise return subclass computation
     return $self->_get_converted_package_name($name);
@@ -148,14 +144,14 @@ sub _get_package_url {
     return undef;
 }
 
-=head2 _get_package_name($name)
+=head2 _get_converted_package_name($name)
 
 Hook called by default B<name()> implementation if given name was not found in
 the aliases.
 
 =cut
 
-sub _get_package_name {
+sub _get_converted_package_name {
     my ($self, $name) = @_;
     return $name;
 }
