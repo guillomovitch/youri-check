@@ -12,30 +12,24 @@ This plugin checks packages age, and report the ones exceeding maximum limit.
 =cut
 
 use Carp;
-use DateTime;
 use DateTime::Format::Duration;
 use Moose::Policy 'Moose::Policy::FollowPBP';
 use Moose;
 use MooseX::Types::Moose qw/Str/;
-use Youri::Check::Types qw/Date DurationFormat/;
+use Youri::Check::Types qw/Date Duration/;
 
 extends 'Youri::Check::Test';
 
 has 'max' => (
     is      => 'rw',
-    isa     => Str,
-    default => '1 year'
+    isa     => Duration,
+    coerce  => 1,
+    default => sub { DateTime::Duration->new(years => 1) }
 );
 has 'now' => (
     is      => 'ro',
     isa     => Date,
     default => sub { DateTime->from_epoch(epoch => time()) }
-);
-has 'format' => (
-    is      => 'rw',
-    isa     => DurationFormat,
-    coerce  => 1,
-    default => sub { DateTime::Format::Duration->new(pattern => '%Y year') }
 );
 
 our $MONIKER = 'Age';
@@ -52,10 +46,6 @@ Specific parameters:
 
 Maximum age allowed (default: 1 year)
 
-=item format $format
-
-Format used to describe age (default: %Y year)
-
 =back
 
 =cut
@@ -64,13 +54,16 @@ sub run {
     my ($self, $media)  = @_;
     croak "Not a class method" unless ref $self;
 
-    my $max_age_string =
-        $media->get_option($self->get_id(), 'max') || $self->get_max();
+    my $max_age =
+        $media->get_option($self->get_id(), 'max') ||
+        $self->get_max();
 
-    my $max_age  = $self->get_format()->parse_duration($max_age_string);
     my $database = $self->get_database();
     my $now      = $self->get_now();
     my $verbosity = $self->get_verbosity();
+    my $format   = DateTime::Format::Duration->new(
+        pattern => '%Y years, %m months, %e days'
+    );
 
     my $check = sub {
         my ($package) = @_;
@@ -95,7 +88,7 @@ sub run {
         if ($verbosity > 1) {
             printf
                 "checking package $package: %s -> %s\n",
-                $age,
+                $format->format_duration_from_deltas($format->normalize($age)),
                 $error ? 'NOK' : 'OK';
         }
     };

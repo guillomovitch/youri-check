@@ -11,10 +11,12 @@ This class defines somes global types for use in youri applications.
 
 =cut
 
+use DateTime::Duration;
+
 # predeclare our own types
 use MooseX::Types 
     -declare => [qw(
-        Date DurationFormat
+        Date Duration
         BuildSource HashRefOfBuildSources
         UpdatesSource HashRefOfUpdatesSources
         HashRefOfStr
@@ -25,7 +27,7 @@ use MooseX::Types::Moose qw/Str HashRef ArrayRef/;
 
 # class types
 class_type Date,           { class => 'DateTime' };
-class_type DurationFormat, { class => 'DateTime::Format::Duration' };
+class_type Duration,       { class => 'DateTime::Duration' };
 class_type UpdatesSource,  { class => 'Youri::Check::Test::Updates::Source' };
 class_type BuildSource,    { class => 'Youri::Check::Test::Build::Source' };
 
@@ -70,9 +72,9 @@ coerce HashRefOfBuildSources,
         return $out;
     };
 
-coerce DurationFormat,
-    from Str,
-    via { DateTime::Format::Duration->new(pattern => $_) };
+coerce Duration,
+    from HashRef,
+    via { DateTime::Duration->new(%$_) };
 
 coerce HashRefOfStr,
     from ArrayRef,
