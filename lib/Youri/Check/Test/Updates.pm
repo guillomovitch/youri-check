@@ -17,7 +17,7 @@ use List::MoreUtils qw(all);
 use Memoize;
 use Moose::Policy 'Moose::Policy::FollowPBP';
 use Moose;
-use MooseX::Types::Moose qw/HashRef/;
+use MooseX::Types::Moose qw/HashRef Str/;
 use Scalar::Util qw(blessed);
 use Youri::Check::Test::Updates::Source;
 use Youri::Check::Types qw/HashRefOfUpdatesSources/;
