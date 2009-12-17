@@ -82,6 +82,7 @@ sub run {
 
     my @sources = values %{$self->get_sources()};
     my $database = $self->get_database();
+    my $verbosity = $self->get_verbosity();
 
     my $check = sub {
         my ($package) = @_;
@@ -89,6 +90,7 @@ sub run {
         my $name    = $package->get_name();
         my $version = $package->get_version();
         my $release = $package->get_release();
+        my $error;
 
         # compute version with rpm subtilities related to preversions
         my $current_version = ($release =~ /^0\.(\w+)\.\w+$/) ?
@@ -121,6 +123,15 @@ sub run {
                     url       => $max_url
                 }
             );
+            $error = 1;
+        }
+
+        if ($verbosity > 1) {
+            printf
+                "checking package $package: %s, %s -> %s\n",
+                $current_version,
+                $max_version,
+                $error ? 'NOK' : 'OK';
         }
     };
 
