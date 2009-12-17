@@ -12,11 +12,13 @@ This class defines somes global types for use in youri applications.
 =cut
 
 use DateTime::Duration;
+use LWP::UserAgent;
 
 # predeclare our own types
 use MooseX::Types 
     -declare => [qw(
         Date Duration
+        Agent
         BuildSource HashRefOfBuildSources
         UpdatesSource HashRefOfUpdatesSources
         HashRefOfStr
@@ -26,10 +28,11 @@ use MooseX::Types
 use MooseX::Types::Moose qw/Str HashRef ArrayRef/;
 
 # class types
-class_type Date,           { class => 'DateTime' };
-class_type Duration,       { class => 'DateTime::Duration' };
-class_type UpdatesSource,  { class => 'Youri::Check::Test::Updates::Source' };
-class_type BuildSource,    { class => 'Youri::Check::Test::Build::Source' };
+class_type Date,          { class => 'DateTime' };
+class_type Duration,      { class => 'DateTime::Duration' };
+class_type Agent,         { class => 'LWP::UserAgent' };
+class_type UpdatesSource, { class => 'Youri::Check::Test::Updates::Source' };
+class_type BuildSource,   { class => 'Youri::Check::Test::Build::Source' };
 
 # collection types
 subtype HashRefOfUpdatesSources,
