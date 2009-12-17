@@ -27,9 +27,10 @@ has 'url' => (
     isa => URI
 );
 has 'exceptions' => (
-    is      => 'ro',
-    isa    => HashRefOfStr,
-    coerce => 1
+    is        => 'ro',
+    isa       => HashRefOfStr,
+    predicate => 'has_exceptions',
+    coerce    => 1
 );
 
 =head1 CLASS METHODS
@@ -74,13 +75,13 @@ sub get_maintainer {
 
     my $maintainer = $self->{_maintainers}->{$name};
 
-    return
-        # undef if maintainer is unknown
-        ! defined $maintainer                  ? undef      :
-        # undef if maintainer is an exception
-        $self->get_exceptions()->{$maintainer} ? undef      :
-        # maintainer otherwise
-                                                 $maintainer;
+    # return undef if maintainer is known and an exception
+    if ($maintainer && $self->has_exceptions()) {
+        return undef if  $self->get_exceptions()->{$maintainer};
+    }
+
+    # otherwise return maintainer
+    return $maintainer;
 }
 
 =head1 COPYRIGHT AND LICENSE
