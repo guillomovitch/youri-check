@@ -12,12 +12,12 @@ available from GNOME.
 
 =cut
 
+use Carp;
 use Moose::Policy 'Moose::Policy::FollowPBP';
 use Moose;
-use Carp;
-use LWP::UserAgent;
 use HTML::TokeParser;
 use List::MoreUtils 'any';
+use Youri::Check::Types qw/Agent/;
 use Youri::Types qw/URI/;
 
 extends 'Youri::Check::Test::Updates::Source';
@@ -29,7 +29,7 @@ has 'url' => (
 );
 has 'agent' => (
     is      => 'ro',
-    isa     => LWP::UserAgent
+    isa     => Agent,
     default => sub { LWP::UserAgent->new() } 
 );
 

@@ -12,9 +12,9 @@ This source plugin for L<Youri::Check::Test::Updates> collects updates
 
 =cut
 
+use Carp;
 use Moose::Policy 'Moose::Policy::FollowPBP';
 use Moose;
-use Carp;
 use Youri::Types qw/URI/;
 
 extends 'Youri::Check::Test::Updates::Source';
@@ -22,7 +22,7 @@ extends 'Youri::Check::Test::Updates::Source';
 has 'url' => (
     is      => 'ro',
     isa     => URI,
-    default => 'http://ftp.debian.org/ls-lR.gz'
+    default => 'http://ftp.debian.org/debian/ls-lR.gz'
 );
 
 =head2 new(%args)
@@ -36,7 +36,7 @@ Specific parameters:
 
 =item url $url
 
-URL to Debian mirror content file (default: http://ftp.debian.org/ls-lR.gz)
+URL to Debian mirror content file (default: http://ftp.debian.org/debian/ls-lR.gz)
 
 =back
 

@@ -12,6 +12,7 @@ available from Gentoo.
 
 =cut
 
+use Carp;
 use Moose::Policy 'Moose::Policy::FollowPBP';
 use Moose;
 use Youri::Types qw/URI/;
@@ -21,7 +22,7 @@ extends 'Youri::Check::Test::Updates::Source';
 has 'url' => (
     is      => 'ro',
     isa     => URI,
-    default => 'http://gentoo.mirror.sdv.fr/snapshots'
+    default => 'http://ftp.free.fr/mirrors/ftp.gentoo.org/snapshots'
 );
 
 
@@ -37,7 +38,7 @@ Specific parameters:
 =item url $url
 
 URL to Gentoo snapshots directory (default:
-http://gentoo.mirror.sdv.fr/snapshots)
+http://ftp.free.fr/mirrors/ftp.gentoo.org/snapshots)
 
 =back
 

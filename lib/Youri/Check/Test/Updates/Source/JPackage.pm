@@ -45,16 +45,27 @@ http://mirrors.dotsrc.org/jpackage/1.7/generic)
 sub BUILD {
     my ($self, $params) = @_;
 
-    my $retriever = Youri::Check::WebRetriever->new(
-        url     => [
-            $params->{url}/SRPMS.free,
-            $params->{url}/SRPMS.non-free,
-            $params->{url}/SRPMS.devel
-        ]
+    my $base_url = $self->get_url();
+    my $free_retriever = Youri::Check::WebRetriever->new(
+        url     => "$base_url/SRPMS.free",
         pattern => qr/>([\w-]+)-([\w\.]+)-[\w\.]+jpp\.src\.rpm<\/a>/
     );
 
-    $self->{_versions} = $retriever->get_results();
+    my $non_free_retriever = Youri::Check::WebRetriever->new(
+        url     => "$base_url/SRPMS.non-free",
+        pattern => qr/>([\w-]+)-([\w\.]+)-[\w\.]+jpp\.src\.rpm<\/a>/
+    );
+
+    my $devel_retriever = Youri::Check::WebRetriever->new(
+        url     => "$base_url/SRPMS.devel",
+        pattern => qr/>([\w-]+)-([\w\.]+)-[\w\.]+jpp\.src\.rpm<\/a>/
+    );
+
+    $self->{_versions} = {
+        %{$free_retriever->get_results()},
+        %{$non_free_retriever->get_results()},
+        %{$devel_retriever->get_results()},
+    };
 }
 
 =head1 COPYRIGHT AND LICENSE

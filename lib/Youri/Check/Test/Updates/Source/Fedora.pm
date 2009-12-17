@@ -47,7 +47,7 @@ sub BUILD {
     my ($self, $params) = @_;
 
      my $retriever = Youri::Check::WebRetriever->new(
-        url     => $params->{url},
+        url     => $self->get_url(),
         pattern => qr/>([\w-]+)-([\w\.]+)-[\w\.]+\.src\.rpm<\/a>/
     );
 

@@ -47,6 +47,7 @@ sub BUILD {
     my ($self, $params) = @_;
 
     my $agent = LWP::UserAgent->new();
+    my $base_url = $self->get_url();
 
     my $callback2 = sub {
          my ($twig, $pi) = @_;
@@ -70,7 +71,7 @@ sub BUILD {
          # get each category information file
          my $info = $c->{att}->{'xlink:href'};
          $info =~ s/info/packagesinfo/;
-         my $url = $params->{url} . $info;
+         my $url = $base_url . $info;
          my $response2 = $agent->get($url);
          my $content2 = $response2->content();
          # correct it, at is is broken
@@ -83,7 +84,7 @@ sub BUILD {
          $twig->purge();
     };
 
-    my $response = $agent->get($params->{url} . '/rest/c/categories.xml');
+    my $response = $agent->get($base_url . '/rest/c/categories.xml');
     my $twig = XML::Twig->new(
        TwigRoots => { c => $callback }
     );

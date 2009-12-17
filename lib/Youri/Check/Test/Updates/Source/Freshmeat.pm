@@ -13,10 +13,10 @@ available from Freshmeat.
 
 =cut
 
+use Carp;
 use Moose::Policy 'Moose::Policy::FollowPBP';
 use Moose;
 use MooseX::Types::Moose qw/Bool/;
-use Carp;
 use XML::Twig;
 use LWP::UserAgent;
 use Youri::Types qw/URI/;

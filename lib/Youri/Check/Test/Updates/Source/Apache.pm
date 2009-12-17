@@ -12,9 +12,9 @@ available for apache modules.
 
 =cut
 
+use Carp;
 use Moose::Policy 'Moose::Policy::FollowPBP';
 use Moose;
-use Carp;
 use LWP::UserAgent;
 use HTML::TableExtract;
 use Youri::Types qw/URI/;
@@ -49,7 +49,7 @@ sub BUILD {
     my ($self, $params) = @_;
 
     my $agent = LWP::UserAgent->new();
-    my $response = $agent->get($params->{url});
+    my $response = $agent->get($self->get_url());
     if ($response->is_success()) {
         my $parser = HTML::TableExtract->new(
             attribs   => {width => '100%'},

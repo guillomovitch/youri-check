@@ -12,18 +12,18 @@ available from Sourceforge.
 
 =cut
 
+use Carp;
 use Moose::Policy 'Moose::Policy::FollowPBP';
 use Moose;
-use Carp;
-use LWP::UserAgent;
 use HTML::TokeParser;
 use Youri::Check::Test::Updates;
+use Youri::Check::Types qw/Agent/;
 
 extends 'Youri::Check::Test::Updates::Source';
 
 has 'agent' => (
     is      => 'ro',
-    isa     => LWP::UserAgent
+    isa     => Agent,
     default => sub { LWP::UserAgent->new() } 
 );
 
