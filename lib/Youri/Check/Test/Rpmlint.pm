@@ -101,8 +101,6 @@ sub run {
         $database->add_package_result(
             $MONIKER, $media, $package, 
             {
-                arch    => $package->get_arch(),
-                package => $name,
                 error   => $error,
                 level   => $level eq 'E' ? 
                     Youri::Check::Test::ERROR :

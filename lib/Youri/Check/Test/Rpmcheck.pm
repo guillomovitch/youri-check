@@ -156,8 +156,6 @@ sub run {
             $database->add_package_result(
                 $MONIKER, $media, $package,
                 { 
-                    arch   => $arch,
-                    rpm   => $name,
                     error => $reason
                 }
             );
