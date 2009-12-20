@@ -11,9 +11,10 @@ This is the youri-check result database.
 
 =cut
 
-use warnings;
-use strict;
 use Carp;
+use Moose::Policy 'Moose::Policy::FollowPBP';
+use Moose;
+use MooseX::Types::Moose qw/Str Bool Int/;
 use Scalar::Util qw/blessed/;
 use Youri::Check::Schema;
 
@@ -25,32 +26,44 @@ Creates and returns a new Youri::Check::Database object.
 
 =cut
 
-sub new {
-    my $class   = shift;
-    my %options = (
-        driver   => '', # driver
-        base     => '', # base
-        port     => '', # port
-        user     => '', # user
-        pass     => '', # pass
-        test     => 0,     # test mode
-        verbose  => 0,     # verbose mode
-        parallel => 0,     # parallel mode
-        resolver => undef, # maintainer resolver, 
-        @_
-    );
-
-    croak "No driver defined" unless $options{driver};
-    croak "No base defined" unless $options{base};
-
-    my $datasource = "DBI:$options{driver}:dbname=$options{base}";
-    $datasource .= ";host=$options{host}" if $options{host};
-    $datasource .= ";port=$options{port}" if $options{port};
+has 'dsn' => (
+    is      => 'ro',
+    isa     => Str,
+    required => 1
+);
+has 'user' => (
+    is      => 'ro',
+    isa     => Str,
+);
+has 'pass' => (
+    is      => 'ro',
+    isa     => Str,
+);
+has 'schema'  => (
+    is       => 'rw',
+    isa      => 'Youri::Check::Schema',
+);
+has 'parallel' => (
+    is      => 'ro',
+    isa     => Bool,
+);
+has 'verbosity' => (
+    is      => 'rw',
+    isa     => Int,
+    default => 0
+);
+has 'resolver'  => (
+    is        => 'rw',
+    isa       => 'Youri::Check::Maintainer::Resolver',
+    predicate => 'has_resolver'
+);
+sub BUILD {
+    my ($self, $params) = @_;
 
     my $schema = Youri::Check::Schema->connect(
-        $datasource,
-        $options{user},
-        $options{pass},
+        $self->get_dsn(),
+        $self->get_user(),
+        $self->get_pass(),
         {
             RaiseError => 1,
             PrintError => 0,
@@ -58,41 +71,15 @@ sub new {
         }
     ) or croak "Unable to connect: $DBI::errstr";
 
-    my $self = bless {
-        _test     => $options{test},
-        _verbose  => $options{verbose},
-        _parallel => $options{parallel},
-        _resolver => $options{resolver},
-        _schema   => $schema
-    }, $class;
-
     # deploy schema if needed
     my $dbh = $schema->storage()->dbh();
     $schema->deploy({add_drop_table => 1})
         if ! $dbh->tables(undef, undef, '%', 'TABLE');
 
-    return $self;
+    $self->set_schema($schema);
 }
 
 =head1 INSTANCE METHODS
-
-=head2 set_resolver()
-
-Set L<Youri::Check::Maintainer::Resolver> object used to resolve package
-maintainers.
-
-=cut
-
-sub set_resolver {
-    my ($self, $resolver) = @_;
-    croak "Not a class method" unless ref $self;
-
-    croak "resolver should be a Youri::Check::Maintainer::Resolver object"
-        unless blessed $resolver &&
-        $resolver->isa("Youri::Check::Maintainer::Resolver");
-
-    $self->{_resolver} = $resolver;
-}
 
 =head2 clone()
 
@@ -105,7 +92,6 @@ sub clone {
     croak "Not a class method" unless ref $self;
 
     my $clone = bless {
-        _test     => $self->{_test},
         _verbose  => $self->{_verbose},
         _resolver => $self->{_resolver},
         _schema   => $self->{_dbh}->schema
@@ -127,21 +113,23 @@ sub register {
     # extend schema
     $self->load($moniker);
 
+    my $schema = $self->get_schema();
+
     # register test run
-    my $last_run = $self->{_schema}->resultset('TestRun')->single({
+    my $last_run = $schema->resultset('TestRun')->single({
         name => $moniker
     });
 
     if ($last_run) {
         # delete all previous results
-        $self->{_schema}->resultset($moniker)->search()->delete();
+        $schema->resultset($moniker)->search()->delete();
 
         # update test run
         $last_run->date(time());
         $last_run->update();
     } else {
         # create additional tables
-        $self->{_schema}->deploy({
+        $schema->deploy({
             add_drop_table => 1,
             parser_args => {
                 sources => [ $moniker ]
@@ -149,7 +137,7 @@ sub register {
         });
 
         # create test run
-        $self->{_schema}->resultset('TestRun')->create({
+        $schema->resultset('TestRun')->create({
             name => $moniker,
             date => time()
         })->update();
@@ -161,7 +149,7 @@ sub unregister {
     croak "Not a class method" unless ref $self;
 
     # get last run
-    my $last_run = $self->{_schema}->resultset('TestRun')->single({
+    my $last_run = $self->get_schema()->resultset('TestRun')->single({
         name => $moniker,
     });
 
@@ -178,8 +166,8 @@ sub load {
 
     # replace current schema with a new clone
     my $schema = Youri::Check::Schema->clone();
-    $schema->storage($self->{_schema}->storage());
-    $self->{_schema} = $schema;
+    $schema->storage($self->get_schema()->storage());
+    $self->set_schema($schema);
 }
 
 =head2 add_rpm_result($source, $moniker, $media, $rpm, $values)
@@ -197,13 +185,13 @@ sub add_rpm_result {
     croak "No values defined" unless $values;
 
     print "adding result for test $moniker and rpm $rpm\n"
-        if $self->{_verbose} > 1;
+        if $self->get_verbosity > 1;
 
     my $rpm_id =
         $self->get_rpm_id($rpm) ||
         $self->add_rpm($media, $rpm);
 
-    my $new_result = $self->{_schema}->resultset($moniker)->create({
+    my $new_result = $self->get_schema()->resultset($moniker)->create({
         rpm_id => $rpm_id,
         %{$values}
     });
@@ -219,13 +207,13 @@ sub add_package_result {
     croak "No values defined" unless $values;
 
     print "adding result for test $moniker and package $package\n"
-        if $self->{_verbose} > 1;
+        if $self->get_verbosity() > 1;
 
     my $package_id =
         $self->get_package_id($package) ||
         $self->add_package($media, $package);
 
-    $self->{_schema}->resultset($moniker)->create({
+    $self->get_schema()->resultset($moniker)->create({
         package_id => $package_id,
         %{$values}
     })->update();
@@ -234,7 +222,7 @@ sub add_package_result {
 sub add_section {
     my ($self, $name) = @_;
 
-    return $self->{_schema}->resultset('Section')->create({
+    return $self->get_schema()->resultset('Section')->create({
         name => $name,
     })->update();
 }
@@ -242,7 +230,7 @@ sub add_section {
 sub get_section_id {
     my ($self, $name) = @_;
 
-    my $record = $self->{_schema}->resultset('Section')->single({
+    my $record = $self->get_schema()->resultset('Section')->single({
         name => $name,
     });
 
@@ -252,7 +240,7 @@ sub get_section_id {
 sub add_maintainer {
     my ($self, $name) = @_;
 
-    return $self->{_schema}->resultset('Maintainer')->create({
+    return $self->get_schema()->resultset('Maintainer')->create({
         name => $name,
     })->update();
 }
@@ -260,7 +248,7 @@ sub add_maintainer {
 sub get_maintainer_id {
     my ($self, $name) = @_;
 
-    my $record = $self->{_schema}->resultset('Maintainer')->single({
+    my $record = $self->get_schema()->resultset('Maintainer')->single({
         name => $name,
     });
 
@@ -277,8 +265,8 @@ sub add_package {
         $self->add_section($section);
 
     my $maintainer_id;
-    if ($self->{_resolver}) {
-        my $maintainer = $self->{_resolver}->get_maintainer($package);
+    if ($self->has_resolver()) {
+        my $maintainer = $self->get_resolver()->get_maintainer($package);
         if ($maintainer) {
             $maintainer_id =
                 $self->get_maintainer_id($maintainer) ||
@@ -286,7 +274,7 @@ sub add_package {
         }
     }
 
-    return $self->{_schema}->resultset('Package')->create({
+    return $self->get_schema()->resultset('Package')->create({
         name          => $package->get_canonical_name(),
         version       => $package->get_version(),
         release       => $package->get_release(),
@@ -298,7 +286,7 @@ sub add_package {
 sub get_package_id {
     my ($self, $package) = @_;
 
-    my $record = $self->{_schema}->resultset('Package')->single({
+    my $record = $self->get_schema()->resultset('Package')->single({
         name    => $package->get_canonical_name(),
         version => $package->get_version(),
         release => $package->get_release(),
@@ -314,7 +302,7 @@ sub add_rpm {
         $self->get_package_id($package) ||
         $self->add_package($media, $package);
 
-    return $self->{_schema}->resultset('RPM')->create({
+    return $self->get_schema()->resultset('RPM')->create({
         name       => $package->get_name(),
         arch       => $package->get_arch(),
         package_id => $package_id
@@ -324,7 +312,7 @@ sub add_rpm {
 sub get_rpm_id {
     my ($self, $package) = @_;
 
-    my $record = $self->{_schema}->resultset('RPM')->single({
+    my $record = $self->get_schema()->resultset('RPM')->single({
         name => $package->get_name(),
         arch => $package->get_arch(),
     });
@@ -341,25 +329,25 @@ Returns the list of all maintainers with results.
 sub get_maintainers {
     my ($self) = @_;
 
-    return $self->{_schema}->resultset('Maintainer')->all();
+    return $self->get_schema()->resultset('Maintainer')->all();
 }
 
 sub get_tests {
     my ($self) = @_;
 
-    return $self->{_schema}->resultset('TestRun')->all();
+    return $self->get_schema()->resultset('TestRun')->all();
 }
 
 sub get_test_count {
     my ($self, $test) = @_;
 
-    return $self->{_schema}->resultset($test)->count();
+    return $self->get_schema()->resultset($test)->count();
 }
 
 sub get_test_results {
     my ($self, $test) = @_;
 
-    return $self->{_schema}->resultset($test)->all();
+    return $self->get_schema()->resultset($test)->all();
 }
 
 
