@@ -21,7 +21,7 @@ __PACKAGE__->add_columns(
 );
 __PACKAGE__->set_primary_key('id');
 __PACKAGE__->belongs_to(
-    'rpm_id' => 'Youri::Check::Schema::RPM'
+    'rpm' => 'Youri::Check::Schema::RPM', 'rpm_id'
 );
 
 1;

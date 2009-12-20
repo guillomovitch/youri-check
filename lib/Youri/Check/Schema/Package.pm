@@ -37,10 +37,10 @@ __PACKAGE__->has_many(
     'files' => 'Youri::Check::Schema::RPM', 'package_id'
 );
 __PACKAGE__->belongs_to(
-    'section_id' => 'Youri::Check::Schema::Section'
+    'section' => 'Youri::Check::Schema::Section', 'section_id'
 );
 __PACKAGE__->belongs_to(
-    'maintainer_id' => 'Youri::Check::Schema::Maintainer'
+    'maintainer' => 'Youri::Check::Schema::Maintainer', 'maintainer_id'
 );
 
 1;

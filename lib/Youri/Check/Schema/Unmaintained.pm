@@ -21,7 +21,7 @@ __PACKAGE__->add_columns(
 );
 __PACKAGE__->set_primary_key('id');
 __PACKAGE__->belongs_to(
-    'package_id' => 'Youri::Check::Schema::Package'
+    'package' => 'Youri::Check::Schema::Package', 'package_id'
 );
 
 1;
