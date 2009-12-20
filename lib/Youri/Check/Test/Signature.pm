@@ -50,27 +50,23 @@ sub run {
     my $check = sub {
         my ($package) = @_;
 
-        my $arch = $package->get_arch();
         my $name = $package->get_name();
 
         my $key = $package->get_gpg_key();
+        my $allowed_key = $self->get_key();
 
         if (!$key) {
             $database->add_package_result(
                 $MONIKER, $media, $package,
                 {
-                    arch  => $arch,
-                    file  => $name,
                     error => "unsigned package $name"
                 }
             );
-        } elsif ($key ne $self->{_key}) {
+        } elsif ($key ne $allowed_key) {
             $database->add_package_result(
                 $MONIKER, $media, $package,
                 {
-                    arch    => $arch,
-                    package => $name,
-                    error   => "invalid key id $key for package $name (allowed $self->{_key})"
+                    error => "invalid key id $key for package $name (allowed $allowed_key)"
                 }
             );
         }
