@@ -114,7 +114,7 @@ sub _init {
             );
             # register monitored arches
             $self->{_arches}->{$_}->{$id} = 1
-                foreach @{$options{sources}->{$id}->{arches}};
+                foreach @{$options{sources}->{$id}->{options}->{arches}};
         };
         print STDERR "Failed to create source $id: $@\n" if $@;
     }
