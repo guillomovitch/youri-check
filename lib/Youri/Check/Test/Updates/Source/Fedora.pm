@@ -59,6 +59,11 @@ sub _get_package_version {
     return $self->{_versions}->{$name};
 }
 
+sub _get_package_url {
+    my ($self, $name) = @_;
+    return "http://cvs.fedoraproject.org/viewvc/rpms/$name/devel/";
+}
+
 =head1 COPYRIGHT AND LICENSE
 
 Copyright (C) 2002-2006, YOURI project
