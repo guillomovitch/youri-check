@@ -43,21 +43,6 @@ has 'path' => (
     default => '/usr/bin/rpmcheck'
 );
 
-sub prepare {
-    my ($self, @medias) = @_;
-    croak "Not a class method" unless ref $self;
-
-    $self->{_hdlists} = tempdir(CLEANUP => 1);
-
-    foreach my $media (@medias) {
-        # uncompress hdlist, as rpmcheck does not handle them
-        my $media_id = $media->get_id();
-        my $hdlist = $media->get_hdlist();
-        system("zcat $hdlist 2>/dev/null > $self->{_hdlists}/$media_id");
-    }
-}
-
-
 sub run {
     my ($self, $media) = @_;
     croak "Not a class method" unless ref $self;
@@ -73,39 +58,57 @@ sub run {
 
     # then run rpmcheck
     my $database = $self->get_database();
-
-    my $command = "$self->{_path} -explain -failures";
-    my $allowed_ids = $media->get_option($self->{_id}, 'allowed');
-    my $id = $media->get_id();
-    foreach my $allowed_id (@{$allowed_ids}) {
-        if ($allowed_id eq $id) {
-            carp "incorrect value in $self->{_id} allowed option for media $id: media self-reference";
-            next;
-        }
-        $command .= " -base $self->{_hdlists}/$allowed_id";
-    }
-    $command .= " <$self->{_hdlists}/$id 2>/dev/null";
-
-    open(my $input, '-|', $command) or croak "Can't run $command: $!";
+    my $verbosity = $self->get_verbosity();
     my $package_pattern = qr/^
         (\S+) \s
-        \(= \s \S+\):
-        \s FAILED
+        \([^)]+\): \s
+        FAILED
         $/x;
-    my $reason_pattern  = qr/^
+    my $dependency_pattern  = qr/^
         \s+
         \S+ \s
         \([^)]+\) \s
-        (depends \s on|conflicts \s with) \s
-        (\S+ (?:\s \([^)]+\))?) \s
+        depends \s on \s
+        (
+            \S+                            # name
+            (?:\s \((?:=|<=|>=) \s \S+\))? # optional version
+        ) \s
         \{([^}]+)\}
-        (?: \s on \s file \s (\S+))?
         $/x;
+    my $conflict_pattern  = qr/^
+        \s+
+        \S+ \s
+        \([^)]+\) \s
+        conflicts \s with \s
+        (
+            \S+                             # name
+            (?:\s \((?:=|<=|>=) \s \S+\))?  # optional version
+        ) \s
+        on \s file \s (\S+)
+        $/x;
+
+    my $command = $self->get_path() . ' -explain -failures -compressed-input';
+    my $allowed_ids = $media->get_option($self->get_id(), 'allowed');
+    my $media_id = $media->get_id();
+    foreach my $allowed_id (@{$allowed_ids}) {
+        if ($allowed_id eq $media_id) {
+            carp "incorrect value for media $media_id: self-reference";
+            next;
+        }
+        $command .= ' -base ' . $media->get_hdlist();
+    }
+    $command .= ' <' . $media->get_hdlist() . ' 2>/dev/null';
+
+    if ($verbosity > 1) {
+        print "command: $command\n";
+    }
+
+    open(my $input, '-|', $command) or croak "Can't run $command: $!";
     my $line;
     PACKAGE: while ($line = <$input>) {
+        chomp $line;
         if ($line !~ $package_pattern) {
-            chomp $line;
-            warn "'$line' doesn't conform to expected format";
+            print STDERR "'$line' doesn't conform to expected result format\n";
             next PACKAGE;
         }
         my $name = $1;
@@ -113,52 +116,48 @@ sub run {
         my $arch = $package->get_arch();
         # skip next line
         $line = <$input>;
-        # fetch all reasons
-        my @reasons;
+
+        # analyse reasons
         REASON: while ($line = <$input>) {
+            chomp $line;
             if ($line =~ /^\s+/) {
-                push(@reasons, $line);
+                my $error;
+                if ($line =~ $dependency_pattern) {
+                    my $dependency = $1;
+                    my $status     = $2;
+
+                    if ($status eq 'NOT AVAILABLE') {
+                        $error = "$dependency is missing";
+                    } else {
+                        $error = "$dependency is not installable";
+                    }
+                } elsif ($line =~ $conflict_pattern) {
+                    my $dependency = $1;
+                    my $file       = $2;
+
+                    $error = $file ?
+                        "implicit conflict with $dependency on file $file" :
+                        "explicit conflict with $dependency";
+                } else {
+                    print STDERR
+                        "'$line' doesn't conform to expected reason format\n";
+                    $error = 'unexpected issue';
+                }
+
+                $database->add_rpm_result(
+                    $MONIKER, $media, $package,
+                    { 
+                        error => $error
+                    }
+                );
+
+                if ($verbosity > 1) {
+                    printf
+                        "checking package $package: %s\n", $error
+                }
             } else {
                 last REASON;
             }
-        }
-
-        # check first reason
-        if ($reasons[0] !~ $reason_pattern) {
-            chomp $reasons[0];
-            warn "'$reasons[0]' doesn't conform to expected format, skipping";
-        } else {
-            my $problem = $1;
-            my $dependency = $2;
-            my $status = $3;
-            my $file = $4;
-
-            # analyse problem
-            my $reason;
-            if ($problem eq 'depends on') {
-                if ($status eq 'NOT AVAILABLE') {
-                    $reason = "$dependency is missing";
-                } else {
-                    $reason = "$dependency is not installable";
-                    if ($reasons[-1] !~ $reason_pattern) {
-                        warn "$reasons[-1] doesn't conform to expected format";
-                    } else {
-                        $problem = $1;
-                        $status = $3;
-                    }
-                }
-            } else {
-                $reason = $file ?
-                    "implicit conflict with $dependency on file $file" :
-                    "explicit conflict with $dependency";
-            }
-
-            $database->add_package_result(
-                $MONIKER, $media, $package,
-                { 
-                    error => $reason
-                }
-            );
         }
 
         # restart loop
