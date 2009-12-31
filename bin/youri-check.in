@@ -305,12 +305,10 @@ foreach my $id (keys %{$tests_conf}) {
             $test_conf,
             {
                 id          => $id,
-                test        => $test,
-                verbose     => $verbose > 0 ? $verbose - 1 : 0,
-                resolver    => $resolver,
                 database    => $database,
             }
         );
+        $test->set_resolver($resolver) if $resolver;
     };
     if ($@) {
         print STDERR "Failed to create test $id, skipping: $@\n";
