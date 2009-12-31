@@ -70,6 +70,11 @@ sub _init {
     $agent->get($options{url}, ':content_cb' => $callback);
 }
 
+sub _url {
+    my ($self, $name) = @_;
+    return "http://cvs.fedoraproject.org/viewvc/rpms/$name/devel/";
+}
+
 =head1 COPYRIGHT AND LICENSE
 
 Copyright (C) 2002-2006, YOURI project
