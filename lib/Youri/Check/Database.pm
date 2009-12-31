@@ -280,7 +280,7 @@ sub add_package {
         release       => $package->get_release(),
         section_id    => $section_id,
         maintainer_id => $maintainer_id
-    })->update();
+    })->update()->id();
 }
 
 sub get_package_id {
@@ -306,7 +306,7 @@ sub add_rpm {
         name       => $package->get_name(),
         arch       => $package->get_arch(),
         package_id => $package_id
-    })->update();
+    })->update()->id();
 }
 
 sub get_rpm_id {
