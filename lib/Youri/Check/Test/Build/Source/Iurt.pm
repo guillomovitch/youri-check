@@ -93,8 +93,8 @@ sub _init {
                     my $result = $4;
                     $self->{_results}->{$name}->{$version}->{$arch} = {
 			    'status' => $result,
-			    'url' => "$base_url/$name-$version-$release.src.rpm/"
 		    };
+		    $self->{_results}->{$name}->{$version}->{$arch}->{url} = "$base_url/$name-$version-$release.src.rpm/" unless $result eq 'recreate_srpm_failure';
                 }
             }
         }
