@@ -91,7 +91,7 @@ sub _init {
                     my $version = $2;
                     my $release = $3;
                     my $result = $4;
-                    $self->{_results}->{$name}->{$version}->{$release}->{$arch} = {
+                    $self->{_results}->{$name}->{$version}->{$arch} = {
 			    'status' => $result,
 			    'url' => "$base_url/$name-$version-$release.src.rpm/"
 		    };
@@ -104,9 +104,8 @@ sub _init {
 sub fails {
     my ($self, $name, $version, $release, $arch, $media) = @_;
     croak "Not a class method" unless ref $self;
-
-    return defined($self->{_results}->{$name}->{$version}->{$release}->{$arch})
-        && defined($status{$self->{_results}->{$name}->{$version}->{$release}->{$arch}->{status}});
+    return defined($self->{_results}->{$name}->{$version}->{$arch})
+        && defined($status{$self->{_results}->{$name}->{$version}->{$arch}->{status}});
 }
 
 sub status {
@@ -114,7 +113,7 @@ sub status {
     croak "Not a class method" unless ref $self;
 
     return
-        $self->{_results}->{$name}->{$version}->{$release}->{$arch}->{status};
+        $self->{_results}->{$name}->{$version}->{$arch}->{status};
 }
 
 sub url {
@@ -122,7 +121,7 @@ sub url {
     croak "Not a class method" unless ref $self;
 
     return
-        $self->{_results}->{$name}->{$version}->{$release}->{$arch}->{url};
+        $self->{_results}->{$name}->{$version}->{$arch}->{url};
 }
 
 =head1 COPYRIGHT AND LICENSE
