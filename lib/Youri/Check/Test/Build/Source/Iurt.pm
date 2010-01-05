@@ -21,7 +21,7 @@ use base 'Youri::Check::Test::Build::Source';
 
 my %status = (
     'recreate_srpm_failure' => 0,
-    'install_deps'          => 1,
+    'missing_dep'           => 1,
     'build_failure'         => 2,
 );
 
