@@ -1,0 +1,11 @@
+PerlRequire /home/guillaume/work/youri/soft/check/trunk/www/apache-perl.pl
+SetHandler perl-script
+PerlHandler HTML::Mason::ApacheHandler
+AddType text/html mhtml
+AddType text/html comp
+AddHandler perl-script mhtml comp
+<Files *>
+Header set Cache-Control: "private, pre-check=0, post-check=0, max-age=0"
+Header set Expires: 0
+Header set Pragma: no-cache
+</Files>

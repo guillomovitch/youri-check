@@ -1,0 +1,17 @@
+<%once>
+use YAML::AppConfig;
+use Youri::Check::Database;
+use Data::Dumper;
+
+my $config = YAML::AppConfig->new(file => $ENV{'YOURI-CHECK.CONF'});
+my $database;
+</%once>
+
+<%init>
+if (!$database) {
+    $database = Youri::Check::Database->new(
+	dsn => $config->get_database()->{dsn}
+    );
+}
+$m->call_next(%ARGS, database => $database);
+</%init>

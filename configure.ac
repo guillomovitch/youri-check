@@ -20,8 +20,6 @@ AC_SUBST(templatesdir)
 AC_CONFIG_FILES([
     Makefile
     bin/Makefile 
-    www/Makefile
-    templates/Makefile
     lib/Makefile
     etc/Makefile
     t/Makefile
