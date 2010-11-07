@@ -123,6 +123,10 @@ sub get_version {
     return $self->_version($name);
 }
 
+sub get_orig_version {
+    return undef;
+}
+
 =head2 get_url($name)
 
 Returns the URL of information source for package with given name.

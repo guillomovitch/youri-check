@@ -58,9 +58,11 @@ sub _init {
             my $line = $1;
             next unless $line =~ $pattern;
             my $name = $1;
-            my $version = version->new($2)->normal();
+            my $orig_version = $2;
+            my $version = version->new($orig_version)->normal();
             $version =~ s/^v//;
             $self->{_versions}->{$name} = $version;
+            $self->{_orig_versions}->{$name} = $orig_version;
         }
 
         # store remaining text
@@ -73,6 +75,20 @@ sub _init {
     };
 
     $agent->get($options{url}, ':content_cb' => $callback);
+}
+
+sub get_orig_version {
+    my ($self, $name) = @_;
+    croak "Not a class method" unless ref $self;
+
+    # translate in grabber namespace
+    $name = $self->get_name($name);
+
+    # return if aliased to null 
+    return unless $name;
+
+    # return original version
+    return $self->{_orig_versions}->{$name};
 }
 
 sub _url {

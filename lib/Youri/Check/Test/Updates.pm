@@ -169,7 +169,7 @@ sub run {
             $version;
         my $current_stable = is_stable($current_version);
 
-        my ($max_version, $max_source, $max_url);
+        my ($max_version, $max_source, $max_url, $max_orig_version);
         $max_version = $current_version;
 
         foreach my $source (@{$self->{_sources}}) {
@@ -185,11 +185,13 @@ sub run {
                 $max_version = $available_version;
                 $max_source  = $source->get_id();
                 $max_url     = $source->get_url($name);
+                $max_orig_version = $source->get_orig_version($name);
             }
         }
         $resultset->add_result($self->{_id}, $media, $package, {
             current   => $current_version,
-            available => $max_version,
+            available => $max_orig_version ?
+                "$max_version ($max_orig_version)" : $max_version,
             source    => $max_source,
             url       => $max_url
         }) if $max_version ne $current_version;
