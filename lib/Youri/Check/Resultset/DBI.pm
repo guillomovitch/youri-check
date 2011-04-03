@@ -96,6 +96,7 @@ sub _init {
     }) or croak "Unable to connect: $DBI::errstr";
 
    $self->{_dbh}->trace($options{verbose} - 1) if $options{verbose} > 1;
+   $self->{_dbh}->do("PRAGMA synchronous = 0") if $options{driver} eq "SQLite";
 }
 
 sub clone {
