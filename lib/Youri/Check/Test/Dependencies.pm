@@ -120,7 +120,7 @@ sub run {
 
     # index allowed medias
     my %allowed_ids = map { $_ => 1 } @{$allowed_ids};
-    my $allowed_ids = join(",", @{$allowed_ids});
+    my $allowed_ids_string = join(",", @{$allowed_ids});
 
     my $class = $media->get_package_class();
 
@@ -158,7 +158,7 @@ sub run {
                 $resultset->add_result($self->{_id}, $media, $package, {
                     arch    => $arch,
                     package => $name,
-                    error   => "$require_name found in incorrect media $_->[MEDIA] (allowed $allowed_ids)",
+                    error   => "$require_name found in incorrect media $_->[MEDIA] (allowed $allowed_ids_string)",
                     level   => Youri::Check::Test::ERROR
                 }) foreach @found;
                 next;
