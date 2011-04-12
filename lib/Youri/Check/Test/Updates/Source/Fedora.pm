@@ -72,7 +72,7 @@ sub _init {
 
 sub _url {
     my ($self, $name) = @_;
-    return "http://cvs.fedoraproject.org/viewvc/rpms/$name/devel/";
+    return "http://pkgs.fedoraproject.org/gitweb/?p=$name.git";
 }
 
 =head1 COPYRIGHT AND LICENSE
