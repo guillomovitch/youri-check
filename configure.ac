@@ -1,5 +1,5 @@
 AC_PREREQ(2.59)
-AC_INIT([youri-check], [0.10])
+AC_INIT([youri-check], [0.10.1])
 AM_INIT_AUTOMAKE([-Wall -Werror foreign])
 
 AC_PATH_PROG([PERL],[perl])
