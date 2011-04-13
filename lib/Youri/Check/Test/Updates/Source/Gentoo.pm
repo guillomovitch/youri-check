@@ -46,8 +46,14 @@ sub _init {
     my $command = "GET $options{url}/portage-latest.tar.bz2 | tar tjf -";
     open(my $input, '-|', $command) or croak "Can't run $command: $!";
     while (my $line = <$input>) {
-        next unless $line =~ /.*\/([\w-]+)-([\d\.]+)(:?-r\d)?\.ebuild$/;
-        $versions->{$1} = $2;
+        next unless $line =~ /^portage\/(.*)\/([\w-]+)-([\d\.]+)(:?-r\d)?\.ebuild$/;
+        $path = $1;
+        $name = $2;
+        $version = $3;
+        if ($path =~ /^dev-(php|python|ruby)/) {
+            $name = "$1-$name";
+        }
+        $versions->{$name} = $version;
     }
     close $input;
 
