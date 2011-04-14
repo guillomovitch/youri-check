@@ -50,14 +50,24 @@ sub _init {
         $path = $1;
         $name = $2;
         $version = $3;
-        if ($path =~ /^dev-(php|python|ruby)/) {
-            $name = "$1-$name";
+        if ($path =~ /^(dev-(perl|php|python|ruby))/) {
+            $name = "$1/$name";
         }
         $versions->{$name} = $version;
     }
     close $input;
 
     $self->{_versions} = $versions;
+}
+
+sub _name {
+    my ($self, $name) = @_;
+    
+    if ($name =~ /^(perl|php|pyhton|ruby)-(.+)$/) {
+        $name = lc("dev-$1/$2");
+    }
+
+    return $name;
 }
 
 sub _url {
