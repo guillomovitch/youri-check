@@ -43,8 +43,6 @@ sub _init {
     );
 
     my @medias;
-    use Data::Dumper;
-    print Dumper($options{'medias'});
     $self->{_srcs} = [];
     foreach my $id (keys %{$options{'medias'}}) {
         my $media_conf = $options{'medias'}->{$id};
