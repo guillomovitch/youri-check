@@ -48,6 +48,7 @@ sub _init {
         },
         @_
     );
+    $self->SUPER::_init(%options);
 }
 
 sub _url {
