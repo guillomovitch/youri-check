@@ -47,9 +47,9 @@ sub _init {
     open(my $input, '-|', $command) or croak "Can't run $command: $!";
     while (my $line = <$input>) {
         next unless $line =~ /^portage\/(.*)\/([\w-]+)-([\d\.]+)(:?-r\d)?\.ebuild$/;
-        $path = $1;
-        $name = $2;
-        $version = $3;
+        my $path = $1;
+        my $name = $2;
+        my $version = $3;
         if ($path =~ /^(dev-(perl|php|python|ruby))/) {
             $name = "$1/$name";
         }
