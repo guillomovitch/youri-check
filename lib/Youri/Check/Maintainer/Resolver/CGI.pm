@@ -49,7 +49,7 @@ sub _init {
 
     my $agent = LWP::UserAgent->new();
     my $buffer = '';
-    my $pattern = qr/^(\S+)\t(\S+)$/;
+    my $pattern = qr/^(\S+)\s(\S+)$/;
 
     my %exceptions;
     if ($options{exceptions}) {
