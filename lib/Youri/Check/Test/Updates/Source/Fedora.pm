@@ -29,7 +29,7 @@ Specific parameters:
 =item url $url
 
 URL to Fedora development SRPMS directory (default:
-http://fr.rpmfind.net/linux/fedora/development/source/SRPMS)
+http://archive.fedoraproject.org/pub/fedora/linux/development/rawhide/source/SRPMS)
 
 =back
 
@@ -38,7 +38,7 @@ http://fr.rpmfind.net/linux/fedora/development/source/SRPMS)
 sub _init {
     my $self    = shift;
     my %options = (
-        url => 'http://fr.rpmfind.net/linux/fedora/development/source/SRPMS',
+        url => 'http://archive.fedoraproject.org/pub/fedora/linux/development/rawhide/source/SRPMS',
         @_
     );
 
