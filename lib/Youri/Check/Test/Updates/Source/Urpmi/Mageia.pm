@@ -1,9 +1,9 @@
 # $Id: /mirror/youri/soft/check/trunk/lib/Youri/Check/Test/Updates/Source/Media/Mageia.pm 1449 2007-01-11T17:11:31.936945Z pterjan  $
-package Youri::Check::Test::Updates::Source::Media::Mageia;
+package Youri::Check::Test::Updates::Source::Urpmi::Mageia;
 
 =head1 NAME
 
-Youri::Check::Test::Updates::Source::Mageia - Mageia updates source
+Youri::Check::Test::Updates::Urpmi::Mageia - Mageia updates source
 
 =head1 DESCRIPTION
 
@@ -15,7 +15,7 @@ available from Mageia.
 use warnings;
 use strict;
 use Carp;
-use base 'Youri::Check::Test::Updates::Source::Media';
+use base 'Youri::Check::Test::Updates::Source::Urpmi';
 
 =head2 new(%args)
 

@@ -1,14 +1,15 @@
 # $Id: /mirror/youri/soft/check/trunk/lib/Youri/Check/Test/Updates/Source/Media.pm 1449 2007-01-11T17:11:31.936945Z pterjan  $
-package Youri::Check::Test::Updates::Source::Media;
+package Youri::Check::Test::Updates::Source::Urpmi;
 
 =head1 NAME
 
-Youri::Check::Test::Updates::Source::Media - Youri::Media distribution updates source
+Youri::Check::Test::Updates::Source::Urpmi - Urpmi-based distribution updates source
 
 =head1 DESCRIPTION
 
 This source plugin for L<Youri::Check::Test::Updates> collects updates
-available from Youri::Media supported distribution.
+from any urpmi-based distribution.
+
 You should subclass it to get links and correct default URL.
 
 =cut

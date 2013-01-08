@@ -3,7 +3,7 @@ package Youri::Check::Test::Updates::Source::Media::Mandriva;
 
 =head1 NAME
 
-Youri::Check::Test::Updates::Source::Mandriva - Mandriva updates source
+Youri::Check::Test::Updates::Urpmi::Mandriva - Mandriva updates source
 
 =head1 DESCRIPTION
 
@@ -15,7 +15,7 @@ available from Mandriva.
 use warnings;
 use strict;
 use Carp;
-use base 'Youri::Check::Test::Updates::Source::Media';
+use base 'Youri::Check::Test::Updates::Source::Urpmi';
 
 =head2 new(%args)
 
