@@ -1,4 +1,4 @@
-# $Id: Fedora.pm 2360 2012-11-27 22:13:37Z pterjan $
+# $Id$
 package Youri::Check::Test::Updates::Source::SRPM;
 
 =head1 NAME
