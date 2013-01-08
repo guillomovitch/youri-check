@@ -3,12 +3,14 @@ package Youri::Check::Test::Updates::Source::Yum;
 
 =head1 NAME
 
-Youri::Check::Test::Updates::Source::Yum - Yum updates source
+Youri::Check::Test::Updates::Source::Yum - Yum-based distribution updates source
 
 =head1 DESCRIPTION
 
 This source plugin for L<Youri::Check::Test::Updates> collects updates
 from any yum-based distribution.
+
+You should subclass it to get links and correct default URL.
 
 =cut
 
