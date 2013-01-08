@@ -17,7 +17,7 @@ use strict;
 use Carp;
 use LWP::UserAgent;
 use XML::Twig;
-use base 'Youri::Check::Test::Updates::Source';
+use base 'Youri::Check::Test::Updates::Source::Yum';
 
 =head2 new(%args)
 
@@ -43,54 +43,7 @@ sub _init {
         @_
     );
 
-    my $agent = LWP::UserAgent->new();
-    my $buffer = '';
-    my $repodata_xml;
-    my $pattern = qr/>([0-9a-f]*-primary.xml.gz)</;
-    my $callback = sub {
-        my ($data, $response, $protocol) = @_;
-
-        # prepend text remaining from previous run
-        $data = $buffer . $data;
-
-        # process current chunk
-        while ($data =~ m/(.*)\n/gc) {
-            my $line = $1;
-            next unless $line =~ $pattern;
-            $repodata_xml = $1;
-        }
-
-        # store remaining text
-        my $pos = pos $data;
-        if ($pos) {
-            $buffer = substr($data, pos $data);
-        } else {
-            $buffer = $data;
-        }
-    };
-
-    $agent->get($options{url} . '/repodata/', ':content_cb' => $callback);
-
-    my $versions;
-   
-    my $package_cb = sub {
-        my ($twig, $package) = @_;
-        my $name =  $package->first_child('name')->text();
-        my $version = $package->first_child('version')->{'att'}->{'ver'};
-        $versions->{$name} = $version;
-        $twig->purge();
-    };
-    my $twig = XML::Twig->new(
-       TwigRoots => { package => $package_cb }
-    );
-
-    my $url = $options{url} . '/repodata/' . $repodata_xml;
-    my $command = "GET $url | zcat";
-    open(my $input, '-|', $command) or croak "Can't run $command: $!\n";
-    $twig->parse($input);
-    close $input;
-
-    $self->{_versions} = $versions;
+    $self->SUPER::_init(%options);
 }
 
 sub _url {
