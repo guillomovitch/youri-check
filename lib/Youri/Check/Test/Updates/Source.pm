@@ -73,6 +73,12 @@ sub new {
 
     $self->_init(%options);
 
+    if ($self->{_verbose} > 1) {
+        require Data::Dumper;
+        print STDERR "source: $self->{id}";
+        print STDERR Data::Dumper($self->{_versions});
+    }
+
     return $self;
 }
 
