@@ -1,9 +1,9 @@
 # $Id$
-package Youri::Check::Test::Updates::Source::Fedora;
+package Youri::Check::Test::Updates::Source::Yum::Fedora;
 
 =head1 NAME
 
-Youri::Check::Test::Updates::Source::Fedora - Fedora updates source
+Youri::Check::Test::Updates::Source::Yum::Fedora - Fedora updates source
 
 =head1 DESCRIPTION
 
@@ -21,7 +21,7 @@ use base 'Youri::Check::Test::Updates::Source::Yum';
 
 =head2 new(%args)
 
-Creates and returns a new Youri::Check::Test::Updates::Source::Fedora object.
+Creates and returns a new Youri::Check::Test::Updates::Source::Yum::Fedora object.
 
 Specific parameters:
 
