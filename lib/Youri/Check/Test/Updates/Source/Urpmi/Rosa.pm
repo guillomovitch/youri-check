@@ -61,7 +61,7 @@ sub _init {
 
 sub _url {
     my ($self, $name) = @_;
-    return "https://abf.rosalinux.ru/import/$name";
+    return "https://abf.rosalinux.ru/import/$name/tree/rosa2012.1";
 }
 
 =head1 COPYRIGHT AND LICENSE
