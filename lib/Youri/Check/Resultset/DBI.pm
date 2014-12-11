@@ -185,8 +185,10 @@ sub add_result {
     my $key = "add_$type";
     my $sth = $self->{_sths}->{$key};
 
+    my @fields = sort keys %$values;
+    my @values = @{$values}{@fields};
+
     unless ($sth) {
-        my @fields = keys %$values;
         $self->_create_table($type, {
             'source_package_id' => 'keyref',
             map { $_ => 'text' } @fields
@@ -208,7 +210,7 @@ sub add_result {
             $package->get_canonical_name(),
             $media->get_name(),
         ),
-        values %$values
+        @values
     );
 }
 
