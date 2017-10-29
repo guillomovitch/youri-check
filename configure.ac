@@ -1,6 +1,6 @@
 AC_PREREQ(2.59)
 AC_INIT([youri-check], [0.10.4])
-AM_INIT_AUTOMAKE([-Wall -Werror foreign])
+AM_INIT_AUTOMAKE([-Wall -Werror foreign serial-tests])
 
 AC_PATH_PROG([PERL],[perl])
 if test -z $PERL; then
