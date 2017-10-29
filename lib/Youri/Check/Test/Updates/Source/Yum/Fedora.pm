@@ -39,7 +39,7 @@ http://archive.fedoraproject.org/pub/fedora/linux/development/rawhide/source/SRP
 sub _init {
     my $self    = shift;
     my %options = (
-        url => 'http://archive.fedoraproject.org/pub/fedora/linux/development/rawhide/source/SRPMS',
+        url => 'http://archive.fedoraproject.org/pub/fedora/linux/development/rawhide/Everything/source/tree/Packages',
         @_
     );
 
@@ -48,7 +48,7 @@ sub _init {
 
 sub _url {
     my ($self, $name) = @_;
-    return "http://pkgs.fedoraproject.org/gitweb/?p=$name.git";
+    return "http://pkgs.fedoraproject.org/cgit/rpms/$name.git";
 }
 
 =head1 COPYRIGHT AND LICENSE
