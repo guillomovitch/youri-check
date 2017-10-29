@@ -1,9 +1,9 @@
 # $Id: /mirror/youri/soft/check/trunk/lib/Youri/Check/Test/Updates/Source/Media/Rosa.pm 1449 2007-01-11T17:11:31.936945Z pterjan  $
-package Youri::Check::Test::Updates::Urpmi::Media::Rosa;
+package Youri::Check::Test::Updates::Source::Urpmi::Rosa;
 
 =head1 NAME
 
-Youri::Check::Test::Updates::Urpmi::Rosa - Rosa updates source
+Youri::Check::Test::Updates::Source::Urpmi::Rosa - Rosa updates source
 
 =head1 DESCRIPTION
 
@@ -15,11 +15,11 @@ available from Rosa.
 use warnings;
 use strict;
 use Carp;
-use base 'Youri::Check::Test::Updates::Urpmi::Media';
+use base 'Youri::Check::Test::Updates::Urpmi';
 
 =head2 new(%args)
 
-Creates and returns a new Youri::Check::Test::Updates::Urpmi::Media::Rosa object.
+Creates and returns a new Youri::Check::Test::Updates::Source::Urpmi::Rosa object.
 
 Specific parameters:
 

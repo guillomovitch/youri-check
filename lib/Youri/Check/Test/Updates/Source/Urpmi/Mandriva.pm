@@ -1,9 +1,9 @@
 # $Id: /mirror/youri/soft/check/trunk/lib/Youri/Check/Test/Updates/Source/Media/Mandriva.pm 1449 2007-01-11T17:11:31.936945Z pterjan  $
-package Youri::Check::Test::Updates::Source::Media::Mandriva;
+package Youri::Check::Test::Updates::Source::Urpmi::Mandriva;
 
 =head1 NAME
 
-Youri::Check::Test::Updates::Urpmi::Mandriva - Mandriva updates source
+Youri::Check::Test::Updates::Source::Urpmi::Mandriva - Mandriva updates source
 
 =head1 DESCRIPTION
 
@@ -19,7 +19,7 @@ use base 'Youri::Check::Test::Updates::Source::Urpmi';
 
 =head2 new(%args)
 
-Creates and returns a new Youri::Check::Test::Updates::Source::Media::Mandriva object.
+Creates and returns a new Youri::Check::Test::Updates::Source::Urpmi::Mandriva object.
 
 Specific parameters:
 

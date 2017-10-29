@@ -3,7 +3,7 @@ package Youri::Check::Test::Updates::Source::Urpmi::Mageia;
 
 =head1 NAME
 
-Youri::Check::Test::Updates::Urpmi::Mageia - Mageia updates source
+Youri::Check::Test::Updates::Source::Urpmi::Mageia - Mageia updates source
 
 =head1 DESCRIPTION
 
@@ -19,7 +19,7 @@ use base 'Youri::Check::Test::Updates::Source::Urpmi';
 
 =head2 new(%args)
 
-Creates and returns a new Youri::Check::Test::Updates::Source::Media::Mageia object.
+Creates and returns a new Youri::Check::Test::Updates::Source::Urpmi::Mageia object.
 
 Specific parameters:
 
