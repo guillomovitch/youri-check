@@ -1,3 +1,8 @@
+2017-10-29 Guillaume Rousse <guillomovitch@zarb.org> 0.10.4
+	* drop old yum metadata-based fedora updates source
+	* add new html-based fedora updates source
+	* clean up urpmi-based updates sources mess
+
 2007-04-22 Guillaume Rousse <guillomovitch@zarb.org> 0.10
 	* internal changes:
 	    - large code cleanup
