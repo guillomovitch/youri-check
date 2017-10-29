@@ -8,9 +8,6 @@ nobase_perllib_DATA = Youri/Check/Test/Build/Source/LBD.pm \
 		      Youri/Check/Test/MandrivaConflicts.pm \
 		      Youri/Check/Test/Missing.pm \
 		      Youri/Check/Test/Unmaintained.pm \
-		      Youri/Check/Test/Updates/Source/Media/Mageia.pm \
-		      Youri/Check/Test/Updates/Source/Media/Mandriva.pm \
-		      Youri/Check/Test/Updates/Source/Media.pm \
 		      Youri/Check/Test/Updates/Source/GNOME.pm \
 		      Youri/Check/Test/Updates/Source/Gentoo.pm \
 		      Youri/Check/Test/Updates/Source/Freshmeat.pm \
@@ -24,6 +21,10 @@ nobase_perllib_DATA = Youri/Check/Test/Build/Source/LBD.pm \
 		      Youri/Check/Test/Updates/Source/PEAR.pm \
 		      Youri/Check/Test/Updates/Source/Apache.pm \
 		      Youri/Check/Test/Updates/Source/PyPI.pm \
+		      Youri/Check/Test/Updates/Source/Urpmi.pm \
+		      Youri/Check/Test/Updates/Source/Urpmi/Mageia.pm \
+		      Youri/Check/Test/Updates/Source/Urpmi/Mandriva.pm \
+		      Youri/Check/Test/Updates/Source/Urpmi/Rosa.pm \
 		      Youri/Check/Test/Updates/Source.pm \
 		      Youri/Check/Test/Age.pm \
 		      Youri/Check/Test/Rpmcheck.pm \
