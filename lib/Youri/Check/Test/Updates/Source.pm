@@ -130,6 +130,7 @@ sub get_version {
 }
 
 sub get_orig_version {
+    ## no critic (ExplicitReturnUndef)
     return undef;
 }
 
