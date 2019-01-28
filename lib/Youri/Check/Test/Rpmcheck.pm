@@ -13,8 +13,8 @@ This plugins checks package dependencies with rpmcheck, and reports output.
 
 use Carp;
 use File::Temp qw/tempdir/;
-use Moose::Policy 'Moose::Policy::FollowPBP';
 use Moose;
+use MooseX::FollowPBP;
 use Youri::Types qw/ExecutableFile/;
 
 extends 'Youri::Check::Test';

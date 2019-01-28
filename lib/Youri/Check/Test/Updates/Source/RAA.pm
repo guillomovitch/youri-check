@@ -12,8 +12,8 @@ available from RAA.
 
 =cut
 
-use Moose::Policy 'Moose::Policy::FollowPBP';
 use Moose;
+use MooseX::FollowPBP;
 use LWP::UserAgent;
 use HTML::TableExtract;
 use Youri::Types qw/URI/;

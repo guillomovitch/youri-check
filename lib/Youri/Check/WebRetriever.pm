@@ -11,8 +11,8 @@ This class provides a simple web data retriever.
 
 =cut
 
-use Moose::Policy 'Moose::Policy::FollowPBP';
 use Moose;
+use MooseX::FollowPBP;
 use LWP::UserAgent;
 use Youri::Types qw/URI/;
 use MooseX::Types::Moose qw/HashRef RegexpRef/;

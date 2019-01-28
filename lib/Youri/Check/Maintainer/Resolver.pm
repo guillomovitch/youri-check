@@ -19,8 +19,8 @@ This abstract class defines Youri::Check::Maintainer::Resolver interface.
 
 =cut
 
-use Moose::Policy 'Moose::Policy::FollowPBP';
 use Moose;
+use MooseX::FollowPBP;
 use Carp;
 use MooseX::Types::Moose qw/Int/;
 

@@ -13,8 +13,8 @@ This plugin checks packages age, and report the ones exceeding maximum limit.
 
 use Carp;
 use DateTime::Format::Duration;
-use Moose::Policy 'Moose::Policy::FollowPBP';
 use Moose;
+use MooseX::FollowPBP;
 use MooseX::Types::Moose qw/Str/;
 use Youri::Check::Types qw/Date Duration/;
 

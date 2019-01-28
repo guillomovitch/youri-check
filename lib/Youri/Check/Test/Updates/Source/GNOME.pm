@@ -13,8 +13,8 @@ available from GNOME.
 =cut
 
 use Carp;
-use Moose::Policy 'Moose::Policy::FollowPBP';
 use Moose;
+use MooseX::FollowPBP;
 use HTML::TokeParser;
 use List::MoreUtils 'any';
 use Youri::Check::Types qw/Agent/;

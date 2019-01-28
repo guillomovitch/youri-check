@@ -13,8 +13,8 @@ available from Gentoo.
 =cut
 
 use Carp;
-use Moose::Policy 'Moose::Policy::FollowPBP';
 use Moose;
+use MooseX::FollowPBP;
 use Youri::Types qw/URI/;
 
 extends 'Youri::Check::Test::Updates::Source';

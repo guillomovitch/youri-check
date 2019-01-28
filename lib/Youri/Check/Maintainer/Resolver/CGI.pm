@@ -13,8 +13,8 @@ It uses a remote CGI to resolve maintainers.
 
 =cut
 
-use Moose::Policy 'Moose::Policy::FollowPBP';
 use Moose;
+use MooseX::FollowPBP;
 use Carp;
 use Youri::Check::WebRetriever;
 use Youri::Check::Types qw/HashRefOfStr/;

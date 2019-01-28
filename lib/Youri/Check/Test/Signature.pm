@@ -11,8 +11,8 @@ This plugin checks packages signature, and report unsigned ones.
 
 =cut
 
-use Moose::Policy 'Moose::Policy::FollowPBP';
 use Moose;
+use MooseX::FollowPBP;
 use MooseX::Types::Moose qw/Str/;
 use Carp;
 

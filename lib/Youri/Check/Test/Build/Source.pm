@@ -12,8 +12,8 @@ L<Youri::Check::Test::Build>.
 
 =cut
 
-use Moose::Policy 'Moose::Policy::FollowPBP';
 use Moose;
+use MooseX::FollowPBP;
 use Carp;
 
 has 'id' => (
