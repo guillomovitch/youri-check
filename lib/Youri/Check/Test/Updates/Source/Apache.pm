@@ -13,8 +13,8 @@ available for apache modules.
 =cut
 
 use Carp;
-use Moose::Policy 'Moose::Policy::FollowPBP';
 use Moose;
+use MooseX::FollowPBP;
 use LWP::UserAgent;
 use HTML::TableExtract;
 use Youri::Types qw/URI/;

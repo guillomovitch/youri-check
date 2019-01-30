@@ -11,8 +11,8 @@ This abstract class defines test interface.
 
 =cut
 
-use Moose::Policy 'Moose::Policy::FollowPBP';
 use Moose;
+use MooseX::FollowPBP;
 use MooseX::Types::Moose qw/Str Int/;
 
 use constant WARNING => 'warning';

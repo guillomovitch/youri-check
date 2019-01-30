@@ -13,8 +13,8 @@ source plugins handle specific sources.
 =cut
 
 use Carp;
-use Moose::Policy 'Moose::Policy::FollowPBP';
 use Moose;
+use MooseX::FollowPBP;
 use Youri::Check::Types qw/HashRefOfBuildSources/;
 
 extends 'Youri::Check::Test';

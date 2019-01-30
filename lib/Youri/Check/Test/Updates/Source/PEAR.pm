@@ -12,8 +12,8 @@ available from PEAR.
 
 =cut
 
-use Moose::Policy 'Moose::Policy::FollowPBP';
 use Moose;
+use MooseX::FollowPBP;
 use LWP::UserAgent;
 use XML::Twig;
 use Youri::Types qw/URI/;

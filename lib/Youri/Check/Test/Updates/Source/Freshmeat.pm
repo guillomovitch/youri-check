@@ -14,8 +14,8 @@ available from Freshmeat.
 =cut
 
 use Carp;
-use Moose::Policy 'Moose::Policy::FollowPBP';
 use Moose;
+use MooseX::FollowPBP;
 use MooseX::Types::Moose qw/Bool/;
 use XML::Twig;
 use LWP::UserAgent;

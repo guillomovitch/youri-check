@@ -12,8 +12,8 @@ ones.
 =cut
 
 use Carp;
-use Moose::Policy 'Moose::Policy::FollowPBP';
 use Moose;
+use MooseX::FollowPBP;
 
 extends 'Youri::Check::Test';
 

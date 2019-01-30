@@ -13,8 +13,8 @@ available from Gentoo.
 =cut
 
 use Carp;
-use Moose::Policy 'Moose::Policy::FollowPBP';
 use Moose;
+use MooseX::FollowPBP;
 use Youri::Types qw/URI/;
 
 extends 'Youri::Check::Test::Updates::Source';
@@ -61,9 +61,14 @@ sub BUILD {
     $self->{_versions} = $versions;
 }
 
+my %VERSION_OVERRIDES =
+(
+    'ffmpeg' => '4',
+);
+
 sub _get_package_version {
     my ($self, $name) = @_;
-    return $self->{_versions}->{$name};
+    return $VERSION_OVERRIDES{$name} // $self->{_versions}->{$name};
 }
 
 sub _get_package_url {

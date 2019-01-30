@@ -13,8 +13,8 @@ ones.
 
 use Carp;
 use List::MoreUtils qw/all any/;
-use Moose::Policy 'Moose::Policy::FollowPBP';
 use Moose;
+use MooseX::FollowPBP;
 
 extends 'Youri::Check::Test';
 

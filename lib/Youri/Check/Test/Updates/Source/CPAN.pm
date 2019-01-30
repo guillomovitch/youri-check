@@ -12,8 +12,8 @@ available from CPAN.
 
 =cut
 
-use Moose::Policy 'Moose::Policy::FollowPBP';
 use Moose;
+use MooseX::FollowPBP;
 use Youri::Check::WebRetriever;
 use Youri::Types qw/URI/;
 

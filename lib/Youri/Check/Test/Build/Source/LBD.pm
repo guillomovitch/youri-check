@@ -15,8 +15,8 @@ is highly advantageous.
 
 =cut
 
-use Moose::Policy 'Moose::Policy::FollowPBP';
 use Moose;
+use MooseX::FollowPBP;
 use Carp;
 use LWP::UserAgent;
 use HTML::TokeParser;

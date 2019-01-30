@@ -13,8 +13,8 @@ available from Sourceforge.
 =cut
 
 use Carp;
-use Moose::Policy 'Moose::Policy::FollowPBP';
 use Moose;
+use MooseX::FollowPBP;
 use HTML::TokeParser;
 use Youri::Check::Test::Updates;
 use Youri::Check::Types qw/Agent/;

@@ -12,8 +12,8 @@ This is the youri-check result database.
 =cut
 
 use Carp;
-use Moose::Policy 'Moose::Policy::FollowPBP';
 use Moose;
+use MooseX::FollowPBP;
 use MooseX::Types::Moose qw/Str Bool Int/;
 use Scalar::Util qw/blessed/;
 use Youri::Check::Schema;

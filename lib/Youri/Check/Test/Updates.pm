@@ -15,8 +15,8 @@ Additional source plugins handle specific sources.
 use Carp;
 use List::MoreUtils qw(all);
 use Memoize;
-use Moose::Policy 'Moose::Policy::FollowPBP';
 use Moose;
+use MooseX::FollowPBP;
 use MooseX::Types::Moose qw/HashRef Str/;
 use Scalar::Util qw(blessed);
 use Youri::Check::Test::Updates::Source;
